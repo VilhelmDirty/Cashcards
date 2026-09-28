@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Review · {{ deck or "All decks" }}{% endblock %}
+{% block content %}
+<div class="review-bar">
+  <span>{{ deck or "All decks" }}</span>
+  <span>{{ counts.due }} due · {{ counts.new }} new</span>
+</div>
+
+<article class="card">
+  <p class="card-meta">
+    {{ card.deck }}{% if card.topic %} · {{ card.topic }}{% endif %}{% if card.source_ref %} · {{ card.source_ref }}{% endif %}
+  </p>
+  {% if card.flag %}<p class="flag">Heads-up: this card {{ card.flag }}.</p>{% endif %}
+  <h1 class="question">{{ card.question }}</h1>
+
+  <div id="answer" class="answer" hidden>
+    <h2>Reference answer</h2>
+    <p class="answer-text">{{ card.answer }}</p>
+    {% if card.note %}<p class="note"><strong>Key insight:</strong> {{ card.note }}</p>{% endif %}
+  </div>
+</article>
+
+<div class="actions">
+  <button id="show" class="button primary" type="button">Show answer <kbd>Space</kbd></button>
+
+  <form id="rate-form" method="post" action="{{ url_for('rate', card_id=card.id) }}" hidden>
+    <input type="hidden" name="deck" value="{{ deck or '' }}">
+    <input type="hidden" name="version" value="{{ version }}">
+    <p class="rate-prompt">How well did you know it?</p>
+    <div class="rate-buttons">
+      {% for value, name in ratings %}
+      <button class="button rate rate-{{ value }}" name="rating" value="{{ value }}">
+        <span>{{ name }}</span>
+        <small>next: {{ previews[value] }}</small>
+        <kbd>{{ value }}</kbd>
+      </button>
+      {% endfor %}
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Small bit of JavaScript: reveal the answer, keyboard shortcuts, no double-submits.
+  const showBtn = document.getElementById("show");
+  const answer = document.getElementById("answer");
+  const form = document.getElementById("rate-form");
+
+  function reveal() {
+    answer.hidden = false;
+    form.hidden = false;
+    showBtn.hidden = true;
+  }
+  showBtn.addEventListener("click", reveal);
+
+  form.addEventListener("submit", () => {
+    // Disable after the browser has captured which button was pressed.
+    setTimeout(() => form.querySelectorAll("button").forEach(b => b.disabled = true), 0);
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.code === "Space" && !showBtn.hidden) { e.preventDefault(); reveal(); }
+    else if (!form.hidden && ["1", "2", "3", "4"].includes(e.key)) {
+      form.querySelector(`button[value="${e.key}"]`).click();
+    }
+  });
+</script>
+{% endblock %}

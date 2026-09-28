@@ -17,6 +17,14 @@ DB_PATH = Path(os.getenv("DB_PATH") or PROJECT_DIR / "data" / "flashcards.db")
 # The folder holding the flashcard files to import.
 CARDS_DIR = Path(os.getenv("CARDS_DIR") or Path.home() / "Downloads" / "Flaschards")
 
+# --- Spaced repetition ---
+# How many never-seen cards to introduce per day. Each new card comes back
+# several times in its first days, so a big number snowballs into big review piles.
+NEW_CARDS_PER_DAY = 20
+# FSRS schedules each card for when you have this chance of still remembering it.
+# Higher = more frequent reviews. 0.9 (90%) is the FSRS default.
+DESIRED_RETENTION = 0.9
+
 # Which files to import, and the deck name each one gets in the app.
 # Paths are relative to CARDS_DIR. Only the newest version of each set is listed;
 # older copies and the interactive explainer pages are deliberately left out.

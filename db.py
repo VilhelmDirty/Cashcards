@@ -17,6 +17,25 @@ CREATE TABLE IF NOT EXISTS cards (
     imported_at TEXT NOT NULL,
     updated_at  TEXT
 );
+
+-- Where each card stands in its review schedule. A card with no row here is "new".
+CREATE TABLE IF NOT EXISTS review_state (
+    card_id   INTEGER PRIMARY KEY REFERENCES cards(id),
+    fsrs_card TEXT NOT NULL,   -- the FSRS library's Card object, saved as JSON text
+    due       TEXT NOT NULL,   -- copy of the due time (UTC) so the queue can sort by it
+    state     TEXT NOT NULL    -- Learning / Review / Relearning
+);
+CREATE INDEX IF NOT EXISTS idx_review_state_due ON review_state(due);
+
+-- One row per review, ever. Useful for stats, and FSRS can later be tuned on it.
+CREATE TABLE IF NOT EXISTS review_log (
+    id          INTEGER PRIMARY KEY,
+    card_id     INTEGER NOT NULL REFERENCES cards(id),
+    rating      INTEGER NOT NULL,  -- 1 Again, 2 Hard, 3 Good, 4 Easy
+    reviewed_at TEXT NOT NULL,     -- UTC
+    was_new     INTEGER NOT NULL,  -- 1 if this was the card's first-ever review
+    graded_by   TEXT NOT NULL      -- 'self' now; 'claude' from Stage 3
+);
 """
 
 
@@ -25,6 +44,7 @@ def connect():
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row  # lets code read columns by name: row["question"]
+    conn.execute("PRAGMA foreign_keys = ON")  # refuse reviews that point at a missing card
     # We keep SQLite's default "rollback journal" mode rather than WAL mode.
     # WAL keeps extra side files open, which sync tools like OneDrive handle badly.
     conn.executescript(SCHEMA)

@@ -1,0 +1,106 @@
+/* Plain, readable study layout. Light and dark themes follow the computer's setting. */
+:root {
+  --bg: #f6f5f1;
+  --surface: #ffffff;
+  --text: #1d1d1f;
+  --muted: #6b6b70;
+  --border: #dcdad3;
+  --accent: #1f5f8b;
+  --accent-text: #ffffff;
+  --again: #b3261e;
+  --hard: #9a6700;
+  --good: #1a7f37;
+  --easy: #1f5f8b;
+  --flag-bg: #fff4d6;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141416;
+    --surface: #1e1e21;
+    --text: #ececef;
+    --muted: #9d9da5;
+    --border: #34343a;
+    --accent: #5aa9e6;
+    --accent-text: #0b1a26;
+    --again: #f2766b;
+    --hard: #e3b341;
+    --good: #56d364;
+    --easy: #5aa9e6;
+    --flag-bg: #3a3017;
+  }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; } /* hidden must win over .button's display rule */
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+a { color: var(--accent); }
+
+.site-header { border-bottom: 1px solid var(--border); background: var(--surface); }
+.brand {
+  display: block; max-width: 760px; margin: 0 auto; padding: 14px 16px;
+  font-weight: 600; text-decoration: none; color: var(--text);
+}
+
+/* --- buttons --- */
+.button {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text);
+  font: inherit; text-decoration: none; cursor: pointer;
+}
+.button:hover { border-color: var(--muted); }
+.button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+.button:disabled { opacity: .5; cursor: default; }
+kbd {
+  font: 12px ui-monospace, Consolas, monospace; padding: 1px 6px;
+  border: 1px solid currentColor; border-radius: 4px; opacity: .6;
+}
+.center { text-align: center; }
+
+/* --- home --- */
+.summary { display: flex; justify-content: center; gap: 40px; margin: 12px 0 24px; }
+.stat { display: flex; flex-direction: column; align-items: center; }
+.stat-num { font-size: 32px; font-weight: 600; }
+.stat-label { color: var(--muted); font-size: 14px; }
+.decks { width: 100%; border-collapse: collapse; margin-top: 28px; background: var(--surface);
+         border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.decks th, .decks td { padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; }
+.decks th { font-size: 13px; color: var(--muted); font-weight: 500; }
+.decks tr:last-child td { border-bottom: none; }
+.num { text-align: right !important; font-variant-numeric: tabular-nums; }
+
+/* --- review --- */
+.review-bar { display: flex; justify-content: space-between; color: var(--muted); font-size: 14px; margin-bottom: 12px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; }
+.card-meta { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+.flag { background: var(--flag-bg); padding: 8px 12px; border-radius: 6px; font-size: 14px; }
+.question { font-size: 22px; font-weight: 600; line-height: 1.4; margin: 0; white-space: pre-line; }
+.answer { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+.answer h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 8px; }
+.answer-text { white-space: pre-line; margin: 0; }
+.note { margin: 16px 0 0; color: var(--muted); }
+
+.actions { margin-top: 20px; text-align: center; }
+.rate-prompt { color: var(--muted); margin: 0 0 10px; }
+.rate-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.rate { flex-direction: column; gap: 2px; padding: 10px 6px; }
+.rate span { font-weight: 600; }
+.rate small { color: var(--muted); font-size: 13px; }
+.rate-1 span { color: var(--again); }
+.rate-2 span { color: var(--hard); }
+.rate-3 span { color: var(--good); }
+.rate-4 span { color: var(--easy); }
+
+.done { text-align: center; margin-top: 48px; }
+
+@media (max-width: 520px) {
+  .rate-buttons { grid-template-columns: repeat(2, 1fr); }
+  .card { padding: 20px; }
+  .summary { gap: 24px; }
+}
