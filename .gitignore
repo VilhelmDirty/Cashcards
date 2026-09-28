@@ -3,8 +3,10 @@
 .env
 
 # --- Personal data ---
-# The SQLite database holds my cards and review history. It is rebuilt
-# from the source HTML files by the importer, so it does not belong in git.
+# data/ holds the SQLite database (my cards and review history) and the app's
+# log files. None of it belongs in git; the importer rebuilds the cards.
+data/
+*.log
 *.db
 *.sqlite
 *.sqlite3
