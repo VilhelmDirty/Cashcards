@@ -23,14 +23,14 @@ from pathlib import Path
 import config
 import db
 
-TASK_NAME = "Finance Flashcards reminder"
+TASK_NAME = f"{config.APP_NAME} reminder"
 NO_WINDOW = 0x08000000  # don't flash a console window when called from the app
 
 INSTALL = r"""
 $action = New-ScheduledTaskAction -Execute $env:FC_EXE -Argument ('"' + $env:FC_SCRIPT + '"') -WorkingDirectory $env:FC_DIR
 $triggers = $env:FC_TIMES.Split(',') | ForEach-Object { New-ScheduledTaskTrigger -Daily -At $_ }
 $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Minutes 5)
-Register-ScheduledTask -TaskName $env:FC_TASK -Action $action -Trigger $triggers -Settings $settings -Description 'Shows a notification when Finance Flashcards has cards due.' -Force | Out-Null
+Register-ScheduledTask -TaskName $env:FC_TASK -Action $action -Trigger $triggers -Settings $settings -Description ('Shows a notification when ' + $env:FC_APP + ' has cards due.') -Force | Out-Null
 """
 
 STATUS = r"""
@@ -59,7 +59,7 @@ class ScheduleError(Exception):
 
 
 def _run(script, **env_vars):
-    env = {**os.environ, "FC_TASK": TASK_NAME, **env_vars}
+    env = {**os.environ, "FC_TASK": TASK_NAME, "FC_APP": config.APP_NAME, **env_vars}
     result = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
                             env=env, capture_output=True, text=True, creationflags=NO_WINDOW)
     if result.returncode != 0:

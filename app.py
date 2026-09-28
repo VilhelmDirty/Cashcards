@@ -100,17 +100,24 @@ def current_mode():
     return "type" if grader.api_key_configured() else "flip"
 
 
+@app.context_processor
+def app_name():
+    """Makes {{ app_name }} available in every page template."""
+    return {"app_name": config.APP_NAME}
+
+
 @app.route("/")
 def home():
     conn = get_conn()
+    hour = datetime.now().hour
+    greeting = "Good morning" if hour < 12 else "Good afternoon" if hour < 18 else "Good evening"
     return render_template(
         "home.html",
+        greeting=greeting,
         decks=srs.deck_summary(conn),
         counts=srs.queue_counts(conn),
         reviewed_today=srs.reviewed_today(conn),
         ai_ready=grader.api_key_configured(),
-        model=config.CLAUDE_MODEL,
-        spend=grader.total_spend(conn),
     )
 
 
@@ -215,7 +222,7 @@ def test_email():
     if not to:
         return render_settings(conn, error="Save an email address first.")
     try:
-        remind.send_reminder_email(conn, srs.reminder_counts(conn), to)
+        remind.send_reminder_email(conn, srs.reminder_counts(conn), to, test=True)
     except mailer.MailError as err:
         return render_settings(conn, error=str(err))
     return render_settings(conn, message=f"Test email sent to {to}. Check your inbox (and spam).")

@@ -26,6 +26,7 @@ from xml.sax.saxutils import escape, quoteattr
 
 import config
 import db
+import emails
 import mailer
 import srs
 from app import URL, is_running
@@ -101,7 +102,7 @@ def show_notification(text):
     xml = f"""<toast activationType="protocol" launch={quoteattr(URL + "/")}>
   <visual>
     <binding template="ToastGeneric">
-      <text>Finance Flashcards</text>
+      <text>{escape(config.APP_NAME)}</text>
       <text>{escape(text)}</text>
     </binding>
   </visual>
@@ -119,32 +120,12 @@ def show_notification(text):
         raise RuntimeError(result.stderr.strip() or f"PowerShell exit code {result.returncode}")
 
 
-def email_subject(counts):
-    if counts["due"]:
-        return f"Finance Flashcards: {plural(counts['due'], 'review')} due"
-    if counts["new"]:
-        return f"Finance Flashcards: {plural(counts['new'], 'new card')} ready"
-    return "Finance Flashcards: test email"
-
-
-def email_body(counts, warm_up):
-    lines = [waiting_message(counts), ""]
-    if counts["by_deck"]:
-        lines.append("Due by deck:")
-        lines += [f"  - {deck}: {n}" for deck, n in counts["by_deck"]]
-        lines.append("")
-    if warm_up:
-        deck, question = warm_up
-        lines += [f"Warm-up question ({deck}) - answer it in your head now:", "",
-                  question, "", "Then check yourself in the app on your laptop.", ""]
-    lines += ["---", "Sent by your Finance Flashcards app. Change the address, how often "
-              "emails come, or which decks count on the app's Settings and home pages."]
-    return "\n".join(lines)
-
-
-def send_reminder_email(conn, counts, to):
-    """Send one reminder email. Raises mailer.MailError on failure."""
-    mailer.send_email(to, email_subject(counts), email_body(counts, srs.warm_up_question(conn)))
+def send_reminder_email(conn, counts, to, test=False):
+    """Send one reminder email (wording and design live in emails.py).
+    Raises mailer.MailError on failure."""
+    subject, text, html = emails.build(counts, srs.warm_up_question(conn),
+                                       srs.study_history(conn), test=test)
+    mailer.send_email(to, subject, text, html)
     db.set_setting(conn, "last_email_date", datetime.now().date().isoformat())
 
 
@@ -187,7 +168,7 @@ def main():
             log("email: skipped, already sent one today")
         else:
             try:
-                send_reminder_email(conn, counts, to)
+                send_reminder_email(conn, counts, to, test=test)
                 log(f"email: sent to {to}")
                 print(f"Email sent to {to}")
             except mailer.MailError as err:

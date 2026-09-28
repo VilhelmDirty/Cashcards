@@ -1,6 +1,6 @@
-# Finance Flashcards — explain it in your own words
+# Cashcards — finance flashcards you explain in your own words
 
-A personal study app that runs on my own computer. It shows me a finance
+**Cashcards** is a personal study app that runs on my own computer. It shows me a finance
 flashcard, I type the answer **in my own words**, and Claude grades my
 explanation against the reference answer. The grade feeds a spaced-repetition
 scheduler (FSRS), so cards I explain poorly come back sooner.
@@ -131,8 +131,8 @@ How the call is built:
   correct *alternative* formula (EV = equity + net debt) as wrong, so the prompt now
   tells it to credit correct alternatives and treat imprecision as "missed", not "wrong".
 - **Cost controls.** Blank / "I don't know" answers skip the API entirely; answers
-  are capped at 5,000 characters; token usage is stored per grade and the running
-  spend is shown on the home page.
+  are capped at 5,000 characters; token usage is stored with every grade and draft
+  (`grader.total_spend()` adds it up), but kept out of the interface.
 - **Failure-safe.** No key, no internet, or no credit shows a plain-English message
   plus the reference answer, so I can still self-rate the card.
 - **Pay once.** Each grade is saved before I rate it, and the page redirects
@@ -159,11 +159,14 @@ days that aren't study days, then:
    through Windows' own notification API, called from PowerShell — no extra package.
 
 4. sends a **reminder email** too, if I've entered an address on the **Settings**
-   page — at most once a day by default, or at every reminder time. The email lists
-   what's due by deck and includes one **warm-up question** from a due card, so I
-   can start thinking before I'm back at my laptop. It's sent through a Gmail
-   account using an app password kept in `.env` (Python's built-in `smtplib`,
-   encrypted with STARTTLS).
+   page — at most once a day by default, or at every reminder time. It's written
+   to be read, not ignored (`emails.py`, `templates/email.html`): rotating
+   finance-pun subject lines ("Margin call: 14 cards due", "IPO day: 20 new cards"),
+   a "Today's statement" of what's due by deck, a **pop quiz** from a due card, and
+   a nudge based on yesterday ("Yesterday's volume: 0 cards. Bold strategy." or
+   "You're on a 4-day streak"). It's a styled HTML email with a plain-text version,
+   sent through a Gmail account using an app password kept in `.env` (Python's
+   built-in `smtplib`, encrypted with STARTTLS).
 
 Email and desktop notifications are independent: if one fails (wrong password,
 no internet), the other still goes out, and the failure is logged. Because the
@@ -266,6 +269,9 @@ folder, set `CARDS_DIR` in `.env`. The list of files to import lives in `config.
 | **Recipient on the Settings page, sender in `.env`** | The address I receive at is a preference (stored locally, never in git); the sending password is a secret (`.env`). |
 | **Once-a-day email by default** | Three reminder times shouldn't mean three emails; configurable. |
 | **Single-instance check on startup** | Launching the app while a reminder already started it just opens the browser instead of crashing on a busy port. |
+| **Design: "money meets index card"** | Cream paper, banknote green and coin gold; Fraunces for headings, Instrument Sans for text, JetBrains Mono for figures; study cards styled as real index cards. Follows the system light/dark setting. |
+| **App name in one setting (`APP_NAME`)** | Pages, emails, notifications and the Windows task all read it, so renaming is one line. |
+| **Email copy in its own module + template** | Wording and layout change without touching the scheduling code; card text is HTML-escaped. |
 | **Claude drafts, I approve** | AI-written study material can be confidently wrong (1 in 5 drafts in testing); a human check before anything enters a deck. |
 | **Drafts stored before review, then redirect** | Refreshing the page never pays for a second batch, and closing the tab doesn't lose them. |
 | **One shared `call_claude` helper** | Grading and drafting get the same plain-English error handling (no key, no credit, offline). |

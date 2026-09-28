@@ -11,6 +11,9 @@ from dotenv import load_dotenv
 PROJECT_DIR = Path(__file__).resolve().parent
 load_dotenv(PROJECT_DIR / ".env")
 
+# The app's name, shown on every page, in emails and in notifications.
+APP_NAME = "Cashcards"
+
 # The SQLite database file. The data/ folder is git-ignored.
 DB_PATH = Path(os.getenv("DB_PATH") or PROJECT_DIR / "data" / "flashcards.db")
 

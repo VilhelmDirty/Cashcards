@@ -1,64 +1,93 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="summary">
-  <div class="stat"><span class="stat-num">{{ counts.due }}</span><span class="stat-label">due now</span></div>
-  <div class="stat"><span class="stat-num">{{ counts.new }}</span><span class="stat-label">new left today</span></div>
-  <div class="stat"><span class="stat-num">{{ reviewed_today }}</span><span class="stat-label">reviewed today</span></div>
+<section class="hero">
+  <p class="eyebrow">{{ greeting }}</p>
+  <h1 class="hero-title">
+    {% if counts.due or counts.new %}Your balance is due.{% else %}All square for now.{% endif %}
+  </h1>
+
+  <div class="ledger">
+    <div class="ledger-item">
+      <span class="ledger-num">{{ counts.due }}</span>
+      <span class="ledger-label">due now</span>
+    </div>
+    <div class="ledger-item">
+      <span class="ledger-num">{{ counts.new }}</span>
+      <span class="ledger-label">new left today</span>
+    </div>
+    <div class="ledger-item">
+      <span class="ledger-num">{{ reviewed_today }}</span>
+      <span class="ledger-label">reviewed today</span>
+    </div>
+  </div>
+
+  <div class="hero-actions">
+    {% if counts.due or counts.new %}
+      <a class="button primary big" href="{{ url_for('review') }}">Study all decks <span aria-hidden="true">→</span></a>
+    {% else %}
+      <p class="muted">Nothing to study right now. Your next cards come due soon.</p>
+    {% endif %}
+    <a class="button ghost" href="{{ url_for('new_card') }}">+ Add a card</a>
+  </div>
 </section>
 
-<p class="center">
-  {% if counts.due or counts.new %}
-    <a class="button primary" href="{{ url_for('review') }}">Study all decks</a>
-  {% else %}
-    Nothing to study right now — nice work.
-  {% endif %}
-</p>
+<section class="panel ai-panel {{ 'on' if ai_ready else 'off' }}">
+  <div class="ai-status" aria-hidden="true"></div>
+  <div>
+    <h2 class="section-title">AI grading</h2>
+    {% if ai_ready %}
+      <p>On. Explain each answer in your own words, and Claude marks it: how much you retained,
+         what you missed, and a tighter way to say it.</p>
+    {% else %}
+      <p>Off. Add an Anthropic API key to the <code>.env</code> file and restart to have your
+         typed answers marked. Until then you rate yourself.</p>
+    {% endif %}
+  </div>
+</section>
 
-<p class="center muted small">
-  {% if ai_ready %}
-    AI grading on · {{ model }} · spent so far ≈ ${{ '%.2f' % spend }}
-  {% else %}
-    AI grading off — add ANTHROPIC_API_KEY to .env and restart to type answers and get feedback.
-  {% endif %}
-</p>
+<section class="decks-section">
+  <div class="section-head">
+    <h2 class="section-title">Decks</h2>
+    <span class="muted small">Tick <em>Remind</em> for decks you want reminders about
+      <span id="remind-saved" class="saved" hidden>· Saved</span></span>
+  </div>
 
-<form id="remind-form" method="post" action="{{ url_for('save_reminders') }}">
-<table class="decks">
-  <thead>
-    <tr><th title="Include this deck in desktop reminders">Remind me</th><th>Deck</th><th class="num">Due</th><th class="num">Unseen</th><th class="num">Total</th><th class="num">Avg time</th><th></th></tr>
-  </thead>
-  <tbody>
-    {% for d in decks %}
-    <tr>
-      <td class="remind-cell">
-        <input type="checkbox" name="remind" value="{{ d.deck }}" {% if d.remind %}checked{% endif %}
-               aria-label="Remind me about {{ d.deck }}">
-      </td>
-      <td>{{ d.deck }}</td>
-      <td class="num">{{ d.due or 0 }}</td>
-      <td class="num">{{ d.unseen }}</td>
-      <td class="num">{{ d.total }}</td>
-      <td class="num">{{ '%.0fs' % d.avg_seconds if d.avg_seconds is not none else '–' }}</td>
-      <td class="num">
-        <a href="{{ url_for('review', deck=d.deck) }}">Study</a>
-        {% if d.unseen == 0 %}<br><a class="small" href="{{ url_for('suggest', deck=d.deck) }}"
-          title="You've seen every card here. Add more?">New cards</a>{% endif %}
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-<p class="remind-help muted small">
-  Ticked decks count towards desktop reminders.
-  <span id="remind-saved" hidden>Saved.</span>
-  <noscript><button class="button" type="submit">Save reminder choices</button></noscript>
-</p>
-</form>
+  <form id="remind-form" method="post" action="{{ url_for('save_reminders') }}">
+    <ul class="deck-list">
+      {% for d in decks %}
+      {% set seen = d.total - d.unseen %}
+      <li class="deck">
+        <div class="deck-main">
+          <a class="deck-name" href="{{ url_for('review', deck=d.deck) }}">{{ d.deck }}</a>
+          <div class="progress" title="{{ seen }} of {{ d.total }} cards seen">
+            <span style="width: {{ (100 * seen / d.total) | round(1) if d.total else 0 }}%"></span>
+          </div>
+          <span class="deck-meta">
+            {{ seen }}/{{ d.total }} seen
+            {% if d.avg_seconds is not none %}· avg {{ '%.0f' % d.avg_seconds }}s{% endif %}
+            {% if d.unseen == 0 %}· <a href="{{ url_for('suggest', deck=d.deck) }}">finished, add new cards?</a>{% endif %}
+          </span>
+        </div>
+        <div class="deck-side">
+          {% if d.due %}<span class="badge">{{ d.due }} due</span>{% endif %}
+          <label class="remind-toggle">
+            <input type="checkbox" name="remind" value="{{ d.deck }}" {% if d.remind %}checked{% endif %}
+                   aria-label="Remind me about {{ d.deck }}">
+            <span>Remind</span>
+          </label>
+          <a class="button small" href="{{ url_for('review', deck=d.deck) }}">Study</a>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    <noscript><button class="button" type="submit">Save reminder choices</button></noscript>
+  </form>
+</section>
 {% endblock %}
 
 {% block scripts %}
 <script>
-  // Save straight away when a box is ticked or unticked.
+  // Save straight away when a Remind box is ticked or unticked.
   const remindForm = document.getElementById("remind-form");
   remindForm.addEventListener("change", async () => {
     await fetch(remindForm.action, { method: "POST", body: new FormData(remindForm) });

@@ -32,15 +32,19 @@ def looks_like_email(address):
     return bool(EMAIL_PATTERN.match(address or ""))
 
 
-def send_email(to, subject, body):
+def send_email(to, subject, body, html=None):
+    """Send one email. `body` is plain text; `html`, if given, is the styled version
+    that most email apps show instead (the plain text is the fallback)."""
     if not email_configured():
         raise MailError("No sending account set up. Add SMTP_USER and SMTP_PASSWORD "
                         "to the .env file, then restart the app.")
     message = EmailMessage()
-    message["From"] = f"Finance Flashcards <{sender()}>"
+    message["From"] = f"{config.APP_NAME} <{sender()}>"
     message["To"] = to
     message["Subject"] = subject
     message.set_content(body)
+    if html:
+        message.add_alternative(html, subtype="html")
 
     try:
         with smtplib.SMTP(config.SMTP_HOST, config.SMTP_PORT, timeout=30) as smtp:

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Settings · Finance Flashcards{% endblock %}
+{% block title %}Settings · {{ app_name }}{% endblock %}
 {% block content %}
 <h1 class="page-title">Reminder settings</h1>
 
@@ -98,7 +98,7 @@
   {% else %}
     <p>Off: no reminders will be sent until you switch this on.
       {% if schedule.error %}<br><span class="muted small">({{ schedule.error }})</span>{% endif %}</p>
-    <p class="muted small">This adds one task to Windows Task Scheduler, named "Finance Flashcards
+    <p class="muted small">This adds one task to Windows Task Scheduler, named "{{ app_name }}
       reminder". It runs only while you're logged in, needs no admin rights, and "Turn off reminders"
       removes it completely.</p>
     <form method="post" action="{{ url_for('change_schedule') }}">

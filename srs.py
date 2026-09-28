@@ -310,6 +310,23 @@ def deck_summary(conn):
     ).fetchall()
 
 
+def study_history(conn):
+    """{"yesterday": reviews done yesterday, "streak": days in a row with at least one
+    review (ending today, or yesterday if I haven't studied yet today), "ever": total}."""
+    per_day = {}
+    for (when,) in conn.execute("SELECT reviewed_at FROM review_log"):
+        day = datetime.fromisoformat(when).astimezone().date()
+        per_day[day] = per_day.get(day, 0) + 1
+    today = datetime.now().astimezone().date()
+    day = today if today in per_day else today - timedelta(days=1)
+    streak = 0
+    while day in per_day:
+        streak += 1
+        day -= timedelta(days=1)
+    return {"yesterday": per_day.get(today - timedelta(days=1), 0), "streak": streak,
+            "ever": sum(per_day.values())}
+
+
 def reviewed_today(conn):
     return conn.execute("SELECT COUNT(*) FROM review_log WHERE reviewed_at >= ?",
                         (_start_of_today(),)).fetchone()[0]
