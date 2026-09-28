@@ -45,7 +45,8 @@ def send_email(to, subject, body):
     try:
         with smtplib.SMTP(config.SMTP_HOST, config.SMTP_PORT, timeout=30) as smtp:
             smtp.starttls(context=ssl.create_default_context())  # encrypt before logging in
-            smtp.login(sender(), os.getenv("SMTP_PASSWORD"))
+            # Google shows app passwords as "abcd efgh ijkl mnop"; the spaces aren't part of it.
+            smtp.login(sender(), os.getenv("SMTP_PASSWORD").replace(" ", ""))
             smtp.send_message(message)
     except smtplib.SMTPAuthenticationError:
         raise MailError("The email account rejected the sign-in. For Gmail, SMTP_PASSWORD "
