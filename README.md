@@ -68,13 +68,13 @@ Requires **Python 3.10+** on Windows (commands below are for PowerShell).
 ```powershell
 # 1. Create a private environment for this project's packages (one time)
 py -m venv .venv
-.venv\Scripts\python -m pip install -r requirements.txt
+.\.venv\Scripts\python -m pip install -r requirements.txt
 
 # 2. Import the flashcards (safe to re-run any time)
-.venv\Scripts\python import_cards.py
+.\.venv\Scripts\python import_cards.py
 
 #    ...and list cards that may need a manual check
-.venv\Scripts\python import_cards.py --flagged
+.\.venv\Scripts\python import_cards.py --flagged
 ```
 
 Card files are read from `Downloads\Flaschards` by default. To use another

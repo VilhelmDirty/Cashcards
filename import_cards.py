@@ -1,8 +1,8 @@
 """Stage 1: import flashcards from my HTML/Markdown files into SQLite.
 
 Run it with:
-    .venv\\Scripts\\python import_cards.py              (import + summary)
-    .venv\\Scripts\\python import_cards.py --flagged    (also list cards needing a check)
+    .\\.venv\\Scripts\\python import_cards.py              (import + summary)
+    .\\.venv\\Scripts\\python import_cards.py --flagged    (also list cards needing a check)
 
 Safe to run again at any time: a card already in the database is updated
 if its answer changed in the source file, and never duplicated.
