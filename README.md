@@ -286,5 +286,14 @@ _More rows added as each tool is introduced._
 - [x] Stage 2 — Review screen with FSRS scheduling (self-rated)
 - [x] Answer timer (60 s limit, average time per deck)
 - [x] Stage 3 — Own-words grading with the Claude API
+- [x] Stage 4 — Due-card reminders (Windows desktop + email)
+- [x] Forgotten → Retained slider, suggested next date with override
+- [x] Reminder times and study days chosen in the app
+- [x] Add cards manually, or approve Claude-drafted ones
+- [x] Cashcards redesign and cheekier emails
 - [ ] Multiple choice with Claude-written wrong options (time feeds the rating)
-- [x] Stage 4 — Due-card reminders (Windows)
+
+## License
+
+[MIT](LICENSE). My flashcard *content* isn't part of this repository: the app
+imports cards from files on my own computer, and the database stays local.
