@@ -6,6 +6,7 @@ You can also run it by hand:
     .\\.venv\\Scripts\\python remind.py          notify only if cards are waiting
     .\\.venv\\Scripts\\python remind.py --test   always notify (to try it out)
 
+Only decks ticked "Remind me" on the app's home page count.
 If cards are waiting it:
   1. starts the study app invisibly in the background (if it isn't running),
      so the notification's "Study now" button has something to open;
@@ -57,10 +58,17 @@ def plural(n, word):
     return f"{n} {word}{'' if n == 1 else 's'}"
 
 
+def short_deck(name):
+    """'WSP: DCF' -> 'DCF', '15.401: Fixed Income' -> 'Fixed Income' (notifications are small)."""
+    return name.split(": ", 1)[-1]
+
+
 def waiting_message(counts):
     parts = []
     if counts["due"]:
-        parts.append(f"{plural(counts['due'], 'review')} due")
+        busiest = ", ".join(f"{short_deck(d)} {n}" for d, n in counts["by_deck"][:3])
+        more = " …" if len(counts["by_deck"]) > 3 else ""
+        parts.append(f"{plural(counts['due'], 'review')} due ({busiest}{more})")
     if counts["new"]:
         parts.append(f"{plural(counts['new'], 'new card')} ready")
     return " · ".join(parts) or "Nothing is due right now. (This is a test notification.)"
@@ -111,13 +119,14 @@ def main():
     test = "--test" in sys.argv
     conn = db.connect()
     try:
-        counts = srs.queue_counts(conn)
+        counts = srs.reminder_counts(conn)  # only decks ticked "Remind me" on the home page
     finally:
         conn.close()
 
     waiting = counts["due"] + counts["new"]
     if waiting < config.REMINDER_MIN_CARDS and not test:
-        log(f"nothing waiting ({counts}), no notification")
+        log(f"nothing waiting in reminded decks (due {counts['due']}, new {counts['new']}), "
+            "no notification")
         return
 
     text = waiting_message(counts)

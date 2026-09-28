@@ -74,6 +74,9 @@ kbd {
 .decks th { font-size: 13px; color: var(--muted); font-weight: 500; }
 .decks tr:last-child td { border-bottom: none; }
 .num { text-align: right !important; font-variant-numeric: tabular-nums; }
+.remind-cell { width: 1%; text-align: center !important; }
+.remind-cell input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+.remind-help { margin-top: 10px; }
 
 /* --- review --- */
 .review-bar { display: flex; justify-content: space-between; color: var(--muted); font-size: 14px; margin-bottom: 12px; }

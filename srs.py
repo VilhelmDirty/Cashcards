@@ -184,14 +184,55 @@ def record_review(conn, card_id, rating, expected_version, graded_by="self",
     return True
 
 
+# ---------------------------------------------------------------- reminders
+
+# A deck counts for reminders unless I've switched it off (no row = on).
+REMINDED = "COALESCE((SELECT s.remind FROM deck_settings s WHERE s.deck = c.deck), 1) = 1"
+
+
+def reminder_counts(conn):
+    """Cards waiting in the decks I want reminders for.
+
+    Returns {"due": n, "new": n, "by_deck": [(deck, due), ...]} with the
+    busiest decks first. New cards share the one daily allowance.
+    """
+    now = _iso(_now())
+    by_deck = conn.execute(
+        f"SELECT c.deck, COUNT(*) FROM cards c JOIN review_state r ON r.card_id = c.id "
+        f"WHERE r.due <= ? AND {REMINDED} GROUP BY c.deck ORDER BY COUNT(*) DESC, c.deck",
+        (now,),
+    ).fetchall()
+    unseen = conn.execute(
+        f"SELECT COUNT(*) FROM cards c LEFT JOIN review_state r ON r.card_id = c.id "
+        f"WHERE r.card_id IS NULL AND {REMINDED}"
+    ).fetchone()[0]
+    return {
+        "due": sum(n for _, n in by_deck),
+        "new": min(unseen, new_cards_left_today(conn)),
+        "by_deck": [(deck, n) for deck, n in by_deck],
+    }
+
+
+def set_reminded_decks(conn, chosen):
+    """Switch reminders on for the decks in `chosen` and off for every other deck."""
+    for (deck,) in conn.execute("SELECT DISTINCT deck FROM cards").fetchall():
+        conn.execute(
+            "INSERT INTO deck_settings (deck, remind) VALUES (?, ?) "
+            "ON CONFLICT(deck) DO UPDATE SET remind = excluded.remind",
+            (deck, int(deck in chosen)),
+        )
+    conn.commit()
+
+
 # ---------------------------------------------------------------- dashboard
 
 def deck_summary(conn):
-    """Per deck: total, unseen, due now, and average thinking time (seconds)."""
+    """Per deck: total, unseen, due now, reminders on/off, average thinking time (s)."""
     return conn.execute(
         "SELECT c.deck AS deck, COUNT(*) AS total, "
         "       SUM(r.card_id IS NULL) AS unseen, "
         "       SUM(r.due <= ?) AS due, "
+        f"      MAX({REMINDED}) AS remind, "
         "       (SELECT AVG(l.duration_ms) / 1000.0 FROM review_log l "
         "        JOIN cards c2 ON c2.id = l.card_id "
         "        WHERE c2.deck = c.deck AND l.duration_ms IS NOT NULL) AS avg_seconds "

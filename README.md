@@ -133,12 +133,13 @@ How the call is built:
 **Windows Task Scheduler** runs `remind.py` at set times each day (default 09:00,
 14:00, 19:00 — `REMINDER_TIMES` in `config.py`). The script:
 
-1. counts cards waiting (due reviews + new cards still allowed today) and stays
-   silent if there are none;
+1. counts cards waiting (due reviews + new cards still allowed today) **in the decks
+   I've ticked "Remind me" on the home page**, and stays silent if there are none;
 2. starts the study app invisibly in the background if it isn't already running,
    so the notification's **Study now** button has something to open — that copy
    shuts itself down after 2 hours without use;
-3. shows a native Windows notification ("12 reviews due · 20 new cards ready")
+3. shows a native Windows notification naming the busiest decks
+   ("7 reviews due (DCF 5, M&A 2) · 20 new cards ready")
    through Windows' own notification API, called from PowerShell — no extra package.
 
 The task catches up after the computer was off ("start when available"), runs only

@@ -41,6 +41,12 @@ CREATE TABLE IF NOT EXISTS review_log (
     retention   INTEGER            -- slider position 0 (forgotten) - 100 (retained)
 );
 
+-- Per-deck choices. A deck with no row here uses the defaults.
+CREATE TABLE IF NOT EXISTS deck_settings (
+    deck   TEXT PRIMARY KEY,
+    remind INTEGER NOT NULL DEFAULT 1   -- 1 = include this deck in reminders
+);
+
 -- Claude's grade of a typed answer. Saved before I confirm the rating, so the
 -- feedback is never lost (and never paid for twice) if the page is refreshed.
 CREATE TABLE IF NOT EXISTS ai_feedback (

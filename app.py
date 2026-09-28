@@ -110,6 +110,16 @@ def home():
     )
 
 
+@app.post("/reminders")
+def save_reminders():
+    """The 'Remind me' checkboxes on the home page: ticked decks trigger reminders."""
+    conn = get_conn()
+    known = {row[0] for row in conn.execute("SELECT DISTINCT deck FROM cards")}
+    chosen = set(request.form.getlist("remind")) & known  # ignore anything unexpected
+    srs.set_reminded_decks(conn, chosen)
+    return redirect(url_for("home"))
+
+
 @app.route("/review")
 def review():
     deck = request.args.get("deck") or None

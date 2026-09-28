@@ -22,13 +22,18 @@
   {% endif %}
 </p>
 
+<form id="remind-form" method="post" action="{{ url_for('save_reminders') }}">
 <table class="decks">
   <thead>
-    <tr><th>Deck</th><th class="num">Due</th><th class="num">Unseen</th><th class="num">Total</th><th class="num">Avg time</th><th></th></tr>
+    <tr><th title="Include this deck in desktop reminders">Remind me</th><th>Deck</th><th class="num">Due</th><th class="num">Unseen</th><th class="num">Total</th><th class="num">Avg time</th><th></th></tr>
   </thead>
   <tbody>
     {% for d in decks %}
     <tr>
+      <td class="remind-cell">
+        <input type="checkbox" name="remind" value="{{ d.deck }}" {% if d.remind %}checked{% endif %}
+               aria-label="Remind me about {{ d.deck }}">
+      </td>
       <td>{{ d.deck }}</td>
       <td class="num">{{ d.due or 0 }}</td>
       <td class="num">{{ d.unseen }}</td>
@@ -39,4 +44,23 @@
     {% endfor %}
   </tbody>
 </table>
+<p class="remind-help muted small">
+  Ticked decks count towards desktop reminders.
+  <span id="remind-saved" hidden>Saved.</span>
+  <noscript><button class="button" type="submit">Save reminder choices</button></noscript>
+</p>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Save straight away when a box is ticked or unticked.
+  const remindForm = document.getElementById("remind-form");
+  remindForm.addEventListener("change", async () => {
+    await fetch(remindForm.action, { method: "POST", body: new FormData(remindForm) });
+    const saved = document.getElementById("remind-saved");
+    saved.hidden = false;
+    setTimeout(() => (saved.hidden = true), 1500);
+  });
+</script>
 {% endblock %}
