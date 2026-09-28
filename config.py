@@ -46,6 +46,16 @@ SCORE_TO_RATING = [
     (0, 1),   # 0-49   -> Again
 ]
 
+# --- Reminders (Windows) ---
+# When Windows Task Scheduler runs remind.py each day. Re-run setup_reminders.py
+# after changing these so the schedule is updated.
+REMINDER_TIMES = ["09:00", "14:00", "19:00"]
+# Stay quiet unless at least this many cards (due + new allowed today) are waiting.
+REMINDER_MIN_CARDS = 1
+# A reminder starts the app invisibly so "Study now" works; it quits after this idle time.
+IDLE_SHUTDOWN_MINUTES = 120
+APP_PORT = 5000
+
 # Which files to import, and the deck name each one gets in the app.
 # Paths are relative to CARDS_DIR. Only the newest version of each set is listed;
 # older copies and the interactive explainer pages are deliberately left out.

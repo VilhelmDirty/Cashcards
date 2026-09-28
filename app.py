@@ -3,14 +3,23 @@
     .\\.venv\\Scripts\\python app.py
 
 It opens http://127.0.0.1:5000 in your browser. Press Ctrl+C in the terminal to stop.
+If the app is already running (e.g. started by a reminder), this just opens the browser.
 
 Two ways to review a card:
   type  - type the answer in my own words; Claude grades it (Stage 3)
   flip  - reveal the answer and rate myself (Stage 2)
+
+Options:
+  --no-browser   don't open a browser tab
+  --background   started invisibly by remind.py: log to data/app.log and quit
+                 after config.IDLE_SHUTDOWN_MINUTES without any page requests
 """
 import json
+import os
+import socket
 import sys
 import threading
+import time
 import webbrowser
 from datetime import datetime, timezone
 
@@ -22,6 +31,31 @@ import grader
 import srs
 
 app = Flask(__name__)
+URL = f"http://127.0.0.1:{config.APP_PORT}"
+_last_request = time.monotonic()
+
+
+def is_running():
+    """True if something is already answering on the app's port."""
+    with socket.socket() as s:
+        s.settimeout(0.5)
+        return s.connect_ex(("127.0.0.1", config.APP_PORT)) == 0
+
+
+@app.before_request
+def note_activity():
+    global _last_request
+    _last_request = time.monotonic()
+
+
+def _quit_when_idle():
+    """Background mode only: stop the server after a long spell with no page requests."""
+    limit = config.IDLE_SHUTDOWN_MINUTES * 60
+    while True:
+        time.sleep(60)
+        if time.monotonic() - _last_request > limit:
+            print(f"{datetime.now():%Y-%m-%d %H:%M} idle for {config.IDLE_SHUTDOWN_MINUTES} min, stopping")
+            os._exit(0)
 
 
 def get_conn():
@@ -190,9 +224,25 @@ def rate(card_id):
 
 
 if __name__ == "__main__":
-    url = "http://127.0.0.1:5000"
-    if "--no-browser" not in sys.argv:
-        threading.Timer(1.0, webbrowser.open, args=[url]).start()
-    print(f"Study app running at {url}  (press Ctrl+C to stop)")
+    background = "--background" in sys.argv
+    open_browser = not background and "--no-browser" not in sys.argv
+
+    if is_running():  # one copy is enough
+        if open_browser:
+            webbrowser.open(URL)
+        print(f"The app is already running at {URL}")
+        sys.exit(0)
+
+    if background:
+        # Started invisibly (no terminal), so send messages to a log file instead.
+        log_path = config.PROJECT_DIR / "data" / "app.log"
+        log_path.parent.mkdir(exist_ok=True)
+        sys.stdout = sys.stderr = open(log_path, "a", encoding="utf-8", buffering=1)
+        print(f"{datetime.now():%Y-%m-%d %H:%M} started in background by a reminder")
+        threading.Thread(target=_quit_when_idle, daemon=True).start()
+    elif open_browser:
+        threading.Timer(1.0, webbrowser.open, args=[URL]).start()
+
+    print(f"Study app running at {URL}  (press Ctrl+C to stop)")
     # 127.0.0.1 means "this computer only": nothing else on the network can reach it.
-    app.run(host="127.0.0.1", port=5000, debug=False)
+    app.run(host="127.0.0.1", port=config.APP_PORT, debug=False)

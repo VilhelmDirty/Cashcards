@@ -128,6 +128,23 @@ How the call is built:
 - **Pay once.** Each grade is saved before I rate it, and the page redirects
   afterwards, so refreshing never triggers a second (paid) grade.
 
+### 4. Reminders (`remind.py`, `setup_reminders.py`) — Windows
+
+**Windows Task Scheduler** runs `remind.py` at set times each day (default 09:00,
+14:00, 19:00 — `REMINDER_TIMES` in `config.py`). The script:
+
+1. counts cards waiting (due reviews + new cards still allowed today) and stays
+   silent if there are none;
+2. starts the study app invisibly in the background if it isn't already running,
+   so the notification's **Study now** button has something to open — that copy
+   shuts itself down after 2 hours without use;
+3. shows a native Windows notification ("12 reviews due · 20 new cards ready")
+   through Windows' own notification API, called from PowerShell — no extra package.
+
+The task catches up after the computer was off ("start when available"), runs only
+while I'm logged in, needs no admin rights, and is removed with one command.
+Each run writes a line to `data/reminders.log`, because scheduled runs have no window.
+
 ### Merged multi-part cards
 
 Some cards only made sense after the previous one ("…of this same bond").
@@ -154,6 +171,12 @@ py -m venv .venv
 # 4. Start the study app - it opens http://127.0.0.1:5000 in your browser
 .\.venv\Scripts\python app.py
 #    Press Ctrl+C in the terminal to stop it.
+
+# 5. Reminders (Windows): try one, then install the daily schedule
+.\.venv\Scripts\python remind.py --test
+.\.venv\Scripts\python setup_reminders.py            # install / update
+.\.venv\Scripts\python setup_reminders.py --status   # next and last run
+.\.venv\Scripts\python setup_reminders.py --remove   # uninstall
 ```
 
 Card files are read from `Downloads\Flaschards` by default. To use another
@@ -193,6 +216,10 @@ folder, set `CARDS_DIR` in `.env`. The list of files to import lives in `config.
 | **Score → rating mapping in config** | The AI's grade drives FSRS, and the bands are easy to tune. |
 | **AI suggests, I confirm** | A grader can be wrong; overrides are logged so I could later measure how often. |
 | **Forgotten → Retained slider instead of grade buttons** | Memory isn't four boxes; a continuum is more honest. FSRS still gets its four grades via configurable bands. |
+| **Windows Task Scheduler for reminders** | Built into Windows, survives reboots, catches up missed times, and uses no memory between reminders — unlike an always-running background program. |
+| **Notifications via PowerShell + Windows' notification API** | Native Windows pop-ups with a "Study now" button and no extra dependency. |
+| **Reminder starts the app; app quits when idle** | "Study now" always works, without leaving a server running forever. |
+| **Single-instance check on startup** | Launching the app while a reminder already started it just opens the browser instead of crashing on a busy port. |
 | **Merge dependent cards at import, listed in config** | A shuffled "part b" can't be answered alone; an explicit list is transparent and editable. |
 
 _More rows added as each tool is introduced._
@@ -204,4 +231,4 @@ _More rows added as each tool is introduced._
 - [x] Answer timer (60 s limit, average time per deck)
 - [x] Stage 3 — Own-words grading with the Claude API
 - [ ] Multiple choice with Claude-written wrong options (time feeds the rating)
-- [ ] Stage 4 — Due-card reminders
+- [x] Stage 4 — Due-card reminders (Windows)
