@@ -34,9 +34,19 @@ CREATE TABLE IF NOT EXISTS review_log (
     rating      INTEGER NOT NULL,  -- 1 Again, 2 Hard, 3 Good, 4 Easy
     reviewed_at TEXT NOT NULL,     -- UTC
     was_new     INTEGER NOT NULL,  -- 1 if this was the card's first-ever review
-    graded_by   TEXT NOT NULL      -- 'self' now; 'claude' from Stage 3
+    graded_by   TEXT NOT NULL,     -- 'self' now; 'claude' from Stage 3
+    duration_ms INTEGER,           -- thinking time: card shown -> answer revealed
+    timed_out   INTEGER NOT NULL DEFAULT 0  -- 1 if the time limit ran out
 );
 """
+
+# Columns added after the first release. A database created earlier won't have
+# them, and CREATE TABLE IF NOT EXISTS won't change an existing table, so they're
+# added here if missing. (Adding columns this way keeps all existing rows.)
+MIGRATIONS = [
+    ("review_log", "duration_ms", "INTEGER"),
+    ("review_log", "timed_out", "INTEGER NOT NULL DEFAULT 0"),
+]
 
 
 def connect():
@@ -48,4 +58,13 @@ def connect():
     # We keep SQLite's default "rollback journal" mode rather than WAL mode.
     # WAL keeps extra side files open, which sync tools like OneDrive handle badly.
     conn.executescript(SCHEMA)
+    _migrate(conn)
     return conn
+
+
+def _migrate(conn):
+    for table, column, definition in MIGRATIONS:
+        existing = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
+        if column not in existing:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
+    conn.commit()

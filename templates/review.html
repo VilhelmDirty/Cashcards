@@ -6,6 +6,11 @@
   <span>{{ counts.due }} due · {{ counts.new }} new</span>
 </div>
 
+<div class="timer" id="timer" data-limit="{{ time_limit }}">
+  <div class="timer-track"><div class="timer-fill" id="timer-fill"></div></div>
+  <span class="timer-text" id="timer-text">0:00 / {{ '%d:%02d' % (time_limit // 60, time_limit % 60) }}</span>
+</div>
+
 <article class="card">
   <p class="card-meta">
     {{ card.deck }}{% if card.topic %} · {{ card.topic }}{% endif %}{% if card.source_ref %} · {{ card.source_ref }}{% endif %}
@@ -14,6 +19,7 @@
   <h1 class="question">{{ card.question }}</h1>
 
   <div id="answer" class="answer" hidden>
+    <p class="time-result" id="time-result"></p>
     <h2>Reference answer</h2>
     <p class="answer-text">{{ card.answer }}</p>
     {% if card.note %}<p class="note"><strong>Key insight:</strong> {{ card.note }}</p>{% endif %}
@@ -26,6 +32,8 @@
   <form id="rate-form" method="post" action="{{ url_for('rate', card_id=card.id) }}" hidden>
     <input type="hidden" name="deck" value="{{ deck or '' }}">
     <input type="hidden" name="version" value="{{ version }}">
+    <input type="hidden" name="duration_ms" id="duration-ms">
+    <input type="hidden" name="timed_out" id="timed-out" value="0">
     <p class="rate-prompt">How well did you know it?</p>
     <div class="rate-buttons">
       {% for value, name in ratings %}
@@ -42,17 +50,46 @@
 
 {% block scripts %}
 <script>
-  // Small bit of JavaScript: reveal the answer, keyboard shortcuts, no double-submits.
+  // Small bit of JavaScript: the timer, revealing the answer,
+  // keyboard shortcuts, and blocking double-submits.
   const showBtn = document.getElementById("show");
   const answer = document.getElementById("answer");
   const form = document.getElementById("rate-form");
+  const timer = document.getElementById("timer");
+  const fill = document.getElementById("timer-fill");
+  const timerText = document.getElementById("timer-text");
+  const limitMs = Number(timer.dataset.limit) * 1000;
 
-  function reveal() {
+  const started = performance.now();  // a clock that isn't affected by the system time changing
+  const fmt = (ms) => {
+    const s = Math.floor(ms / 1000);
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  };
+
+  function tick() {
+    const elapsed = Math.min(performance.now() - started, limitMs);
+    fill.style.width = `${100 * (1 - elapsed / limitMs)}%`;
+    timer.classList.toggle("warning", elapsed >= limitMs * 0.75);
+    timerText.textContent = `${fmt(elapsed)} / ${fmt(limitMs)}`;
+    if (elapsed >= limitMs) reveal(true);
+  }
+  const ticker = setInterval(tick, 200);
+
+  function reveal(timedOut = false) {
+    if (!answer.hidden) return;  // already revealed
+    clearInterval(ticker);
+    const elapsed = Math.min(performance.now() - started, limitMs);
+    document.getElementById("duration-ms").value = Math.round(elapsed);
+    document.getElementById("timed-out").value = timedOut ? "1" : "0";
+    document.getElementById("time-result").textContent = timedOut
+      ? "Time's up — answer shown automatically."
+      : `You took ${fmt(elapsed)}.`;
+    timer.classList.add(timedOut ? "timed-out" : "stopped");
     answer.hidden = false;
     form.hidden = false;
     showBtn.hidden = true;
   }
-  showBtn.addEventListener("click", reveal);
+  showBtn.addEventListener("click", () => reveal(false));
 
   form.addEventListener("submit", () => {
     // Disable after the browser has captured which button was pressed.
@@ -61,7 +98,7 @@
 
   document.addEventListener("keydown", (e) => {
     if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
-    if (e.code === "Space" && !showBtn.hidden) { e.preventDefault(); reveal(); }
+    if (e.code === "Space" && !showBtn.hidden) { e.preventDefault(); reveal(false); }
     else if (!form.hidden && ["1", "2", "3", "4"].includes(e.key)) {
       form.querySelector(`button[value="${e.key}"]`).click();
     }

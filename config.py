@@ -24,6 +24,8 @@ NEW_CARDS_PER_DAY = 20
 # FSRS schedules each card for when you have this chance of still remembering it.
 # Higher = more frequent reviews. 0.9 (90%) is the FSRS default.
 DESIRED_RETENTION = 0.9
+# Seconds to think before the answer is revealed automatically.
+TIME_LIMIT_SECONDS = 60
 
 # Which files to import, and the deck name each one gets in the app.
 # Paths are relative to CARDS_DIR. Only the newest version of each set is listed;

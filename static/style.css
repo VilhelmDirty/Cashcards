@@ -97,6 +97,17 @@ kbd {
 .rate-3 span { color: var(--good); }
 .rate-4 span { color: var(--easy); }
 
+/* --- timer --- */
+.timer { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.timer-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.timer-fill { height: 100%; width: 100%; background: var(--accent); transition: width .2s linear; }
+.timer-text { font: 14px ui-monospace, Consolas, monospace; color: var(--muted); min-width: 92px; text-align: right; }
+.timer.warning .timer-fill { background: var(--hard); }
+.timer.timed-out .timer-fill { background: var(--again); }
+.timer.timed-out .timer-text { color: var(--again); }
+.timer.stopped .timer-fill { background: var(--good); }
+.time-result { margin: 0 0 16px; font-size: 14px; color: var(--muted); }
+
 .done { text-align: center; margin-top: 48px; }
 
 @media (max-width: 520px) {

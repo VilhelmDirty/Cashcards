@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 
 from flask import Flask, abort, g, redirect, render_template, request, url_for
 
+import config
 import db
 import srs
 
@@ -60,6 +61,7 @@ def review():
         previews=srs.preview(conn, card["id"]),
         version=srs.version(conn, card["id"]),
         ratings=srs.RATINGS,
+        time_limit=config.TIME_LIMIT_SECONDS,
     )
 
 
@@ -71,7 +73,16 @@ def rate(card_id):
     conn = get_conn()
     if conn.execute("SELECT 1 FROM cards WHERE id = ?", (card_id,)).fetchone() is None:
         abort(404)
-    srs.record_review(conn, card_id, rating, request.form.get("version", ""))
+    # The browser measures thinking time. Treat it as untrusted input:
+    # ignore anything that isn't a sensible number of milliseconds.
+    duration_ms = request.form.get("duration_ms", type=int)
+    if duration_ms is not None and not 0 <= duration_ms <= 10 * 60 * 1000:
+        duration_ms = None
+    srs.record_review(
+        conn, card_id, rating, request.form.get("version", ""),
+        duration_ms=duration_ms,
+        timed_out=request.form.get("timed_out") == "1",
+    )
     # Redirect after saving, so refreshing the page can't submit the rating twice.
     return redirect(url_for("review", deck=request.form.get("deck") or None))
 

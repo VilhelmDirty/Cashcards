@@ -148,19 +148,25 @@ def version(conn, card_id):
     return _load_fsrs_card(conn, card_id)[1]
 
 
-def record_review(conn, card_id, rating, expected_version, graded_by="self"):
+def record_review(conn, card_id, rating, expected_version, graded_by="self",
+                  duration_ms=None, timed_out=False):
     """Apply a rating (1-4) via FSRS and save the result.
 
     expected_version guards against double-submits: if the card's schedule has
     changed since the page was shown (e.g. a double-click already rated it),
     the second rating is ignored. Returns True if the review was saved.
+
+    duration_ms is my thinking time. FSRS records it but schedules on the rating
+    alone, so time only changes the schedule where it's built into the rating
+    (multiple choice, later).
     """
     card, current_version = _load_fsrs_card(conn, card_id)
     if current_version != expected_version:
         return False
 
     now = _now()
-    card, _log = scheduler.review_card(card, fsrs.Rating(rating), review_datetime=now)
+    card, _log = scheduler.review_card(card, fsrs.Rating(rating), review_datetime=now,
+                                       review_duration=duration_ms)
 
     conn.execute(
         "INSERT INTO review_state (card_id, fsrs_card, due, state) VALUES (?, ?, ?, ?) "
@@ -169,9 +175,10 @@ def record_review(conn, card_id, rating, expected_version, graded_by="self"):
         (card_id, card.to_json(), _iso(card.due), card.state.name),
     )
     conn.execute(
-        "INSERT INTO review_log (card_id, rating, reviewed_at, was_new, graded_by) "
-        "VALUES (?, ?, ?, ?, ?)",
-        (card_id, rating, _iso(now), current_version == "new", graded_by),
+        "INSERT INTO review_log (card_id, rating, reviewed_at, was_new, graded_by, "
+        "duration_ms, timed_out) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (card_id, rating, _iso(now), current_version == "new", graded_by,
+         duration_ms, timed_out),
     )
     conn.commit()
     return True
@@ -180,10 +187,14 @@ def record_review(conn, card_id, rating, expected_version, graded_by="self"):
 # ---------------------------------------------------------------- dashboard
 
 def deck_summary(conn):
+    """Per deck: total, unseen, due now, and average thinking time (seconds)."""
     return conn.execute(
         "SELECT c.deck AS deck, COUNT(*) AS total, "
         "       SUM(r.card_id IS NULL) AS unseen, "
-        "       SUM(r.due <= ?) AS due "
+        "       SUM(r.due <= ?) AS due, "
+        "       (SELECT AVG(l.duration_ms) / 1000.0 FROM review_log l "
+        "        JOIN cards c2 ON c2.id = l.card_id "
+        "        WHERE c2.deck = c.deck AND l.duration_ms IS NOT NULL) AS avg_seconds "
         "FROM cards c LEFT JOIN review_state r ON r.card_id = c.id "
         "GROUP BY c.deck ORDER BY c.deck",
         (_iso(_now()),),

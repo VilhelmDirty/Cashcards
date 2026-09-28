@@ -88,6 +88,12 @@ The screens are a small **Flask** web app that runs on my own computer and opens
 in the browser. Keyboard shortcuts: <kbd>Space</kbd> shows the answer,
 <kbd>1</kbd>–<kbd>4</kbd> rate it Again / Hard / Good / Easy.
 
+**Timer.** Each card has a 60-second thinking clock (card shown → answer revealed).
+At 60 seconds the answer is revealed automatically and the attempt is marked as
+over time. Times are stored per review, and the home page shows my average per deck —
+in an interview, speed of recall matters as much as accuracy. For self-rated
+flashcards, time is recorded but doesn't change the schedule; my rating does.
+
 ## How to run it
 
 Requires **Python 3.10+** on Windows (commands below are for PowerShell).
@@ -138,6 +144,8 @@ folder, set `CARDS_DIR` in `.env`. The list of files to import lives in `config.
 | **Previews without FSRS's random "fuzz"** | Fuzz spreads reviews out (good) but made previews jumpy — Hard could show a longer interval than Good. |
 | **Redirect after each rating (Post/Redirect/Get)** | Refreshing the page can't re-submit a rating. |
 | **All times stored in UTC** | One unambiguous clock; converted to local time only for "today" limits. |
+| **Timer measured in the browser, checked on the server** | Only the browser knows when I revealed the answer; the server rejects values that aren't a sensible number of milliseconds. |
+| **Small migration step in `db.py`** | Adding columns to an existing table keeps my review history when the schema grows. |
 
 _More rows added as each tool is introduced._
 
@@ -145,5 +153,7 @@ _More rows added as each tool is introduced._
 
 - [x] Stage 1 — Import cards from HTML into SQLite (767 cards across 13 decks)
 - [x] Stage 2 — Review screen with FSRS scheduling (self-rated)
+- [x] Answer timer (60 s limit, average time per deck)
 - [ ] Stage 3 — Own-words grading with the Claude API
+- [ ] Multiple choice with Claude-written wrong options (time feeds the rating)
 - [ ] Stage 4 — Due-card reminders
