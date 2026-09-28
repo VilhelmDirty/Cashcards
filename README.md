@@ -119,7 +119,12 @@ How the call is built:
 - **Grade substance, not wording.** The prompt tells Claude that paraphrasing
   deserves full credit — the whole point is to *not* memorise the card's wording.
 - **Model in one setting.** `CLAUDE_MODEL` in `config.py`; currently Claude Haiku 4.5,
-  Anthropic's cheapest current model (~$0.002 per graded answer).
+  Anthropic's cheapest current model. Measured: ~700–850 input and 60–140 output
+  tokens per grade, about **$0.0012 per graded answer** (~800 grades per $1), 3–4 s each.
+- **Tested on real answers.** A good own-words answer scored 92, a half-right one 60,
+  a wrong one 15. The first half-right test scored 45 because Claude marked a
+  correct *alternative* formula (EV = equity + net debt) as wrong, so the prompt now
+  tells it to credit correct alternatives and treat imprecision as "missed", not "wrong".
 - **Cost controls.** Blank / "I don't know" answers skip the API entirely; answers
   are capped at 5,000 characters; token usage is stored per grade and the running
   spend is shown on the home page.

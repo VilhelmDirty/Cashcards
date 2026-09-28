@@ -21,8 +21,14 @@ out loud to an interviewer.
 You will get a flashcard question, the reference answer, and the student's answer.
 
 Grade substance, not wording: an answer that says the same thing differently \
-deserves full credit. Don't penalise spelling, grammar or brevity unless meaning \
-is lost. If the question has several parts (a, b, c...), grade all of them together.
+deserves full credit. Finance concepts often have several correct formulations \
+(e.g. enterprise value = operating assets - operating liabilities = equity value + \
+net debt); credit any correct alternative even if the reference uses a different \
+one. Only list something under "wrong" if it is actually incorrect finance, not \
+merely different from the reference; an imprecision (e.g. "debt" where "net debt" \
+is meant) is a missed point, not an error. Don't penalise spelling, grammar or \
+brevity unless meaning is lost. If the question has several parts (a, b, c...), \
+grade all of them together.
 
 score (0-100):
   90-100  every key point, correct, clear enough to say in an interview
