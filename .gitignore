@@ -1,0 +1,25 @@
+# --- Secrets: never commit these ---
+# .env holds the Anthropic API key. See .env.example for the template.
+.env
+
+# --- Personal data ---
+# The SQLite database holds my cards and review history. It is rebuilt
+# from the source HTML files by the importer, so it does not belong in git.
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# --- Python clutter ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# --- Editor / OS clutter ---
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
