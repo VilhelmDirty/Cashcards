@@ -35,8 +35,8 @@
     <input type="hidden" name="duration_ms" id="duration-ms">
     <input type="hidden" name="timed_out" id="timed-out" value="0">
     <input type="hidden" name="mode" value="flip">
-    <p class="rate-prompt">How well did you know it?</p>
-    {% include "_rate_buttons.html" %}
+    <p class="rate-prompt">How much did you retain? Drag, or use the arrow keys.</p>
+    {% include "_retention_slider.html" %}
   </form>
 </div>
 {% endblock %}
@@ -81,20 +81,17 @@
     answer.hidden = false;
     form.hidden = false;
     showBtn.hidden = true;
+    document.getElementById("retention").focus();  // arrow keys move the slider right away
   }
   showBtn.addEventListener("click", () => reveal(false));
 
   form.addEventListener("submit", () => {
-    // Disable after the browser has captured which button was pressed.
     setTimeout(() => form.querySelectorAll("button").forEach(b => b.disabled = true), 0);
   });
 
   document.addEventListener("keydown", (e) => {
     if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.code === "Space" && !showBtn.hidden) { e.preventDefault(); reveal(false); }
-    else if (!form.hidden && ["1", "2", "3", "4"].includes(e.key)) {
-      form.querySelector(`button[value="${e.key}"]`).click();
-    }
   });
 </script>
 {% endblock %}

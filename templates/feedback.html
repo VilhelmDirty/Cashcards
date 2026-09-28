@@ -20,8 +20,8 @@
     <p class="muted">Your answer wasn't graded, so rate yourself against the reference below.</p>
   {% else %}
     <div class="score score-{{ suggested }}">
-      <span class="score-num">{{ feedback.score }}</span><span class="score-of">/100</span>
-      <span class="score-label">Suggested: {{ ratings[suggested - 1][1] }}</span>
+      <span class="score-num">{{ feedback.score }}</span><span class="score-of">/100 retained</span>
+      <span class="score-label">Claude's assessment</span>
     </div>
   {% endif %}
 
@@ -66,26 +66,19 @@
   <input type="hidden" name="duration_ms" value="{{ duration_ms if duration_ms is not none else '' }}">
   <input type="hidden" name="timed_out" value="{{ 1 if timed_out else 0 }}">
   <p class="rate-prompt">
-    {% if suggested %}Press <kbd>Enter</kbd> to accept <strong>{{ ratings[suggested - 1][1] }}</strong>, or pick another rating.
-    {% else %}How well did you know it?{% endif %}
+    {% if feedback %}Claude set the slider from your answer. Press <kbd>Enter</kbd> to accept, or adjust it if you disagree.
+    {% else %}How much did you retain? Drag, or use the arrow keys.{% endif %}
   </p>
-  {% include "_rate_buttons.html" %}
+  {% include "_retention_slider.html" %}
 </form>
 {% endblock %}
 
 {% block scripts %}
 <script>
   const form = document.getElementById("rate-form");
-  const suggested = form.querySelector("button.suggested");
+  document.getElementById("retention").focus();
   form.addEventListener("submit", () => {
     setTimeout(() => form.querySelectorAll("button").forEach(b => b.disabled = true), 0);
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
-    if (e.key === "Enter" && suggested) { e.preventDefault(); suggested.click(); }
-    else if (["1", "2", "3", "4"].includes(e.key)) {
-      form.querySelector(`button[value="${e.key}"]`).click();
-    }
   });
 </script>
 {% endblock %}

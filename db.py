@@ -37,7 +37,8 @@ CREATE TABLE IF NOT EXISTS review_log (
     graded_by   TEXT NOT NULL,     -- 'self' now; 'claude' from Stage 3
     duration_ms INTEGER,           -- thinking time: card shown -> answer revealed
     timed_out   INTEGER NOT NULL DEFAULT 0, -- 1 if the time limit ran out
-    feedback_id INTEGER REFERENCES ai_feedback(id)  -- the AI grade behind this rating, if any
+    feedback_id INTEGER REFERENCES ai_feedback(id), -- the AI grade behind this rating, if any
+    retention   INTEGER            -- slider position 0 (forgotten) - 100 (retained)
 );
 
 -- Claude's grade of a typed answer. Saved before I confirm the rating, so the
@@ -66,6 +67,7 @@ MIGRATIONS = [
     ("review_log", "duration_ms", "INTEGER"),
     ("review_log", "timed_out", "INTEGER NOT NULL DEFAULT 0"),
     ("review_log", "feedback_id", "INTEGER REFERENCES ai_feedback(id)"),
+    ("review_log", "retention", "INTEGER"),
 ]
 
 

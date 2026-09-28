@@ -37,7 +37,8 @@ PRICE_PER_M_OUTPUT = 5.00
 # Typing an explanation takes longer than recalling one, so typed answers get
 # their own limit. At the limit, whatever I've typed is submitted.
 TYPED_TIME_LIMIT_SECONDS = 60
-# How Claude's 0-100 score becomes an FSRS rating: the highest band reached wins.
+# The Forgotten (0) -> Retained (100) slider, set by Claude or by me, is turned
+# into one of FSRS's four grades behind the scenes. Highest band reached wins.
 SCORE_TO_RATING = [
     (90, 4),  # 90-100 -> Easy
     (70, 3),  # 70-89  -> Good

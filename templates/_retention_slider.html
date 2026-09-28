@@ -1,0 +1,42 @@
+{# Forgotten -> Retained slider. Shared by the self-rating and feedback screens.
+   Needs: previews (FSRS next-review text per grade 1-4), bands (config.SCORE_TO_RATING),
+   initial (0-100 starting position). The value is converted to an FSRS grade on the server. #}
+<div class="retention" id="retention-box"
+     data-previews='{{ previews | tojson }}' data-bands='{{ bands | tojson }}'>
+  <div class="retention-ends"><span>Forgotten</span><span>Retained</span></div>
+  <input type="range" name="retention" id="retention" min="0" max="100" step="1"
+         value="{{ initial }}" aria-label="How much you retained, from forgotten (0) to retained (100)">
+  <div class="retention-readout">
+    <span><strong id="retention-value">{{ initial }}</strong>/100 retained</span>
+    <span>next review: <strong id="retention-next"></strong></span>
+  </div>
+  <button class="button primary retention-confirm" type="submit">Confirm <kbd>Enter</kbd></button>
+</div>
+<script>
+  (() => {
+    const box = document.getElementById("retention-box");
+    const slider = document.getElementById("retention");
+    const previews = JSON.parse(box.dataset.previews);
+    const bands = JSON.parse(box.dataset.bands);  // [[90, 4], [70, 3], ...] highest first
+    const grade = (v) => (bands.find(([min]) => v >= min) || [0, 1])[1];
+
+    function update() {
+      const v = Number(slider.value);
+      document.getElementById("retention-value").textContent = v;
+      document.getElementById("retention-next").textContent = previews[grade(v)];
+      // colour the filled part of the track, red (forgotten) -> green (retained)
+      slider.style.setProperty("--fill", `${v}%`);
+      slider.style.setProperty("--hue", `${Math.round(v * 1.2)}`);
+    }
+    slider.addEventListener("input", update);
+    update();
+
+    // Enter confirms from anywhere on the page (the slider itself can't submit a form).
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" || e.repeat || e.target.tagName === "TEXTAREA") return;
+      if (box.closest("form").hidden) return;
+      e.preventDefault();
+      box.closest("form").requestSubmit();
+    });
+  })();
+</script>

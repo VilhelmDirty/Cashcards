@@ -104,9 +104,13 @@ per card returns:
 - what I **missed** and what I got **wrong**,
 - a **tightened rewrite** of my own wording.
 
-The score maps to an FSRS rating — 90+ Easy, 70–89 Good, 50–69 Hard, below 50
-Again — which is pre-selected so <kbd>Enter</kbd> accepts it. I can override it
-(logged as `override`) because the grader can be wrong.
+The score sets a **Forgotten → Retained slider** (0–100). <kbd>Enter</kbd> accepts
+Claude's assessment; I can drag the slider if I disagree (logged as `override`),
+because a grader can be wrong. Self-rating mode uses the same slider.
+
+Behind the scenes the slider is converted to one of FSRS's four grades
+(90+ Easy, 70–89 Good, 50–69 Hard, below 50 Again), because FSRS's memory model
+is built on exactly four. The raw 0–100 value is stored with every review too.
 
 How the call is built:
 
@@ -188,6 +192,7 @@ folder, set `CARDS_DIR` in `.env`. The list of files to import lives in `config.
 | **Official `anthropic` SDK + structured outputs** | Typed errors, automatic retries, and guaranteed-valid JSON instead of hand-parsing text. |
 | **Score → rating mapping in config** | The AI's grade drives FSRS, and the bands are easy to tune. |
 | **AI suggests, I confirm** | A grader can be wrong; overrides are logged so I could later measure how often. |
+| **Forgotten → Retained slider instead of grade buttons** | Memory isn't four boxes; a continuum is more honest. FSRS still gets its four grades via configurable bands. |
 | **Merge dependent cards at import, listed in config** | A shuffled "part b" can't be answered alone; an explicit list is transparent and editable. |
 
 _More rows added as each tool is introduced._

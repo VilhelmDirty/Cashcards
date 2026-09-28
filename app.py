@@ -95,7 +95,8 @@ def review():
         "review.html", **common,
         previews=srs.preview(conn, card["id"]),
         version=srs.version(conn, card["id"]),
-        ratings=srs.RATINGS,
+        bands=config.SCORE_TO_RATING,
+        initial=50,  # self-rating starts mid-way; I move it
         time_limit=config.TIME_LIMIT_SECONDS,
     )
 
@@ -120,7 +121,8 @@ def grade(card_id):
             # Grading failed: show the reference answer so I can still rate myself.
             return render_template(
                 "feedback.html", card=card, deck=deck, feedback=None, error=str(err),
-                user_answer=answer, suggested=None, ratings=srs.RATINGS,
+                user_answer=answer, suggested=None, initial=50,
+                bands=config.SCORE_TO_RATING,
                 previews=srs.preview(conn, card_id), version=srs.version(conn, card_id),
                 duration_ms=duration_ms, timed_out=timed_out,
             )
@@ -147,7 +149,8 @@ def feedback(feedback_id):
         "feedback.html", card=card, deck=deck, error=None,
         feedback=row, missed=json.loads(row["missed"]), wrong=json.loads(row["wrong"]),
         user_answer=row["user_answer"], suggested=grader.score_to_rating(row["score"]),
-        ratings=srs.RATINGS, previews=srs.preview(conn, card["id"]),
+        initial=row["score"],  # Claude's assessment sets the slider
+        bands=config.SCORE_TO_RATING, previews=srs.preview(conn, card["id"]),
         version=srs.version(conn, card["id"]),
         duration_ms=row["duration_ms"], timed_out=row["timed_out"],
     )
@@ -155,9 +158,11 @@ def feedback(feedback_id):
 
 @app.post("/review/<int:card_id>")
 def rate(card_id):
-    rating = request.form.get("rating", type=int)
-    if rating not in (1, 2, 3, 4):
+    # The Forgotten (0) -> Retained (100) slider; FSRS needs one of 4 grades.
+    retention = request.form.get("retention", type=int)
+    if retention is None or not 0 <= retention <= 100:
         abort(400)
+    rating = grader.score_to_rating(retention)
     conn = get_conn()
     get_card(conn, card_id)
 
@@ -167,8 +172,8 @@ def rate(card_id):
                            (feedback_id, card_id)).fetchone()
         if row is None:
             abort(400)
-        # Did I accept Claude's suggested rating, or override it?
-        graded_by = "claude" if rating == grader.score_to_rating(row["score"]) else "override"
+        # Did I keep Claude's assessment, or move the slider?
+        graded_by = "claude" if retention == row["score"] else "override"
 
     srs.record_review(
         conn, card_id, rating, request.form.get("version", ""),
@@ -176,6 +181,7 @@ def rate(card_id):
         duration_ms=read_duration(),
         timed_out=request.form.get("timed_out") == "1",
         feedback_id=feedback_id,
+        retention=retention,
     )
     # Redirect after saving, so refreshing the page can't submit the rating twice.
     mode = request.form.get("mode")
