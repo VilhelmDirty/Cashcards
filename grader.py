@@ -76,28 +76,22 @@ def _client():
     return anthropic.Anthropic(timeout=60.0, max_retries=2)
 
 
-def grade_answer(card, user_answer):
-    """Ask Claude to grade one answer. Returns (Grade, input_tokens, output_tokens)."""
+def call_claude(system, prompt, output_format, max_tokens):
+    """One Claude request with a structured reply. Shared by grading and card drafting.
+
+    Returns the SDK response (response.parsed_output is the validated object).
+    Raises GradingError with a plain-English message for anything that goes wrong.
+    """
     if not api_key_configured():
         raise GradingError("No API key found. Add ANTHROPIC_API_KEY to the .env file "
                            "in the project folder, then restart the app.")
-
-    reference = card["answer"]
-    if card["note"]:
-        reference += f"\n\nKey insight: {card['note']}"
-    prompt = (
-        f"<question>\n{card['question']}\n</question>\n\n"
-        f"<reference_answer>\n{reference}\n</reference_answer>\n\n"
-        f"<student_answer>\n{user_answer}\n</student_answer>"
-    )
-
     try:
         response = _client().messages.parse(
             model=config.CLAUDE_MODEL,
-            max_tokens=2000,
-            system=SYSTEM_PROMPT,
+            max_tokens=max_tokens,
+            system=system,
             messages=[{"role": "user", "content": prompt}],
-            output_format=Grade,
+            output_format=output_format,
         )
     except anthropic.AuthenticationError:
         raise GradingError("The API key was rejected. Check ANTHROPIC_API_KEY in .env.")
@@ -121,6 +115,22 @@ def grade_answer(card, user_answer):
 
     if response.stop_reason == "max_tokens" or response.parsed_output is None:
         raise GradingError("Claude's reply was cut off. Try again.")
+    return response
+
+
+def grade_answer(card, user_answer):
+    """Ask Claude to grade one answer. Returns (Grade, input_tokens, output_tokens)."""
+    reference = card["answer"]
+    if card["note"]:
+        reference += f"\n\nKey insight: {card['note']}"
+    prompt = (
+        f"<question>\n{card['question']}\n</question>\n\n"
+        f"<reference_answer>\n{reference}\n</reference_answer>\n\n"
+        f"<student_answer>\n{user_answer}\n</student_answer>"
+    )
+
+    response = call_claude(system=SYSTEM_PROMPT, prompt=prompt, output_format=Grade,
+                           max_tokens=2000)
 
     grade = response.parsed_output
     grade.score = max(0, min(100, grade.score))  # keep it in range whatever comes back
@@ -146,9 +156,22 @@ def save_feedback(conn, card_id, user_answer, grade, model, input_tokens, output
     return cursor.lastrowid
 
 
+def record_usage(conn, purpose, input_tokens, output_tokens):
+    """Log Claude usage that isn't a grade (grades keep their tokens in ai_feedback)."""
+    conn.execute(
+        "INSERT INTO ai_usage (created_at, purpose, model, input_tokens, output_tokens) "
+        "VALUES (?, ?, ?, ?, ?)",
+        (datetime.now(timezone.utc).isoformat(timespec="seconds"), purpose,
+         config.CLAUDE_MODEL, input_tokens, output_tokens),
+    )
+    conn.commit()
+
+
 def total_spend(conn):
-    """Estimated dollars spent on grading so far."""
+    """Estimated dollars spent on Claude so far (grading + card drafting)."""
     tokens_in, tokens_out = conn.execute(
-        "SELECT COALESCE(SUM(input_tokens), 0), COALESCE(SUM(output_tokens), 0) FROM ai_feedback"
+        "SELECT COALESCE(SUM(i), 0), COALESCE(SUM(o), 0) FROM ("
+        "  SELECT input_tokens AS i, output_tokens AS o FROM ai_feedback"
+        "  UNION ALL SELECT input_tokens, output_tokens FROM ai_usage)"
     ).fetchone()
     return (tokens_in * config.PRICE_PER_M_INPUT + tokens_out * config.PRICE_PER_M_OUTPUT) / 1e6

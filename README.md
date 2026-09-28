@@ -173,6 +173,21 @@ The task catches up after the computer was off ("start when available"), runs on
 while I'm logged in, needs no admin rights, and is removed with one command.
 Each run writes a line to `data/reminders.log`, because scheduled runs have no window.
 
+### 5. Adding new cards (`card_writer.py`)
+
+- **Add card** (top bar): pick a deck or create a new one, then type the question
+  and reference answer. New cards join the review queue as new cards.
+- **New cards from Claude**: once I've seen every card in a deck, a *New cards*
+  link appears. Claude reads up to 40 of the deck's cards and drafts 3, 5 or 10
+  new ones that go a step further (the "why", worked examples, interviewer
+  follow-ups), each self-contained. **Nothing is saved until I approve it:** drafts
+  wait on the page, where I edit, tick or discard each one.
+- Why the approval step matters, measured on a real batch of 5 DCF drafts: 3 were
+  good, 1 had a real error (UFCF without the after-tax interest add-back), and
+  1 was muddled. About $0.009 per batch of 5 with Haiku.
+- Cards record where they came from (`origin`: import / manual / claude), and the
+  importer never touches cards I added.
+
 ### Merged multi-part cards
 
 Some cards only made sense after the previous one ("…of this same bond").
@@ -251,6 +266,10 @@ folder, set `CARDS_DIR` in `.env`. The list of files to import lives in `config.
 | **Recipient on the Settings page, sender in `.env`** | The address I receive at is a preference (stored locally, never in git); the sending password is a secret (`.env`). |
 | **Once-a-day email by default** | Three reminder times shouldn't mean three emails; configurable. |
 | **Single-instance check on startup** | Launching the app while a reminder already started it just opens the browser instead of crashing on a busy port. |
+| **Claude drafts, I approve** | AI-written study material can be confidently wrong (1 in 5 drafts in testing); a human check before anything enters a deck. |
+| **Drafts stored before review, then redirect** | Refreshing the page never pays for a second batch, and closing the tab doesn't lose them. |
+| **One shared `call_claude` helper** | Grading and drafting get the same plain-English error handling (no key, no credit, offline). |
+| **Suggested next date + optional override** | FSRS knows the maths, I know my calendar. |
 | **Merge dependent cards at import, listed in config** | A shuffled "part b" can't be answered alone; an explicit list is transparent and editable. |
 
 _More rows added as each tool is introduced._

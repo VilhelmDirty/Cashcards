@@ -26,6 +26,7 @@ from datetime import date, datetime, timedelta, timezone
 
 from flask import Flask, abort, g, redirect, render_template, request, url_for
 
+import card_writer
 import config
 import db
 import grader
@@ -218,6 +219,88 @@ def test_email():
     except mailer.MailError as err:
         return render_settings(conn, error=str(err))
     return render_settings(conn, message=f"Test email sent to {to}. Check your inbox (and spam).")
+
+
+@app.route("/cards/new")
+def new_card():
+    conn = get_conn()
+    return render_template("new_card.html", decks=card_writer.deck_names(conn),
+                           deck=request.args.get("deck"), message=request.args.get("msg"),
+                           error=None, form={})
+
+
+@app.post("/cards/new")
+def save_new_card():
+    conn = get_conn()
+    form = request.form
+    deck = form.get("new_deck", "") if form.get("deck") == "__new__" else form.get("deck", "")
+    try:
+        card_writer.add_card(conn, deck, form.get("question", ""), form.get("answer", ""),
+                             form.get("topic"))
+    except card_writer.CardError as err:
+        return render_template("new_card.html", decks=card_writer.deck_names(conn),
+                               deck=form.get("deck"), message=None, error=str(err), form=form)
+    return redirect(url_for("new_card", deck=deck.strip(),
+                            msg="Card added. It joins your reviews as a new card."))
+
+
+def render_suggest(conn, deck, message=None, error=None):
+    summary = next((d for d in srs.deck_summary(conn) if d["deck"] == deck), None)
+    if summary is None:
+        abort(404)
+    return render_template("suggest.html", deck=deck, summary=summary,
+                           drafts=card_writer.pending_drafts(conn, deck),
+                           ai_ready=grader.api_key_configured(), model=config.CLAUDE_MODEL,
+                           message=message, error=error)
+
+
+@app.route("/decks/suggest")
+def suggest():
+    return render_suggest(get_conn(), request.args.get("deck", ""), message=request.args.get("msg"))
+
+
+@app.post("/decks/suggest")
+def make_suggestions():
+    """Ask Claude to draft new cards; they wait on the page for my approval."""
+    conn = get_conn()
+    deck = request.form.get("deck", "")
+    count = request.form.get("count", type=int)
+    if count not in (3, 5, 10):
+        abort(400)
+    try:
+        drafted = card_writer.draft_cards(conn, deck, count)
+    except (grader.GradingError, card_writer.CardError) as err:
+        return render_suggest(conn, deck, error=str(err))
+    # Redirect so refreshing the page doesn't pay for another batch.
+    return redirect(url_for("suggest", deck=deck, msg=f"Claude drafted {drafted} cards. "
+                            "Check each one, edit if needed, and tick the ones to keep."))
+
+
+@app.post("/drafts/save")
+def save_drafts():
+    conn = get_conn()
+    deck = request.form.get("deck", "")
+    if request.form.get("action") == "discard":
+        card_writer.discard_drafts(conn, deck)
+        return redirect(url_for("suggest", deck=deck, msg="Drafts discarded."))
+
+    saved, problems = 0, []
+    for draft in card_writer.pending_drafts(conn, deck):
+        n = draft["id"]
+        if not request.form.get(f"keep_{n}"):
+            continue
+        try:
+            card_writer.add_card(conn, deck, request.form.get(f"question_{n}", ""),
+                                 request.form.get(f"answer_{n}", ""),
+                                 request.form.get(f"topic_{n}"), origin="claude")
+            saved += 1
+        except card_writer.CardError as err:
+            problems.append(str(err))
+    card_writer.discard_drafts(conn, deck)  # anything not ticked is thrown away
+    message = f"Added {saved} new card{'' if saved == 1 else 's'} to {deck}."
+    if problems:
+        message += f" Skipped {len(problems)}: {problems[0]}"
+    return redirect(url_for("suggest", deck=deck, msg=message))
 
 
 @app.route("/review")

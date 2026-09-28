@@ -11,7 +11,10 @@
   <header class="site-header">
     <nav class="nav">
       <a href="{{ url_for('home') }}" class="brand">Finance Flashcards</a>
-      <a href="{{ url_for('settings') }}" class="nav-link">Settings</a>
+      <span class="nav-links">
+        <a href="{{ url_for('new_card') }}" class="nav-link">Add card</a>
+        <a href="{{ url_for('settings') }}" class="nav-link">Settings</a>
+      </span>
     </nav>
   </header>
   <main>

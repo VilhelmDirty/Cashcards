@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}New cards · {{ deck }}{% endblock %}
+{% block content %}
+<h1 class="page-title">New cards for {{ deck }}</h1>
+
+{% if message %}<p class="notice">{{ message }}</p>{% endif %}
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+{% if drafts %}
+<form method="post" action="{{ url_for('save_drafts') }}">
+  <input type="hidden" name="deck" value="{{ deck }}">
+  <p class="muted small">Claude can make mistakes. Check every answer before you keep it; untick
+    anything wrong or too easy. Unticked drafts are thrown away.</p>
+  {% for d in drafts %}
+  <article class="card draft">
+    <label class="check keep"><input type="checkbox" name="keep_{{ d.id }}" checked> Keep this card</label>
+    <label for="topic_{{ d.id }}">Topic</label>
+    <input type="text" id="topic_{{ d.id }}" name="topic_{{ d.id }}" value="{{ d.topic or '' }}" maxlength="80">
+    <label for="question_{{ d.id }}">Question</label>
+    <textarea id="question_{{ d.id }}" name="question_{{ d.id }}" rows="3" maxlength="2000">{{ d.question }}</textarea>
+    <label for="answer_{{ d.id }}">Answer</label>
+    <textarea id="answer_{{ d.id }}" name="answer_{{ d.id }}" rows="5" maxlength="5000">{{ d.answer }}</textarea>
+  </article>
+  {% endfor %}
+  <div class="draft-actions">
+    <button class="button" name="action" value="discard" formnovalidate>Discard all</button>
+    <button class="button primary" name="action" value="save">Add ticked cards</button>
+  </div>
+</form>
+
+{% else %}
+<section class="card settings">
+  <p>
+    {% if summary.unseen == 0 %}<strong>You've been through every card in this deck.</strong>
+    {% else %}You still have {{ summary.unseen }} unseen card{{ '' if summary.unseen == 1 else 's' }} here,
+    but you can ask for new ones now if you like.{% endif %}
+    Claude can draft new cards that take the material a step further: the reasons behind the rules,
+    worked examples, and the follow-up questions interviewers ask. You check and approve each one.
+  </p>
+  {% if ai_ready %}
+  <form method="post" action="{{ url_for('make_suggestions') }}" class="suggest-form">
+    <input type="hidden" name="deck" value="{{ deck }}">
+    <label for="count">How many</label>
+    <select id="count" name="count">
+      <option value="3">3</option><option value="5" selected>5</option><option value="10">10</option>
+    </select>
+    <button class="button primary" type="submit" id="draft-button">Draft cards with Claude</button>
+  </form>
+  <p class="muted small">Uses {{ model }}; about 1–2 cents per batch. Takes around 10–20 seconds.</p>
+  <p class="grading" id="drafting" hidden>Claude is writing cards…</p>
+  {% else %}
+  <p class="muted small">Add ANTHROPIC_API_KEY to .env and restart the app to use this.</p>
+  {% endif %}
+  <p class="small">Or <a href="{{ url_for('new_card', deck=deck) }}">write a card yourself</a>.</p>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const f = document.querySelector(".suggest-form");
+  if (f) f.addEventListener("submit", () => {
+    document.getElementById("drafting").hidden = false;
+    setTimeout(() => (document.getElementById("draft-button").disabled = true), 0);
+  });
+</script>
+{% endblock %}

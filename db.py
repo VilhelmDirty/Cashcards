@@ -55,6 +55,26 @@ CREATE TABLE IF NOT EXISTS app_settings (
     value TEXT
 );
 
+-- New cards Claude has drafted for a deck, waiting for me to edit/approve/discard.
+CREATE TABLE IF NOT EXISTS card_drafts (
+    id         INTEGER PRIMARY KEY,
+    deck       TEXT NOT NULL,
+    topic      TEXT,
+    question   TEXT NOT NULL,
+    answer     TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+
+-- Claude usage other than grading (grades keep their tokens in ai_feedback).
+CREATE TABLE IF NOT EXISTS ai_usage (
+    id            INTEGER PRIMARY KEY,
+    created_at    TEXT NOT NULL,
+    purpose       TEXT NOT NULL,     -- e.g. 'draft_cards'
+    model         TEXT NOT NULL,
+    input_tokens  INTEGER NOT NULL,
+    output_tokens INTEGER NOT NULL
+);
+
 -- Claude's grade of a typed answer. Saved before I confirm the rating, so the
 -- feedback is never lost (and never paid for twice) if the page is refreshed.
 CREATE TABLE IF NOT EXISTS ai_feedback (
@@ -83,6 +103,7 @@ MIGRATIONS = [
     ("review_log", "feedback_id", "INTEGER REFERENCES ai_feedback(id)"),
     ("review_log", "retention", "INTEGER"),
     ("review_log", "custom_due", "TEXT"),
+    ("cards", "origin", "TEXT NOT NULL DEFAULT 'import'"),  # 'import', 'manual' or 'claude'
 ]
 
 
