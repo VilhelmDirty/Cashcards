@@ -9,7 +9,10 @@
 </head>
 <body>
   <header class="site-header">
-    <a href="{{ url_for('home') }}" class="brand">Finance Flashcards</a>
+    <nav class="nav">
+      <a href="{{ url_for('home') }}" class="brand">Finance Flashcards</a>
+      <a href="{{ url_for('settings') }}" class="nav-link">Settings</a>
+    </nav>
   </header>
   <main>
     {% block content %}{% endblock %}

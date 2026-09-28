@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Settings · Finance Flashcards{% endblock %}
+{% block content %}
+<h1 class="page-title">Reminder settings</h1>
+
+{% if message %}<p class="notice">{{ message }}</p>{% endif %}
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+<form method="post" action="{{ url_for('save_settings') }}" class="card settings">
+  <h2>Email</h2>
+  <label for="email_to">Send reminder emails to</label>
+  <input type="email" id="email_to" name="email_to" value="{{ email_to }}"
+         placeholder="you@example.com" autocomplete="email">
+  <p class="muted small">Leave empty for no emails. Saved only on this computer.</p>
+
+  <label for="email_frequency">How often</label>
+  <select id="email_frequency" name="email_frequency">
+    <option value="daily" {% if email_frequency == 'daily' %}selected{% endif %}>At most once a day</option>
+    <option value="every" {% if email_frequency == 'every' %}selected{% endif %}>At every reminder time ({{ times | join(', ') }})</option>
+    <option value="off" {% if email_frequency == 'off' %}selected{% endif %}>Off</option>
+  </select>
+
+  <p class="muted small">
+    {% if email_ready %}Sending from <strong>{{ sender }}</strong>.
+    {% else %}<strong>No sending account yet:</strong> add SMTP_USER and SMTP_PASSWORD (a Gmail
+    app password) to the .env file, then restart the app.{% endif %}
+  </p>
+
+  <h2>Desktop</h2>
+  <label class="check">
+    <input type="checkbox" name="desktop" {% if desktop %}checked{% endif %}>
+    Show Windows notifications
+  </label>
+
+  <h2>Which decks</h2>
+  <p class="muted small">
+    {% if reminded %}{{ reminded | join(', ') }}.{% else %}None: every deck is unticked.{% endif %}
+    Change these with the <a href="{{ url_for('home') }}">Remind me</a> checkboxes on the home page.
+  </p>
+
+  <div class="settings-actions">
+    <button class="button primary" type="submit">Save</button>
+  </div>
+</form>
+
+<form method="post" action="{{ url_for('test_email') }}" class="center">
+  <button class="button" type="submit" {% if not email_to or not email_ready %}disabled{% endif %}>
+    Send a test email now
+  </button>
+</form>
+{% endblock %}

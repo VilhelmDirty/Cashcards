@@ -47,6 +47,12 @@ CREATE TABLE IF NOT EXISTS deck_settings (
     remind INTEGER NOT NULL DEFAULT 1   -- 1 = include this deck in reminders
 );
 
+-- App-wide choices made on the Settings page (e.g. where reminder emails go).
+CREATE TABLE IF NOT EXISTS app_settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT
+);
+
 -- Claude's grade of a typed answer. Saved before I confirm the rating, so the
 -- feedback is never lost (and never paid for twice) if the page is refreshed.
 CREATE TABLE IF NOT EXISTS ai_feedback (
@@ -88,6 +94,25 @@ def connect():
     conn.executescript(SCHEMA)
     _migrate(conn)
     return conn
+
+
+SETTING_DEFAULTS = {
+    "desktop_notifications": "1",   # "1" on, "0" off
+    "email_to": "",                 # where reminder emails go; empty = no emails
+    "email_frequency": "daily",     # "off", "daily" (at most one a day), "every" (each reminder time)
+    "last_email_date": "",          # local date of the last reminder email, for "daily"
+}
+
+
+def get_setting(conn, key):
+    row = conn.execute("SELECT value FROM app_settings WHERE key = ?", (key,)).fetchone()
+    return row["value"] if row else SETTING_DEFAULTS[key]
+
+
+def set_setting(conn, key, value):
+    conn.execute("INSERT INTO app_settings (key, value) VALUES (?, ?) "
+                 "ON CONFLICT(key) DO UPDATE SET value = excluded.value", (key, value))
+    conn.commit()
 
 
 def _migrate(conn):

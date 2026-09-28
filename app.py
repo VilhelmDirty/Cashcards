@@ -28,6 +28,7 @@ from flask import Flask, abort, g, redirect, render_template, request, url_for
 import config
 import db
 import grader
+import mailer
 import srs
 
 app = Flask(__name__)
@@ -118,6 +119,54 @@ def save_reminders():
     chosen = set(request.form.getlist("remind")) & known  # ignore anything unexpected
     srs.set_reminded_decks(conn, chosen)
     return redirect(url_for("home"))
+
+
+def render_settings(conn, message=None, error=None):
+    return render_template(
+        "settings.html",
+        email_to=db.get_setting(conn, "email_to"),
+        email_frequency=db.get_setting(conn, "email_frequency"),
+        desktop=db.get_setting(conn, "desktop_notifications") == "1",
+        sender=mailer.sender(), email_ready=mailer.email_configured(),
+        times=config.REMINDER_TIMES,
+        reminded=[d["deck"] for d in srs.deck_summary(conn) if d["remind"]],
+        message=message, error=error,
+    )
+
+
+@app.route("/settings")
+def settings():
+    return render_settings(get_conn(), message="Saved." if request.args.get("saved") else None)
+
+
+@app.post("/settings")
+def save_settings():
+    conn = get_conn()
+    email_to = request.form.get("email_to", "").strip()
+    if email_to and not mailer.looks_like_email(email_to):
+        return render_settings(conn, error=f"'{email_to}' doesn't look like an email address.")
+    frequency = request.form.get("email_frequency")
+    if frequency not in ("off", "daily", "every"):
+        abort(400)
+    db.set_setting(conn, "email_to", email_to)
+    db.set_setting(conn, "email_frequency", frequency)
+    db.set_setting(conn, "desktop_notifications", "1" if request.form.get("desktop") else "0")
+    return redirect(url_for("settings", saved=1))
+
+
+@app.post("/settings/test-email")
+def test_email():
+    """Send a real reminder email right now, to check the setup works."""
+    import remind  # imported here because remind.py itself imports this file
+    conn = get_conn()
+    to = db.get_setting(conn, "email_to")
+    if not to:
+        return render_settings(conn, error="Save an email address first.")
+    try:
+        remind.send_reminder_email(conn, srs.reminder_counts(conn), to)
+    except mailer.MailError as err:
+        return render_settings(conn, error=str(err))
+    return render_settings(conn, message=f"Test email sent to {to}. Check your inbox (and spam).")
 
 
 @app.route("/review")

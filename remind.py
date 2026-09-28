@@ -1,17 +1,20 @@
-"""Stage 4: a Windows notification when flashcards are waiting.
+"""Stage 4: remind me when flashcards are waiting - desktop notification and/or email.
 
 Windows Task Scheduler runs this a few times a day (set up by setup_reminders.py).
 You can also run it by hand:
 
-    .\\.venv\\Scripts\\python remind.py          notify only if cards are waiting
-    .\\.venv\\Scripts\\python remind.py --test   always notify (to try it out)
+    .\\.venv\\Scripts\\python remind.py          remind only if cards are waiting
+    .\\.venv\\Scripts\\python remind.py --test   always remind (to try it out)
 
-Only decks ticked "Remind me" on the app's home page count.
-If cards are waiting it:
-  1. starts the study app invisibly in the background (if it isn't running),
-     so the notification's "Study now" button has something to open;
-  2. shows a notification using Windows' built-in notification system.
-Each run adds a line to data/reminders.log, since scheduled runs have no window.
+Only decks ticked "Remind me" on the app's home page count. The Settings page
+chooses the channels. If cards are waiting it:
+  - desktop: starts the study app invisibly (if it isn't running) so the
+    notification's "Study now" button has something to open, then shows a
+    notification using Windows' built-in notification system;
+  - email: sends a short email (at most once a day, unless set to every time)
+    with the counts and one warm-up question.
+One channel failing doesn't stop the other. Each run adds a line to
+data/reminders.log, since scheduled runs have no window.
 """
 import os
 import subprocess
@@ -23,6 +26,7 @@ from xml.sax.saxutils import escape, quoteattr
 
 import config
 import db
+import mailer
 import srs
 from app import URL, is_running
 
@@ -115,29 +119,82 @@ def show_notification(text):
         raise RuntimeError(result.stderr.strip() or f"PowerShell exit code {result.returncode}")
 
 
+def email_subject(counts):
+    if counts["due"]:
+        return f"Finance Flashcards: {plural(counts['due'], 'review')} due"
+    if counts["new"]:
+        return f"Finance Flashcards: {plural(counts['new'], 'new card')} ready"
+    return "Finance Flashcards: test email"
+
+
+def email_body(counts, warm_up):
+    lines = [waiting_message(counts), ""]
+    if counts["by_deck"]:
+        lines.append("Due by deck:")
+        lines += [f"  - {deck}: {n}" for deck, n in counts["by_deck"]]
+        lines.append("")
+    if warm_up:
+        deck, question = warm_up
+        lines += [f"Warm-up question ({deck}) - answer it in your head now:", "",
+                  question, "", "Then check yourself in the app on your laptop.", ""]
+    lines += ["---", "Sent by your Finance Flashcards app. Change the address, how often "
+              "emails come, or which decks count on the app's Settings and home pages."]
+    return "\n".join(lines)
+
+
+def send_reminder_email(conn, counts, to):
+    """Send one reminder email. Raises mailer.MailError on failure."""
+    mailer.send_email(to, email_subject(counts), email_body(counts, srs.warm_up_question(conn)))
+    db.set_setting(conn, "last_email_date", datetime.now().date().isoformat())
+
+
 def main():
     test = "--test" in sys.argv
     conn = db.connect()
     try:
         counts = srs.reminder_counts(conn)  # only decks ticked "Remind me" on the home page
+        waiting = counts["due"] + counts["new"]
+        if waiting < config.REMINDER_MIN_CARDS and not test:
+            log(f"nothing waiting in reminded decks (due {counts['due']}, new {counts['new']}), "
+                "no reminder")
+            return
+
+        text = waiting_message(counts)
+        failures = 0
+
+        # --- desktop notification ---
+        if db.get_setting(conn, "desktop_notifications") == "1":
+            try:
+                app_status = start_app_in_background()
+                show_notification(text)
+                log(f"desktop: {text} (app {app_status})")
+                print(f"Desktop notification shown: {text}")
+            except Exception as err:  # never crash silently in a scheduled run: write it down
+                failures += 1
+                log(f"desktop FAILED: {err}")
+
+        # --- email ---
+        to = db.get_setting(conn, "email_to")
+        frequency = db.get_setting(conn, "email_frequency")
+        already_today = db.get_setting(conn, "last_email_date") == datetime.now().date().isoformat()
+        if not to or frequency == "off":
+            pass
+        elif frequency == "daily" and already_today and not test:
+            log("email: skipped, already sent one today")
+        else:
+            try:
+                send_reminder_email(conn, counts, to)
+                log(f"email: sent to {to}")
+                print(f"Email sent to {to}")
+            except mailer.MailError as err:
+                failures += 1
+                log(f"email FAILED: {err}")
+                print(f"Email failed: {err}")
     finally:
         conn.close()
 
-    waiting = counts["due"] + counts["new"]
-    if waiting < config.REMINDER_MIN_CARDS and not test:
-        log(f"nothing waiting in reminded decks (due {counts['due']}, new {counts['new']}), "
-            "no notification")
-        return
-
-    text = waiting_message(counts)
-    try:
-        app_status = start_app_in_background()
-        show_notification(text)
-    except Exception as err:  # never crash silently in a scheduled run: write it down
-        log(f"FAILED: {err}")
-        raise
-    log(f"notified: {text} (app {app_status})")
-    print(f"Notification shown: {text}  (app {app_status})")
+    if failures:
+        sys.exit(1)  # shows as an error in Task Scheduler / setup_reminders.py --status
 
 
 if __name__ == "__main__":

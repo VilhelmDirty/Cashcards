@@ -142,6 +142,17 @@ How the call is built:
    ("7 reviews due (DCF 5, M&A 2) · 20 new cards ready")
    through Windows' own notification API, called from PowerShell — no extra package.
 
+4. sends a **reminder email** too, if I've entered an address on the **Settings**
+   page — at most once a day by default, or at every reminder time. The email lists
+   what's due by deck and includes one **warm-up question** from a due card, so I
+   can start thinking before I'm back at my laptop. It's sent through a Gmail
+   account using an app password kept in `.env` (Python's built-in `smtplib`,
+   encrypted with STARTTLS).
+
+Email and desktop notifications are independent: if one fails (wrong password,
+no internet), the other still goes out, and the failure is logged. Because the
+reminder runs on my laptop, emails only go out while it's on.
+
 The task catches up after the computer was off ("start when available"), runs only
 while I'm logged in, needs no admin rights, and is removed with one command.
 Each run writes a line to `data/reminders.log`, because scheduled runs have no window.
@@ -220,6 +231,9 @@ folder, set `CARDS_DIR` in `.env`. The list of files to import lives in `config.
 | **Windows Task Scheduler for reminders** | Built into Windows, survives reboots, catches up missed times, and uses no memory between reminders — unlike an always-running background program. |
 | **Notifications via PowerShell + Windows' notification API** | Native Windows pop-ups with a "Study now" button and no extra dependency. |
 | **Reminder starts the app; app quits when idle** | "Study now" always works, without leaving a server running forever. |
+| **Email via Gmail SMTP + app password** | Email is the notification I check most. `smtplib` is built into Python; an app password can only send mail and can be revoked without touching my real password. |
+| **Recipient on the Settings page, sender in `.env`** | The address I receive at is a preference (stored locally, never in git); the sending password is a secret (`.env`). |
+| **Once-a-day email by default** | Three reminder times shouldn't mean three emails; configurable. |
 | **Single-instance check on startup** | Launching the app while a reminder already started it just opens the browser instead of crashing on a busy port. |
 | **Merge dependent cards at import, listed in config** | A shuffled "part b" can't be answered alone; an explicit list is transparent and editable. |
 

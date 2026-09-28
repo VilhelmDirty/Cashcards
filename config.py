@@ -56,6 +56,11 @@ REMINDER_MIN_CARDS = 1
 IDLE_SHUTDOWN_MINUTES = 120
 APP_PORT = 5000
 
+# Outgoing email for reminders. The account and its app password live in .env;
+# the address emails are sent TO is set on the app's Settings page.
+SMTP_HOST = os.getenv("SMTP_HOST") or "smtp.gmail.com"
+SMTP_PORT = int(os.getenv("SMTP_PORT") or 587)
+
 # Which files to import, and the deck name each one gets in the app.
 # Paths are relative to CARDS_DIR. Only the newest version of each set is listed;
 # older copies and the interactive explainer pages are deliberately left out.

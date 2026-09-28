@@ -213,6 +213,22 @@ def reminder_counts(conn):
     }
 
 
+def warm_up_question(conn):
+    """One question from a reminded deck, for the reminder email: the most
+    overdue card, or a random new card if nothing is due. None if neither."""
+    row = conn.execute(
+        f"SELECT c.deck, c.question FROM cards c JOIN review_state r ON r.card_id = c.id "
+        f"WHERE r.due <= ? AND {REMINDED} ORDER BY r.due LIMIT 1",
+        (_iso(_now()),),
+    ).fetchone()
+    if row is None:
+        row = conn.execute(
+            f"SELECT c.deck, c.question FROM cards c LEFT JOIN review_state r ON r.card_id = c.id "
+            f"WHERE r.card_id IS NULL AND {REMINDED} ORDER BY RANDOM() LIMIT 1"
+        ).fetchone()
+    return (row["deck"], row["question"]) if row else None
+
+
 def set_reminded_decks(conn, chosen):
     """Switch reminders on for the decks in `chosen` and off for every other deck."""
     for (deck,) in conn.execute("SELECT DISTINCT deck FROM cards").fetchall():
