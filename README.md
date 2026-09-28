@@ -108,6 +108,11 @@ The score sets a **Forgotten → Retained slider** (0–100). <kbd>Enter</kbd> a
 Claude's assessment; I can drag the slider if I disagree (logged as `override`),
 because a grader can be wrong. Self-rating mode uses the same slider.
 
+Under the slider, FSRS's **suggested next review** is shown as a date
+("Thu 2 Oct (in 3 d)"). A **change** link lets me pick my own date instead
+(date picker, or Tomorrow / This weekend). My date wins; FSRS still learns from
+the rating, and at the next review it uses the real time elapsed.
+
 Behind the scenes the slider is converted to one of FSRS's four grades
 (90+ Easy, 70–89 Good, 50–69 Hard, below 50 Again), because FSRS's memory model
 is built on exactly four. The raw 0–100 value is stored with every review too.

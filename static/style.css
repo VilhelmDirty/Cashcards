@@ -167,6 +167,12 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .retention input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .retention-readout { display: flex; justify-content: space-between; margin-top: 10px; font-size: 15px; }
 .retention-confirm { display: flex; margin: 16px auto 0; }
+.retention-readout { flex-wrap: wrap; gap: 6px 16px; }
+.custom-date { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px 14px; margin-top: 10px; }
+.custom-date input[type="date"] {
+  padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--bg); color: var(--text); font: inherit;
+}
 
 /* --- settings --- */
 .page-title { font-size: 24px; margin: 8px 0 16px; }

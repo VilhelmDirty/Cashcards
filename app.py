@@ -22,7 +22,7 @@ import sys
 import threading
 import time
 import webbrowser
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from flask import Flask, abort, g, redirect, render_template, request, url_for
 
@@ -310,6 +310,18 @@ def rate(card_id):
     conn = get_conn()
     get_card(conn, card_id)
 
+    # Optional: my own next-review date instead of FSRS's suggestion.
+    due_override = None
+    if request.form.get("custom_due"):
+        try:
+            chosen = date.fromisoformat(request.form["custom_due"])
+        except ValueError:
+            abort(400)
+        today = datetime.now().date()
+        if not today < chosen <= today + timedelta(days=365):
+            abort(400)  # from tomorrow up to a year ahead
+        due_override = srs.local_date_to_due(chosen)
+
     graded_by, feedback_id = "self", request.form.get("feedback_id", type=int)
     if feedback_id is not None:
         row = conn.execute("SELECT score FROM ai_feedback WHERE id = ? AND card_id = ?",
@@ -326,6 +338,7 @@ def rate(card_id):
         timed_out=request.form.get("timed_out") == "1",
         feedback_id=feedback_id,
         retention=retention,
+        due_override=due_override,
     )
     # Redirect after saving, so refreshing the page can't submit the rating twice.
     mode = request.form.get("mode")

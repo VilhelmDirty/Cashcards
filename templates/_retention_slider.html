@@ -1,6 +1,7 @@
 {# Forgotten -> Retained slider. Shared by the self-rating and feedback screens.
-   Needs: previews (FSRS next-review text per grade 1-4), bands (config.SCORE_TO_RATING),
-   initial (0-100 starting position). The value is converted to an FSRS grade on the server. #}
+   Needs: previews (FSRS's suggested next review per grade 1-4), bands (config.SCORE_TO_RATING),
+   initial (0-100 starting position). The value is converted to an FSRS grade on the server.
+   "change" lets me pick my own next-review date instead of FSRS's suggestion. #}
 <div class="retention" id="retention-box"
      data-previews='{{ previews | tojson }}' data-bands='{{ bands | tojson }}'>
   <div class="retention-ends"><span>Forgotten</span><span>Retained</span></div>
@@ -8,7 +9,17 @@
          value="{{ initial }}" aria-label="How much you retained, from forgotten (0) to retained (100)">
   <div class="retention-readout">
     <span><strong id="retention-value">{{ initial }}</strong>/100 retained</span>
-    <span>next review: <strong id="retention-next"></strong></span>
+    <span>
+      next review: <strong id="retention-next"></strong>
+      <span class="muted" id="next-source">suggested</span>
+      <button type="button" class="link-button" id="change-date">change</button>
+    </span>
+  </div>
+  <div class="custom-date" id="custom-date" hidden>
+    <input type="date" name="custom_due" id="custom-due" aria-label="Your own next review date">
+    <button type="button" class="link-button" data-pick="1">Tomorrow</button>
+    <button type="button" class="link-button" data-pick="weekend">This weekend</button>
+    <button type="button" class="link-button" id="use-suggested">use suggested</button>
   </div>
   <button class="button primary retention-confirm" type="submit">Confirm <kbd>Enter</kbd></button>
 </div>
@@ -19,21 +30,49 @@
     const previews = JSON.parse(box.dataset.previews);
     const bands = JSON.parse(box.dataset.bands);  // [[90, 4], [70, 3], ...] highest first
     const grade = (v) => (bands.find(([min]) => v >= min) || [0, 1])[1];
+    const picker = document.getElementById("custom-due");
+    const panel = document.getElementById("custom-date");
+
+    // Dates in the browser's local time, as "YYYY-MM-DD" (what <input type=date> uses).
+    const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const inDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d; };
+    picker.min = iso(inDays(1));    // from tomorrow...
+    picker.max = iso(inDays(365));  // ...up to a year ahead
+    const pretty = (value) => new Date(value + "T00:00").toLocaleDateString(undefined,
+      { weekday: "short", day: "numeric", month: "short" });
 
     function update() {
       const v = Number(slider.value);
       document.getElementById("retention-value").textContent = v;
-      document.getElementById("retention-next").textContent = previews[grade(v)];
+      document.getElementById("retention-next").textContent =
+        picker.value ? pretty(picker.value) : previews[grade(v)];
+      document.getElementById("next-source").textContent = picker.value ? "your choice" : "suggested";
       // colour the filled part of the track, red (forgotten) -> green (retained)
       slider.style.setProperty("--fill", `${v}%`);
       slider.style.setProperty("--hue", `${Math.round(v * 1.2)}`);
     }
     slider.addEventListener("input", update);
+    picker.addEventListener("input", update);
     update();
+
+    document.getElementById("change-date").addEventListener("click", () => {
+      panel.hidden = false;
+      picker.focus();
+    });
+    panel.addEventListener("click", (e) => {
+      const pick = e.target.dataset.pick;
+      if (pick === "1") picker.value = iso(inDays(1));
+      if (pick === "weekend") {  // the coming Saturday (or Sunday if today is Saturday)
+        const day = new Date().getDay();  // 0 = Sunday ... 6 = Saturday
+        picker.value = iso(inDays(day === 6 ? 1 : 6 - day || 6));
+      }
+      if (e.target.id === "use-suggested") { picker.value = ""; panel.hidden = true; }
+      update();
+    });
 
     // Enter confirms from anywhere on the page (the slider itself can't submit a form).
     document.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter" || e.repeat || e.target.tagName === "TEXTAREA") return;
+      if (e.key !== "Enter" || e.repeat || ["TEXTAREA", "BUTTON"].includes(e.target.tagName)) return;
       if (box.closest("form").hidden) return;
       e.preventDefault();
       box.closest("form").requestSubmit();

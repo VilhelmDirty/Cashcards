@@ -128,7 +128,7 @@ def next_due(conn, deck=None):
 # ---------------------------------------------------------------- reviewing
 
 def preview(conn, card_id):
-    """What each rating would do, e.g. {1: '1 min', 3: '10 min', 4: '7 d'}.
+    """FSRS's suggested next review for each grade, e.g. {1: 'in 1 min', 4: 'Thu 2 Oct (in 7 d)'}.
 
     Runs FSRS on the card without saving anything. The real review adds a
     little fuzz, so the saved interval can differ from the preview by a few percent.
@@ -139,8 +139,22 @@ def preview(conn, card_id):
     for value, _name in RATINGS:
         updated, _log = _preview_scheduler.review_card(card, fsrs.Rating(value),
                                                        review_datetime=now)
-        result[value] = format_interval(updated.due - now)
+        result[value] = describe_due(updated.due, now)
     return result
+
+
+def describe_due(due, now):
+    """'in 10 min' for same-session steps, otherwise 'Thu 2 Oct (in 3 d)'."""
+    delta = due - now
+    if delta < timedelta(hours=12):
+        return f"in {format_interval(delta)}"
+    local = due.astimezone()
+    return f"{local:%a} {local.day} {local:%b} (in {format_interval(delta)})"
+
+
+def local_date_to_due(day):
+    """A calendar date I picked -> the moment it becomes due: local midnight, in UTC."""
+    return datetime(day.year, day.month, day.day).astimezone().astimezone(timezone.utc)
 
 
 def version(conn, card_id):
@@ -149,7 +163,8 @@ def version(conn, card_id):
 
 
 def record_review(conn, card_id, rating, expected_version, graded_by="self",
-                  duration_ms=None, timed_out=False, feedback_id=None, retention=None):
+                  duration_ms=None, timed_out=False, feedback_id=None, retention=None,
+                  due_override=None):
     """Apply a rating (1-4) via FSRS and save the result.
 
     expected_version guards against double-submits: if the card's schedule has
@@ -167,6 +182,10 @@ def record_review(conn, card_id, rating, expected_version, graded_by="self",
     now = _now()
     card, _log = scheduler.review_card(card, fsrs.Rating(rating), review_datetime=now,
                                        review_duration=duration_ms)
+    # My own date wins over FSRS's suggestion. FSRS still learns from the rating,
+    # and at the next review it uses the real time elapsed, so the model stays honest.
+    if due_override is not None:
+        card.due = due_override
 
     conn.execute(
         "INSERT INTO review_state (card_id, fsrs_card, due, state) VALUES (?, ?, ?, ?) "
@@ -176,9 +195,11 @@ def record_review(conn, card_id, rating, expected_version, graded_by="self",
     )
     conn.execute(
         "INSERT INTO review_log (card_id, rating, reviewed_at, was_new, graded_by, "
-        "duration_ms, timed_out, feedback_id, retention) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "duration_ms, timed_out, feedback_id, retention, custom_due) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (card_id, rating, _iso(now), current_version == "new", graded_by,
-         duration_ms, timed_out, feedback_id, retention),
+         duration_ms, timed_out, feedback_id, retention,
+         _iso(due_override) if due_override else None),
     )
     conn.commit()
     return True

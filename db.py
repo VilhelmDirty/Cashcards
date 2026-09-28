@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS review_log (
     duration_ms INTEGER,           -- thinking time: card shown -> answer revealed
     timed_out   INTEGER NOT NULL DEFAULT 0, -- 1 if the time limit ran out
     feedback_id INTEGER REFERENCES ai_feedback(id), -- the AI grade behind this rating, if any
-    retention   INTEGER            -- slider position 0 (forgotten) - 100 (retained)
+    retention   INTEGER,           -- slider position 0 (forgotten) - 100 (retained)
+    custom_due  TEXT               -- my own next-review date, if I overrode FSRS (UTC)
 );
 
 -- Per-deck choices. A deck with no row here uses the defaults.
@@ -81,6 +82,7 @@ MIGRATIONS = [
     ("review_log", "timed_out", "INTEGER NOT NULL DEFAULT 0"),
     ("review_log", "feedback_id", "INTEGER REFERENCES ai_feedback(id)"),
     ("review_log", "retention", "INTEGER"),
+    ("review_log", "custom_due", "TEXT"),
 ]
 
 
