@@ -7,6 +7,43 @@
 {% if error %}<p class="error">{{ error }}</p>{% endif %}
 
 <form method="post" action="{{ url_for('save_settings') }}" class="card settings">
+  <h2>When</h2>
+  <label>Reminder time{{ 's' if times | length > 1 }}</label>
+  <div id="times">
+    {% for t in times %}
+    <div class="time-row">
+      <input type="time" name="reminder_time" value="{{ t }}" required>
+      <button type="button" class="link-button remove-time" aria-label="Remove this time">remove</button>
+    </div>
+    {% endfor %}
+  </div>
+  <button type="button" class="link-button" id="add-time">+ add another time</button>
+
+  <label>Study days</label>
+  <div class="weekdays">
+    {% for name in weekdays %}
+    <label class="check"><input type="checkbox" name="study_day" value="{{ loop.index0 }}"
+      {% if loop.index0 in study_days %}checked{% endif %}> {{ name }}</label>
+    {% endfor %}
+  </div>
+  <p class="muted small">No reminders on unticked days. Cards due then wait for your next study day.</p>
+
+  <label>Coming up, from your progress so far</label>
+  <table class="outlook">
+    {% for day in outlook[:7] %}
+    <tr class="{{ '' if day.study_day else 'rest-day' }}">
+      <td>{{ 'Today' if loop.first else day.date.strftime('%a %d %b') }}</td>
+      <td class="num">{% if day.due %}{{ day.due }} due{% else %}–{% endif %}</td>
+      <td>{% if day.reminder %}reminder at {{ times | join(', ') }}{% elif not day.study_day %}rest day{% else %}no reminder{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p class="muted small">
+    FSRS spaces each card out from how well you knew it, so these numbers change as you study.
+    {% if unseen %}{{ unseen }} cards in your reminded decks haven't been started yet, so study days
+    also remind you about new cards.{% endif %}
+  </p>
+
   <h2>Email</h2>
   <label for="email_to">Send reminder emails to</label>
   <input type="email" id="email_to" name="email_to" value="{{ email_to }}"
@@ -48,4 +85,43 @@
     Send a test email now
   </button>
 </form>
+
+<section class="card settings schedule">
+  <h2>Windows reminder schedule</h2>
+  {% if schedule.installed %}
+    <p>On. Windows checks at {{ schedule.times | join(', ') }} each day{% if schedule.next_run %}; next check
+      <strong>{{ schedule.next_run }}</strong>{% endif %}.
+      {% if schedule.last_run %}Last check {{ schedule.last_run }}{{ '' if schedule.last_ok else ' (it reported an error, see data/reminders.log)' }}.{% endif %}</p>
+    <form method="post" action="{{ url_for('change_schedule') }}">
+      <button class="button" name="action" value="remove">Turn off reminders</button>
+    </form>
+  {% else %}
+    <p>Off: no reminders will be sent until you switch this on.
+      {% if schedule.error %}<br><span class="muted small">({{ schedule.error }})</span>{% endif %}</p>
+    <p class="muted small">This adds one task to Windows Task Scheduler, named "Finance Flashcards
+      reminder". It runs only while you're logged in, needs no admin rights, and "Turn off reminders"
+      removes it completely.</p>
+    <form method="post" action="{{ url_for('change_schedule') }}">
+      <button class="button primary" name="action" value="install">Turn on reminders</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Add / remove reminder-time rows (at least one must stay).
+  const times = document.getElementById("times");
+  document.getElementById("add-time").addEventListener("click", () => {
+    const rows = times.querySelectorAll(".time-row");
+    if (rows.length >= 6) return;
+    const row = rows[rows.length - 1].cloneNode(true);
+    row.querySelector("input").value = "12:00";
+    times.appendChild(row);
+  });
+  times.addEventListener("click", (e) => {
+    if (!e.target.classList.contains("remove-time")) return;
+    if (times.querySelectorAll(".time-row").length > 1) e.target.closest(".time-row").remove();
+  });
+</script>
 {% endblock %}

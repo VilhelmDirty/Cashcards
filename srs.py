@@ -213,6 +213,37 @@ def reminder_counts(conn):
     }
 
 
+def upcoming(conn, study_days, days=14):
+    """Day-by-day reminder outlook for the next `days` days, from FSRS's due dates.
+
+    Each day: {"date", "due", "study_day", "reminder"}. Cards due on a day I don't
+    study roll forward to my next study day, because that's when I'll see them.
+    Overdue cards count towards today. "reminder" is True when a reminder will fire
+    that day (a study day with cards due, or with new cards left to learn).
+    """
+    today = datetime.now().astimezone().date()
+    per_day = {}
+    for (due,) in conn.execute(
+        f"SELECT r.due FROM cards c JOIN review_state r ON r.card_id = c.id WHERE {REMINDED}"
+    ):
+        day = max(datetime.fromisoformat(due).astimezone().date(), today)
+        per_day[day] = per_day.get(day, 0) + 1
+    unseen = conn.execute(
+        f"SELECT COUNT(*) FROM cards c LEFT JOIN review_state r ON r.card_id = c.id "
+        f"WHERE r.card_id IS NULL AND {REMINDED}"
+    ).fetchone()[0]
+
+    outlook, carried = [], 0
+    for offset in range(days):
+        day = today + timedelta(days=offset)
+        due = per_day.get(day, 0) + carried
+        study = day.weekday() in study_days
+        carried = 0 if study else due
+        outlook.append({"date": day, "due": due if study else per_day.get(day, 0),
+                        "study_day": study, "reminder": study and (due > 0 or unseen > 0)})
+    return outlook, unseen
+
+
 def warm_up_question(conn):
     """One question from a reminded deck, for the reminder email: the most
     overdue card, or a random new card if nothing is due. None if neither."""

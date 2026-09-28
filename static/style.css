@@ -180,6 +180,19 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 }
 .settings input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
 .settings-actions { margin-top: 24px; }
+.settings input[type="time"] {
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); color: var(--text); font: inherit;
+}
+.time-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.link-button { background: none; border: none; padding: 0; color: var(--accent); font: inherit; font-size: 14px; cursor: pointer; }
+.link-button:hover { text-decoration: underline; }
+.weekdays { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.weekdays label.check { margin: 0; }
+.outlook { border-collapse: collapse; font-size: 15px; margin-top: 4px; }
+.outlook td { padding: 4px 16px 4px 0; }
+.outlook .rest-day { color: var(--muted); }
+.schedule { margin-top: 24px; }
 .notice { background: var(--surface); border: 1px solid var(--good); padding: 10px 12px; border-radius: 6px; }
 form.center { margin-top: 16px; }
 

@@ -16,6 +16,7 @@ Options:
 """
 import json
 import os
+import re
 import socket
 import sys
 import threading
@@ -29,6 +30,7 @@ import config
 import db
 import grader
 import mailer
+import setup_reminders
 import srs
 
 app = Flask(__name__)
@@ -121,14 +123,29 @@ def save_reminders():
     return redirect(url_for("home"))
 
 
+WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+TIME_PATTERN = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")  # 24-hour "HH:MM"
+
+
+def schedule_status():
+    """The Windows schedule's state, or an error message if it can't be read."""
+    try:
+        return setup_reminders.status()
+    except setup_reminders.ScheduleError as err:
+        return {"installed": False, "error": str(err)}
+
+
 def render_settings(conn, message=None, error=None):
+    days = db.study_days(conn)
+    outlook, unseen = srs.upcoming(conn, days)
     return render_template(
         "settings.html",
         email_to=db.get_setting(conn, "email_to"),
         email_frequency=db.get_setting(conn, "email_frequency"),
         desktop=db.get_setting(conn, "desktop_notifications") == "1",
         sender=mailer.sender(), email_ready=mailer.email_configured(),
-        times=config.REMINDER_TIMES,
+        times=db.reminder_times(conn), study_days=days, weekdays=WEEKDAYS,
+        outlook=outlook, unseen=unseen, schedule=schedule_status(),
         reminded=[d["deck"] for d in srs.deck_summary(conn) if d["remind"]],
         message=message, error=error,
     )
@@ -136,7 +153,7 @@ def render_settings(conn, message=None, error=None):
 
 @app.route("/settings")
 def settings():
-    return render_settings(get_conn(), message="Saved." if request.args.get("saved") else None)
+    return render_settings(get_conn(), message=request.args.get("msg"))
 
 
 @app.post("/settings")
@@ -148,10 +165,44 @@ def save_settings():
     frequency = request.form.get("email_frequency")
     if frequency not in ("off", "daily", "every"):
         abort(400)
+    times = sorted({t.strip() for t in request.form.getlist("reminder_time") if t.strip()})
+    if not times or len(times) > 6 or not all(TIME_PATTERN.match(t) for t in times):
+        return render_settings(conn, error="Choose between 1 and 6 reminder times.")
+    days = sorted({int(d) for d in request.form.getlist("study_day") if d in "0123456" and d})
+
+    old_times = db.reminder_times(conn)
     db.set_setting(conn, "email_to", email_to)
     db.set_setting(conn, "email_frequency", frequency)
     db.set_setting(conn, "desktop_notifications", "1" if request.form.get("desktop") else "0")
-    return redirect(url_for("settings", saved=1))
+    db.set_setting(conn, "reminder_times", ",".join(times))
+    db.set_setting(conn, "study_days", ",".join(map(str, days)))
+
+    message = "Saved."
+    if times != old_times and schedule_status().get("installed"):
+        try:  # keep the Windows schedule in step with the new times
+            setup_reminders.install(times)
+            message = "Saved, and the Windows reminder schedule was updated."
+        except setup_reminders.ScheduleError as err:
+            return render_settings(conn, error=f"Saved, but updating the schedule failed: {err}")
+    return redirect(url_for("settings", msg=message))
+
+
+@app.post("/settings/schedule")
+def change_schedule():
+    """The Install / Remove buttons for the Windows reminder schedule."""
+    conn = get_conn()
+    try:
+        if request.form.get("action") == "install":
+            setup_reminders.install(db.reminder_times(conn))
+            message = "Reminder schedule installed."
+        elif request.form.get("action") == "remove":
+            setup_reminders.remove()
+            message = "Reminder schedule removed. No more reminders until you install it again."
+        else:
+            abort(400)
+    except setup_reminders.ScheduleError as err:
+        return render_settings(conn, error=f"Windows schedule problem: {err}")
+    return redirect(url_for("settings", msg=message))
 
 
 @app.post("/settings/test-email")

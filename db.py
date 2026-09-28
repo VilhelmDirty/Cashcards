@@ -1,6 +1,7 @@
 """Opening the SQLite database and creating its tables."""
 import sqlite3
 
+import config
 from config import DB_PATH
 
 SCHEMA = """
@@ -101,12 +102,23 @@ SETTING_DEFAULTS = {
     "email_to": "",                 # where reminder emails go; empty = no emails
     "email_frequency": "daily",     # "off", "daily" (at most one a day), "every" (each reminder time)
     "last_email_date": "",          # local date of the last reminder email, for "daily"
+    "reminder_times": ",".join(config.REMINDER_TIMES),  # "HH:MM,HH:MM" local time
+    "study_days": "0,1,2,3,4,5,6",  # weekdays reminders may fire: 0 = Monday ... 6 = Sunday
 }
 
 
 def get_setting(conn, key):
     row = conn.execute("SELECT value FROM app_settings WHERE key = ?", (key,)).fetchone()
     return row["value"] if row else SETTING_DEFAULTS[key]
+
+
+def reminder_times(conn):
+    return [t for t in get_setting(conn, "reminder_times").split(",") if t]
+
+
+def study_days(conn):
+    """Weekday numbers (0 = Monday) on which reminders may fire."""
+    return {int(d) for d in get_setting(conn, "study_days").split(",") if d != ""}
 
 
 def set_setting(conn, key, value):

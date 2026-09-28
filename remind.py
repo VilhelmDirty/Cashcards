@@ -152,6 +152,10 @@ def main():
     test = "--test" in sys.argv
     conn = db.connect()
     try:
+        weekday = datetime.now().weekday()
+        if weekday not in db.study_days(conn) and not test:
+            log(f"not a study day ({datetime.now():%A}), no reminder")
+            return
         counts = srs.reminder_counts(conn)  # only decks ticked "Remind me" on the home page
         waiting = counts["due"] + counts["new"]
         if waiting < config.REMINDER_MIN_CARDS and not test:

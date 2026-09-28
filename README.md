@@ -135,8 +135,14 @@ How the call is built:
 
 ### 4. Reminders (`remind.py`, `setup_reminders.py`) — Windows
 
-**Windows Task Scheduler** runs `remind.py` at set times each day (default 09:00,
-14:00, 19:00 — `REMINDER_TIMES` in `config.py`). The script:
+**Smart reminders, on my schedule.** On the **Settings** page I choose the time(s)
+of day and which weekdays are study days, and switch the schedule on or off.
+The page also shows the next week's outlook, computed from FSRS's due dates
+(e.g. "Thu: 12 due · Sat: rest day"); cards due on a rest day roll forward to my
+next study day. Changing the times updates the Windows schedule automatically.
+
+**Windows Task Scheduler** runs `remind.py` at the chosen times. The script skips
+days that aren't study days, then:
 
 1. counts cards waiting (due reviews + new cards still allowed today) **in the decks
    I've ticked "Remind me" on the home page**, and stays silent if there are none;

@@ -47,9 +47,9 @@ SCORE_TO_RATING = [
 ]
 
 # --- Reminders (Windows) ---
-# When Windows Task Scheduler runs remind.py each day. Re-run setup_reminders.py
-# after changing these so the schedule is updated.
-REMINDER_TIMES = ["09:00", "14:00", "19:00"]
+# Starting values only: reminder times and study days are chosen on the app's
+# Settings page, which also keeps the Windows schedule in step.
+REMINDER_TIMES = ["19:00"]
 # Stay quiet unless at least this many cards (due + new allowed today) are waiting.
 REMINDER_MIN_CARDS = 1
 # A reminder starts the app invisibly so "Study now" works; it quits after this idle time.
