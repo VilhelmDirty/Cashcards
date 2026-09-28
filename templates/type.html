@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Review · {{ deck or "All decks" }}{% endblock %}
+{% block content %}
+<div class="review-bar">
+  <span>{{ deck or "All decks" }} · <a href="{{ url_for('review', deck=deck, mode='flip') }}">switch to self-rating</a></span>
+  <span>{{ counts.due }} due · {{ counts.new }} new</span>
+</div>
+
+<div class="timer" id="timer" data-limit="{{ time_limit }}">
+  <div class="timer-track"><div class="timer-fill" id="timer-fill"></div></div>
+  <span class="timer-text" id="timer-text">0:00 / {{ '%d:%02d' % (time_limit // 60, time_limit % 60) }}</span>
+</div>
+
+<article class="card">
+  <p class="card-meta">
+    {{ card.deck }}{% if card.topic %} · {{ card.topic }}{% endif %}{% if card.source_ref %} · {{ card.source_ref }}{% endif %}
+  </p>
+  {% if card.flag %}<p class="flag">Heads-up: this card {{ card.flag }}.</p>{% endif %}
+  <h1 class="question">{{ card.question }}</h1>
+
+  <form id="answer-form" method="post" action="{{ url_for('grade', card_id=card.id) }}">
+    <input type="hidden" name="deck" value="{{ deck or '' }}">
+    <input type="hidden" name="duration_ms" id="duration-ms">
+    <input type="hidden" name="timed_out" id="timed-out" value="0">
+    <label for="answer" class="answer-label">Explain it in your own words</label>
+    <textarea id="answer" name="answer" rows="7" maxlength="5000" autofocus
+              placeholder="Answer as if an interviewer just asked you…"></textarea>
+    <div class="answer-actions">
+      <button type="submit" id="skip" class="button">I don't know</button>
+      <button type="submit" id="submit" class="button primary">Grade my answer <kbd>Ctrl+Enter</kbd></button>
+    </div>
+    <p class="grading" id="grading" hidden>Claude is grading your answer…</p>
+  </form>
+</article>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const form = document.getElementById("answer-form");
+  const answer = document.getElementById("answer");
+  const timer = document.getElementById("timer");
+  const fill = document.getElementById("timer-fill");
+  const timerText = document.getElementById("timer-text");
+  const limitMs = Number(timer.dataset.limit) * 1000;
+  const started = performance.now();
+  let submitted = false;
+
+  const fmt = (ms) => {
+    const s = Math.floor(ms / 1000);
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  };
+
+  function finish(timedOut) {
+    if (submitted) return false;
+    submitted = true;
+    clearInterval(ticker);
+    const elapsed = Math.min(performance.now() - started, limitMs);
+    document.getElementById("duration-ms").value = Math.round(elapsed);
+    document.getElementById("timed-out").value = timedOut ? "1" : "0";
+    timer.classList.add(timedOut ? "timed-out" : "stopped");
+    document.getElementById("grading").hidden = false;
+    // Disable after the browser has captured which button was pressed.
+    setTimeout(() => form.querySelectorAll("button").forEach(b => b.disabled = true), 0);
+    return true;
+  }
+
+  function tick() {
+    const elapsed = Math.min(performance.now() - started, limitMs);
+    fill.style.width = `${100 * (1 - elapsed / limitMs)}%`;
+    timer.classList.toggle("warning", elapsed >= limitMs * 0.75);
+    timerText.textContent = `${fmt(elapsed)} / ${fmt(limitMs)}`;
+    if (elapsed >= limitMs && finish(true)) {
+      document.getElementById("submit").click();  // time's up: submit what I've typed
+    }
+  }
+  const ticker = setInterval(tick, 200);
+
+  form.addEventListener("submit", (e) => {
+    if (e.submitter && e.submitter.id === "skip") answer.value = "";
+    finish(false);
+  });
+
+  answer.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      form.requestSubmit(document.getElementById("submit"));
+    }
+  });
+</script>
+{% endblock %}

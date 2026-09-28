@@ -2,7 +2,7 @@
 {% block title %}Review · {{ deck or "All decks" }}{% endblock %}
 {% block content %}
 <div class="review-bar">
-  <span>{{ deck or "All decks" }}</span>
+  <span>{{ deck or "All decks" }} · <a href="{{ url_for('review', deck=deck, mode='type') }}">switch to typed answers</a></span>
   <span>{{ counts.due }} due · {{ counts.new }} new</span>
 </div>
 
@@ -34,16 +34,9 @@
     <input type="hidden" name="version" value="{{ version }}">
     <input type="hidden" name="duration_ms" id="duration-ms">
     <input type="hidden" name="timed_out" id="timed-out" value="0">
+    <input type="hidden" name="mode" value="flip">
     <p class="rate-prompt">How well did you know it?</p>
-    <div class="rate-buttons">
-      {% for value, name in ratings %}
-      <button class="button rate rate-{{ value }}" name="rating" value="{{ value }}">
-        <span>{{ name }}</span>
-        <small>next: {{ previews[value] }}</small>
-        <kbd>{{ value }}</kbd>
-      </button>
-      {% endfor %}
-    </div>
+    {% include "_rate_buttons.html" %}
   </form>
 </div>
 {% endblock %}

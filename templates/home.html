@@ -14,6 +14,14 @@
   {% endif %}
 </p>
 
+<p class="center muted small">
+  {% if ai_ready %}
+    AI grading on · {{ model }} · spent so far ≈ ${{ '%.2f' % spend }}
+  {% else %}
+    AI grading off — add ANTHROPIC_API_KEY to .env and restart to type answers and get feedback.
+  {% endif %}
+</p>
+
 <table class="decks">
   <thead>
     <tr><th>Deck</th><th class="num">Due</th><th class="num">Unseen</th><th class="num">Total</th><th class="num">Avg time</th><th></th></tr>

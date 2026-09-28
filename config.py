@@ -27,6 +27,24 @@ DESIRED_RETENTION = 0.9
 # Seconds to think before the answer is revealed automatically.
 TIME_LIMIT_SECONDS = 60
 
+# --- AI grading (Claude API) ---
+# The ONE place the model is named. Haiku is Anthropic's cheapest current model.
+CLAUDE_MODEL = "claude-haiku-4-5"
+# Price per million tokens for CLAUDE_MODEL, used only to show my running spend.
+# Check https://www.anthropic.com/pricing if you change the model.
+PRICE_PER_M_INPUT = 1.00
+PRICE_PER_M_OUTPUT = 5.00
+# Typing an explanation takes longer than recalling one, so typed answers get
+# their own limit. At the limit, whatever I've typed is submitted.
+TYPED_TIME_LIMIT_SECONDS = 60
+# How Claude's 0-100 score becomes an FSRS rating: the highest band reached wins.
+SCORE_TO_RATING = [
+    (90, 4),  # 90-100 -> Easy
+    (70, 3),  # 70-89  -> Good
+    (50, 2),  # 50-69  -> Hard
+    (0, 1),   # 0-49   -> Again
+]
+
 # Which files to import, and the deck name each one gets in the app.
 # Paths are relative to CARDS_DIR. Only the newest version of each set is listed;
 # older copies and the interactive explainer pages are deliberately left out.

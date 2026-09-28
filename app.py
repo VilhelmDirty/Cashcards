@@ -3,7 +3,12 @@
     .\\.venv\\Scripts\\python app.py
 
 It opens http://127.0.0.1:5000 in your browser. Press Ctrl+C in the terminal to stop.
+
+Two ways to review a card:
+  type  - type the answer in my own words; Claude grades it (Stage 3)
+  flip  - reveal the answer and rate myself (Stage 2)
 """
+import json
 import sys
 import threading
 import webbrowser
@@ -13,6 +18,7 @@ from flask import Flask, abort, g, redirect, render_template, request, url_for
 
 import config
 import db
+import grader
 import srs
 
 app = Flask(__name__)
@@ -32,6 +38,30 @@ def close_conn(_error):
         conn.close()
 
 
+def get_card(conn, card_id):
+    card = conn.execute("SELECT * FROM cards WHERE id = ?", (card_id,)).fetchone()
+    if card is None:
+        abort(404)
+    return card
+
+
+def read_duration():
+    """The browser measures thinking time. Treat it as untrusted input:
+    ignore anything that isn't a sensible number of milliseconds."""
+    duration_ms = request.form.get("duration_ms", type=int)
+    if duration_ms is not None and not 0 <= duration_ms <= 10 * 60 * 1000:
+        return None
+    return duration_ms
+
+
+def current_mode():
+    """'type' (AI grading) when an API key is set up, unless I picked otherwise."""
+    mode = request.args.get("mode")
+    if mode in ("type", "flip"):
+        return mode
+    return "type" if grader.api_key_configured() else "flip"
+
+
 @app.route("/")
 def home():
     conn = get_conn()
@@ -40,12 +70,16 @@ def home():
         decks=srs.deck_summary(conn),
         counts=srs.queue_counts(conn),
         reviewed_today=srs.reviewed_today(conn),
+        ai_ready=grader.api_key_configured(),
+        model=config.CLAUDE_MODEL,
+        spend=grader.total_spend(conn),
     )
 
 
 @app.route("/review")
 def review():
     deck = request.args.get("deck") or None
+    mode = current_mode()
     conn = get_conn()
     card = srs.next_card(conn, deck)
     if card is None:
@@ -53,15 +87,69 @@ def review():
         wait = next_due - datetime.now(timezone.utc) if next_due else None
         return render_template("done.html", deck=deck, wait=wait,
                                wait_text=srs.format_interval(wait) if wait else None)
+    common = dict(card=card, deck=deck, mode=mode, counts=srs.queue_counts(conn, deck))
+    if mode == "type":
+        return render_template("type.html", **common,
+                               time_limit=config.TYPED_TIME_LIMIT_SECONDS)
     return render_template(
-        "review.html",
-        card=card,
-        deck=deck,
-        counts=srs.queue_counts(conn, deck),
+        "review.html", **common,
         previews=srs.preview(conn, card["id"]),
         version=srs.version(conn, card["id"]),
         ratings=srs.RATINGS,
         time_limit=config.TIME_LIMIT_SECONDS,
+    )
+
+
+@app.post("/grade/<int:card_id>")
+def grade(card_id):
+    """Send my typed answer to Claude, save the grade, then show the feedback page."""
+    conn = get_conn()
+    card = get_card(conn, card_id)
+    deck = request.form.get("deck") or None
+    answer = request.form.get("answer", "").strip()[:5000]  # cap length: cost control
+    duration_ms = read_duration()
+    timed_out = request.form.get("timed_out") == "1"
+
+    if not answer:
+        result, model, tokens_in, tokens_out = grader.blank_grade(), None, 0, 0
+    else:
+        try:
+            result, tokens_in, tokens_out = grader.grade_answer(card, answer)
+            model = config.CLAUDE_MODEL
+        except grader.GradingError as err:
+            # Grading failed: show the reference answer so I can still rate myself.
+            return render_template(
+                "feedback.html", card=card, deck=deck, feedback=None, error=str(err),
+                user_answer=answer, suggested=None, ratings=srs.RATINGS,
+                previews=srs.preview(conn, card_id), version=srs.version(conn, card_id),
+                duration_ms=duration_ms, timed_out=timed_out,
+            )
+
+    feedback_id = grader.save_feedback(conn, card_id, answer, result, model,
+                                       tokens_in, tokens_out, duration_ms, timed_out)
+    # Redirect so refreshing the feedback page doesn't pay for a second grade.
+    return redirect(url_for("feedback", feedback_id=feedback_id, deck=deck))
+
+
+@app.route("/feedback/<int:feedback_id>")
+def feedback(feedback_id):
+    conn = get_conn()
+    row = conn.execute("SELECT * FROM ai_feedback WHERE id = ?", (feedback_id,)).fetchone()
+    if row is None:
+        abort(404)
+    deck = request.args.get("deck") or None
+    already_rated = conn.execute("SELECT 1 FROM review_log WHERE feedback_id = ?",
+                                 (feedback_id,)).fetchone()
+    if already_rated:  # e.g. the Back button after rating
+        return redirect(url_for("review", deck=deck))
+    card = get_card(conn, row["card_id"])
+    return render_template(
+        "feedback.html", card=card, deck=deck, error=None,
+        feedback=row, missed=json.loads(row["missed"]), wrong=json.loads(row["wrong"]),
+        user_answer=row["user_answer"], suggested=grader.score_to_rating(row["score"]),
+        ratings=srs.RATINGS, previews=srs.preview(conn, card["id"]),
+        version=srs.version(conn, card["id"]),
+        duration_ms=row["duration_ms"], timed_out=row["timed_out"],
     )
 
 
@@ -71,20 +159,28 @@ def rate(card_id):
     if rating not in (1, 2, 3, 4):
         abort(400)
     conn = get_conn()
-    if conn.execute("SELECT 1 FROM cards WHERE id = ?", (card_id,)).fetchone() is None:
-        abort(404)
-    # The browser measures thinking time. Treat it as untrusted input:
-    # ignore anything that isn't a sensible number of milliseconds.
-    duration_ms = request.form.get("duration_ms", type=int)
-    if duration_ms is not None and not 0 <= duration_ms <= 10 * 60 * 1000:
-        duration_ms = None
+    get_card(conn, card_id)
+
+    graded_by, feedback_id = "self", request.form.get("feedback_id", type=int)
+    if feedback_id is not None:
+        row = conn.execute("SELECT score FROM ai_feedback WHERE id = ? AND card_id = ?",
+                           (feedback_id, card_id)).fetchone()
+        if row is None:
+            abort(400)
+        # Did I accept Claude's suggested rating, or override it?
+        graded_by = "claude" if rating == grader.score_to_rating(row["score"]) else "override"
+
     srs.record_review(
         conn, card_id, rating, request.form.get("version", ""),
-        duration_ms=duration_ms,
+        graded_by=graded_by,
+        duration_ms=read_duration(),
         timed_out=request.form.get("timed_out") == "1",
+        feedback_id=feedback_id,
     )
     # Redirect after saving, so refreshing the page can't submit the rating twice.
-    return redirect(url_for("review", deck=request.form.get("deck") or None))
+    mode = request.form.get("mode")
+    return redirect(url_for("review", deck=request.form.get("deck") or None,
+                            mode=mode if mode in ("type", "flip") else None))
 
 
 if __name__ == "__main__":

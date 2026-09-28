@@ -1,0 +1,12 @@
+{# The four FSRS rating buttons. Shared by the flip and feedback screens.
+   Needs: ratings, previews, and optionally suggested (1-4) to highlight. #}
+<div class="rate-buttons">
+  {% for value, name in ratings %}
+  <button class="button rate rate-{{ value }}{% if suggested == value %} suggested{% endif %}"
+          name="rating" value="{{ value }}">
+    <span>{{ name }}</span>
+    <small>next: {{ previews[value] }}</small>
+    <kbd>{{ value }}</kbd>
+  </button>
+  {% endfor %}
+</div>

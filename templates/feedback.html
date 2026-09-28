@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Feedback · {{ card.deck }}{% endblock %}
+{% block content %}
+<div class="review-bar">
+  <span>{{ deck or "All decks" }}</span>
+  <span>
+    {% if duration_ms is not none %}{{ '%.0f' % (duration_ms / 1000) }}s{% endif %}
+    {% if timed_out %} · time ran out{% endif %}
+  </span>
+</div>
+
+<article class="card">
+  <p class="card-meta">
+    {{ card.deck }}{% if card.topic %} · {{ card.topic }}{% endif %}{% if card.source_ref %} · {{ card.source_ref }}{% endif %}
+  </p>
+  <h1 class="question">{{ card.question }}</h1>
+
+  {% if error %}
+    <p class="error">{{ error }}</p>
+    <p class="muted">Your answer wasn't graded, so rate yourself against the reference below.</p>
+  {% else %}
+    <div class="score score-{{ suggested }}">
+      <span class="score-num">{{ feedback.score }}</span><span class="score-of">/100</span>
+      <span class="score-label">Suggested: {{ ratings[suggested - 1][1] }}</span>
+    </div>
+  {% endif %}
+
+  <section class="fb">
+    <h2>Your answer</h2>
+    <p class="fb-text">{{ user_answer or "(no answer)" }}</p>
+  </section>
+
+  {% if feedback %}
+    {% if missed %}
+    <section class="fb">
+      <h2>What you missed</h2>
+      <ul>{% for item in missed %}<li>{{ item }}</li>{% endfor %}</ul>
+    </section>
+    {% endif %}
+    {% if wrong %}
+    <section class="fb fb-wrong">
+      <h2>What you got wrong</h2>
+      <ul>{% for item in wrong %}<li>{{ item }}</li>{% endfor %}</ul>
+    </section>
+    {% endif %}
+    {% if feedback.rewrite %}
+    <section class="fb fb-rewrite">
+      <h2>Tighter version</h2>
+      <p class="fb-text">{{ feedback.rewrite }}</p>
+    </section>
+    {% endif %}
+  {% endif %}
+
+  <details class="fb" {% if error or not feedback.rewrite %}open{% endif %}>
+    <summary>Reference answer</summary>
+    <p class="fb-text">{{ card.answer }}</p>
+    {% if card.note %}<p class="note"><strong>Key insight:</strong> {{ card.note }}</p>{% endif %}
+  </details>
+</article>
+
+<form id="rate-form" class="actions" method="post" action="{{ url_for('rate', card_id=card.id) }}">
+  <input type="hidden" name="deck" value="{{ deck or '' }}">
+  <input type="hidden" name="version" value="{{ version }}">
+  <input type="hidden" name="mode" value="type">
+  {% if feedback %}<input type="hidden" name="feedback_id" value="{{ feedback.id }}">{% endif %}
+  <input type="hidden" name="duration_ms" value="{{ duration_ms if duration_ms is not none else '' }}">
+  <input type="hidden" name="timed_out" value="{{ 1 if timed_out else 0 }}">
+  <p class="rate-prompt">
+    {% if suggested %}Press <kbd>Enter</kbd> to accept <strong>{{ ratings[suggested - 1][1] }}</strong>, or pick another rating.
+    {% else %}How well did you know it?{% endif %}
+  </p>
+  {% include "_rate_buttons.html" %}
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const form = document.getElementById("rate-form");
+  const suggested = form.querySelector("button.suggested");
+  form.addEventListener("submit", () => {
+    setTimeout(() => form.querySelectorAll("button").forEach(b => b.disabled = true), 0);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === "Enter" && suggested) { e.preventDefault(); suggested.click(); }
+    else if (["1", "2", "3", "4"].includes(e.key)) {
+      form.querySelector(`button[value="${e.key}"]`).click();
+    }
+  });
+</script>
+{% endblock %}

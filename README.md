@@ -94,6 +94,42 @@ over time. Times are stored per review, and the home page shows my average per d
 in an interview, speed of recall matters as much as accuracy. For self-rated
 flashcards, time is recorded but doesn't change the schedule; my rating does.
 
+### 3. Own-words grading with Claude (`grader.py`)
+
+In **typed mode** I explain the answer in my own words, as I would to an
+interviewer, then Claude grades it against the reference answer. One API call
+per card returns:
+
+- a **score** out of 100,
+- what I **missed** and what I got **wrong**,
+- a **tightened rewrite** of my own wording.
+
+The score maps to an FSRS rating — 90+ Easy, 70–89 Good, 50–69 Hard, below 50
+Again — which is pre-selected so <kbd>Enter</kbd> accepts it. I can override it
+(logged as `override`) because the grader can be wrong.
+
+How the call is built:
+
+- **Structured outputs.** The response must match a fixed schema (a Pydantic
+  model), so the app never parses free-form text.
+- **Grade substance, not wording.** The prompt tells Claude that paraphrasing
+  deserves full credit — the whole point is to *not* memorise the card's wording.
+- **Model in one setting.** `CLAUDE_MODEL` in `config.py`; currently Claude Haiku 4.5,
+  Anthropic's cheapest current model (~$0.002 per graded answer).
+- **Cost controls.** Blank / "I don't know" answers skip the API entirely; answers
+  are capped at 5,000 characters; token usage is stored per grade and the running
+  spend is shown on the home page.
+- **Failure-safe.** No key, no internet, or no credit shows a plain-English message
+  plus the reference answer, so I can still self-rate the card.
+- **Pay once.** Each grade is saved before I rate it, and the page redirects
+  afterwards, so refreshing never triggers a second (paid) grade.
+
+### Merged multi-part cards
+
+Some cards only made sense after the previous one ("…of this same bond").
+They're listed in `MERGE_GROUPS` in `config.py` and merged at import into one
+card with parts a), b), c) — 34 cards became 12.
+
 ## How to run it
 
 Requires **Python 3.10+** on Windows (commands below are for PowerShell).
@@ -109,7 +145,9 @@ py -m venv .venv
 #    ...and list cards that may need a manual check
 .\.venv\Scripts\python import_cards.py --flagged
 
-# 3. Start the study app - it opens http://127.0.0.1:5000 in your browser
+# 3. (Optional) For AI grading, add your key to .env - see "Setup: API key" below
+
+# 4. Start the study app - it opens http://127.0.0.1:5000 in your browser
 .\.venv\Scripts\python app.py
 #    Press Ctrl+C in the terminal to stop it.
 ```
@@ -146,6 +184,11 @@ folder, set `CARDS_DIR` in `.env`. The list of files to import lives in `config.
 | **All times stored in UTC** | One unambiguous clock; converted to local time only for "today" limits. |
 | **Timer measured in the browser, checked on the server** | Only the browser knows when I revealed the answer; the server rejects values that aren't a sensible number of milliseconds. |
 | **Small migration step in `db.py`** | Adding columns to an existing table keeps my review history when the schema grows. |
+| **Claude Haiku 4.5 for grading** | Cheapest current Claude model; comparing a short answer to a reference is a well-bounded task. Swappable in one line. |
+| **Official `anthropic` SDK + structured outputs** | Typed errors, automatic retries, and guaranteed-valid JSON instead of hand-parsing text. |
+| **Score → rating mapping in config** | The AI's grade drives FSRS, and the bands are easy to tune. |
+| **AI suggests, I confirm** | A grader can be wrong; overrides are logged so I could later measure how often. |
+| **Merge dependent cards at import, listed in config** | A shuffled "part b" can't be answered alone; an explicit list is transparent and editable. |
 
 _More rows added as each tool is introduced._
 
@@ -154,6 +197,6 @@ _More rows added as each tool is introduced._
 - [x] Stage 1 — Import cards from HTML into SQLite (767 cards across 13 decks)
 - [x] Stage 2 — Review screen with FSRS scheduling (self-rated)
 - [x] Answer timer (60 s limit, average time per deck)
-- [ ] Stage 3 — Own-words grading with the Claude API
+- [x] Stage 3 — Own-words grading with the Claude API
 - [ ] Multiple choice with Claude-written wrong options (time feeds the rating)
 - [ ] Stage 4 — Due-card reminders

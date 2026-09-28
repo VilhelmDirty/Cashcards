@@ -36,7 +36,26 @@ CREATE TABLE IF NOT EXISTS review_log (
     was_new     INTEGER NOT NULL,  -- 1 if this was the card's first-ever review
     graded_by   TEXT NOT NULL,     -- 'self' now; 'claude' from Stage 3
     duration_ms INTEGER,           -- thinking time: card shown -> answer revealed
-    timed_out   INTEGER NOT NULL DEFAULT 0  -- 1 if the time limit ran out
+    timed_out   INTEGER NOT NULL DEFAULT 0, -- 1 if the time limit ran out
+    feedback_id INTEGER REFERENCES ai_feedback(id)  -- the AI grade behind this rating, if any
+);
+
+-- Claude's grade of a typed answer. Saved before I confirm the rating, so the
+-- feedback is never lost (and never paid for twice) if the page is refreshed.
+CREATE TABLE IF NOT EXISTS ai_feedback (
+    id            INTEGER PRIMARY KEY,
+    card_id       INTEGER NOT NULL REFERENCES cards(id),
+    created_at    TEXT NOT NULL,     -- UTC
+    user_answer   TEXT NOT NULL,
+    score         INTEGER NOT NULL,  -- 0-100
+    missed        TEXT NOT NULL,     -- JSON list: key points I left out
+    wrong         TEXT NOT NULL,     -- JSON list: things I got wrong
+    rewrite       TEXT NOT NULL,     -- my answer, tightened
+    model         TEXT,              -- NULL when no API call was needed (blank answer)
+    input_tokens  INTEGER NOT NULL DEFAULT 0,
+    output_tokens INTEGER NOT NULL DEFAULT 0,
+    duration_ms   INTEGER,
+    timed_out     INTEGER NOT NULL DEFAULT 0
 );
 """
 
@@ -46,6 +65,7 @@ CREATE TABLE IF NOT EXISTS review_log (
 MIGRATIONS = [
     ("review_log", "duration_ms", "INTEGER"),
     ("review_log", "timed_out", "INTEGER NOT NULL DEFAULT 0"),
+    ("review_log", "feedback_id", "INTEGER REFERENCES ai_feedback(id)"),
 ]
 
 

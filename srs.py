@@ -149,7 +149,7 @@ def version(conn, card_id):
 
 
 def record_review(conn, card_id, rating, expected_version, graded_by="self",
-                  duration_ms=None, timed_out=False):
+                  duration_ms=None, timed_out=False, feedback_id=None):
     """Apply a rating (1-4) via FSRS and save the result.
 
     expected_version guards against double-submits: if the card's schedule has
@@ -176,9 +176,9 @@ def record_review(conn, card_id, rating, expected_version, graded_by="self",
     )
     conn.execute(
         "INSERT INTO review_log (card_id, rating, reviewed_at, was_new, graded_by, "
-        "duration_ms, timed_out) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        "duration_ms, timed_out, feedback_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         (card_id, rating, _iso(now), current_version == "new", graded_by,
-         duration_ms, timed_out),
+         duration_ms, timed_out, feedback_id),
     )
     conn.commit()
     return True

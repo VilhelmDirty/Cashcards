@@ -3,3 +3,4 @@ json5>=0.9             # reads the JavaScript card lists inside the HTML files
 python-dotenv>=1.0     # loads settings and the API key from .env
 flask>=3.0             # the small web server behind the study screens
 fsrs>=6.0              # the spaced-repetition scheduler (FSRS algorithm)
+anthropic>=1.0         # official Claude API library (AI grading)

@@ -108,6 +108,41 @@ kbd {
 .timer.stopped .timer-fill { background: var(--good); }
 .time-result { margin: 0 0 16px; font-size: 14px; color: var(--muted); }
 
+/* --- typed answers + AI feedback --- */
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+.answer-label { display: block; margin: 24px 0 8px; font-size: 14px; color: var(--muted); }
+textarea {
+  width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); color: var(--text); font: inherit; resize: vertical;
+}
+textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.answer-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.grading { color: var(--muted); text-align: right; margin: 10px 0 0; }
+
+.score { display: flex; align-items: baseline; gap: 6px; margin: 20px 0 4px; }
+.score-num { font-size: 40px; font-weight: 700; line-height: 1; }
+.score-of { color: var(--muted); }
+.score-label { margin-left: auto; font-weight: 600; }
+.score-1 .score-num, .score-1 .score-label { color: var(--again); }
+.score-2 .score-num, .score-2 .score-label { color: var(--hard); }
+.score-3 .score-num, .score-3 .score-label { color: var(--good); }
+.score-4 .score-num, .score-4 .score-label { color: var(--easy); }
+
+.fb { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+.fb h2, .fb summary {
+  font-size: 13px; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--muted); margin: 0 0 8px; font-weight: 600;
+}
+.fb summary { cursor: pointer; }
+.fb ul { margin: 0; padding-left: 20px; }
+.fb li { margin-bottom: 4px; }
+.fb-text { white-space: pre-line; margin: 0; }
+.fb-wrong h2 { color: var(--again); }
+.fb-rewrite .fb-text { border-left: 3px solid var(--good); padding-left: 12px; }
+.error { background: var(--flag-bg); padding: 10px 12px; border-radius: 6px; margin-top: 16px; }
+.rate.suggested { border-width: 2px; border-color: var(--text); }
+
 .done { text-align: center; margin-top: 48px; }
 
 @media (max-width: 520px) {
