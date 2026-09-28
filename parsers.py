@@ -266,7 +266,8 @@ MENTIONS_VISUAL = re.compile(
 def review_flag(card):
     """Return a reason this card may need a manual check, or None."""
     reasons = []
-    if DEPENDS_ON_PREVIOUS.search(card["question"]):
+    # A merged multi-part card already contains the part it depends on.
+    if not card.get("merged") and DEPENDS_ON_PREVIOUS.search(card["question"]):
         reasons.append("may depend on the previous card")
     if card["has_visual"] or MENTIONS_VISUAL.search(card["question"]):
         reasons.append("original showed a chart/picture")

@@ -45,3 +45,29 @@ DECKS = [
     ("WSP: Private Equity & LBOs", "WSP Quizzes/PE_Flashcards_Q1_Q109_v5.html"),
     ("WSP: Trading Comps", "WSP Quizzes/trading_comps_new_cards 2.0.html"),
 ]
+
+# Cards that only make sense together ("this same bond...", "Same company...").
+# The importer merges each group into ONE card with parts a), b), c)...
+# Listed by each card's number in the original file, in order.
+MERGE_GROUPS = {
+    "Fabozzi: Chapters 2-4": [
+        ["Q2a", "Q2b", "Q2c"],       # FV, PV, then semiannual FV of the same bond
+        ["Q4a", "Q4b"],              # "this instrument"
+        ["Q17a", "Q17b", "Q17c"],    # floater / inverse floater built from one collateral
+        ["Q18", "Q18b", "Q18c"],     # pricing the inverse floater, then a worked example
+        ["Q21a", "Q21b"],            # "Same $400,000... more attractive than 21(a)?"
+        ["Q52a", "Q52b", "Q52c"],    # Bond A vs Bond B convexity
+    ],
+    "15.401: Fixed Income": [
+        ["Q13A", "Q13B", "Q13C"],    # 4-yr vs 30-yr bond as rates move
+        ["Q22A", "Q22B", "Q22C"],    # spot rates -> YTM (3.66%) -> forward rate
+    ],
+    "WSP: DCF": [
+        ["12A", "12B", "12C", "12D", "12E"],  # one full DCF, step by step
+        ["28A", "28B", "28C"],       # "Same company... Adding to Q28B"
+        ["60A", "60B"],              # "Same figures", intrinsic vs exit multiple
+    ],
+    "WSP: Trading Comps": [
+        ["26", "27"],                # "From the same live comp set"
+    ],
+}

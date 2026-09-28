@@ -23,6 +23,54 @@ def card_key(deck, question):
     return hashlib.sha1(f"{deck}\n{normalised}".encode("utf-8")).hexdigest()
 
 
+def merge_parts(deck, cards, problems):
+    """Replace each group in config.MERGE_GROUPS with one card: a) ... b) ... c) ...
+
+    Returns (cards, parts) where parts are the original cards that were merged,
+    so their old separate copies can be removed from the database.
+    """
+    by_ref = {}
+    for card in cards:
+        by_ref.setdefault(card["ref"], []).append(card)
+
+    replacements, dropped, all_parts = {}, set(), []
+    for refs in config.MERGE_GROUPS.get(deck, []):
+        matches = [by_ref.get(ref, []) for ref in refs]
+        if any(len(m) != 1 for m in matches):
+            problems.append(f"{deck}: can't merge {' / '.join(refs)} "
+                            "(a card number is missing or used twice)")
+            continue
+        parts = [m[0] for m in matches]
+        label = lambda i, text: f"{'abcdefghij'[i]}) {text}"
+        merged = {
+            "ref": f"{parts[0]['ref']}–{parts[-1]['ref']}",
+            "topic": parts[0]["topic"],
+            "question": "\n\n".join(label(i, p["question"]) for i, p in enumerate(parts)),
+            "answer": "\n\n".join(label(i, p["answer"]) for i, p in enumerate(parts)),
+            "note": "\n".join(p["note"] for p in parts if p["note"]) or None,
+            "has_visual": any(p["has_visual"] for p in parts),
+            "merged": True,
+        }
+        replacements[id(parts[0])] = merged      # merged card takes the first part's place
+        dropped.update(id(p) for p in parts[1:])
+        all_parts += parts
+
+    merged_cards = [replacements.get(id(c), c) for c in cards if id(c) not in dropped]
+    return merged_cards, all_parts
+
+
+def remove_card(conn, deck, question):
+    """Delete a card, and its review history, that a merged card has replaced."""
+    row = conn.execute("SELECT id FROM cards WHERE card_key = ?",
+                       (card_key(deck, question),)).fetchone()
+    if row is None:
+        return False
+    for table in ("review_log", "review_state"):
+        conn.execute(f"DELETE FROM {table} WHERE card_id = ?", (row["id"],))
+    conn.execute("DELETE FROM cards WHERE id = ?", (row["id"],))
+    return True
+
+
 def save_card(conn, deck, card, now):
     """Insert a new card or update a changed one. Returns 'new', 'updated' or 'unchanged'."""
     key = card_key(deck, card["question"])
@@ -68,7 +116,7 @@ def main():
     print("-" * len(header))
 
     totals = dict(found=0, new=0, updated=0, unchanged=0, dupe=0, flag=0)
-    problems = []
+    problems, merged_notes = [], []
 
     for deck, relative_path in config.DECKS:
         path = config.CARDS_DIR / relative_path
@@ -81,6 +129,12 @@ def main():
             problems.append(f"{deck}: could not read file ({err})")
             continue
         problems += [f"{deck}: {w}" for w in warnings]
+
+        cards, parts = merge_parts(deck, cards, problems)
+        removed = sum(remove_card(conn, deck, p["question"]) for p in parts)
+        if removed:
+            merged_notes.append(f"{deck}: replaced {removed} separate cards with "
+                                f"{sum(1 for c in cards if c.get('merged'))} multi-part cards")
 
         counts = dict(found=len(cards), new=0, updated=0, unchanged=0, dupe=0, flag=0)
         seen = set()
@@ -104,6 +158,11 @@ def main():
           f"{totals['unchanged']:>6}{totals['dupe']:>6}{totals['flag']:>6}")
     in_db = conn.execute("SELECT COUNT(*) FROM cards").fetchone()[0]
     print(f"\nCards now in the database: {in_db}")
+
+    if merged_notes:
+        print("\nMerged multi-part cards:")
+        for note in merged_notes:
+            print(f"  - {note}")
 
     if problems:
         print("\nSkipped / problems:")
