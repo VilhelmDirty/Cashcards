@@ -8,6 +8,10 @@
 {% block content %}
 <section class="done">
   <h1>All caught up{% if deck %} on {{ deck }}{% endif %}</h1>
+  {% if session and session.done %}
+    <p class="muted">This session: {{ session.done }} of {{ session.target }} answered. The rest are
+      cards you're still learning, so they need a short gap before they come back.</p>
+  {% endif %}
   {% if wait and wait.total_seconds() < 1800 %}
     <p>A card you're still learning comes back in about {{ wait_text }}. This page will reload by itself.</p>
   {% elif wait_text %}

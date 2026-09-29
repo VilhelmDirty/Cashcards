@@ -60,6 +60,7 @@
 
 <form id="rate-form" class="actions" method="post" action="{{ url_for('rate', card_id=card.id) }}">
   <input type="hidden" name="deck" value="{{ deck or '' }}">
+  {% if session_id %}<input type="hidden" name="s" value="{{ session_id }}">{% endif %}
   <input type="hidden" name="version" value="{{ version }}">
   <input type="hidden" name="mode" value="type">
   {% if feedback %}<input type="hidden" name="feedback_id" value="{{ feedback.id }}">{% endif %}

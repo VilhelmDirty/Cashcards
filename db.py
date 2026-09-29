@@ -43,6 +43,14 @@ CREATE TABLE IF NOT EXISTS review_log (
     custom_due  TEXT               -- my own next-review date, if I overrode FSRS (UTC)
 );
 
+-- One row per study session: I click Study, and it runs for `target` questions.
+CREATE TABLE IF NOT EXISTS study_sessions (
+    id         INTEGER PRIMARY KEY,
+    deck       TEXT,              -- NULL = all decks
+    target     INTEGER NOT NULL,  -- smaller of my session size and the cards waiting
+    started_at TEXT NOT NULL      -- UTC
+);
+
 -- Per-deck choices. A deck with no row here uses the defaults.
 CREATE TABLE IF NOT EXISTS deck_settings (
     deck   TEXT PRIMARY KEY,
@@ -104,6 +112,7 @@ MIGRATIONS = [
     ("review_log", "retention", "INTEGER"),
     ("review_log", "custom_due", "TEXT"),
     ("cards", "origin", "TEXT NOT NULL DEFAULT 'import'"),  # 'import', 'manual' or 'claude'
+    ("review_log", "session_id", "INTEGER REFERENCES study_sessions(id)"),
 ]
 
 
@@ -126,8 +135,9 @@ SETTING_DEFAULTS = {
     "email_frequency": "daily",     # "off", "daily" (at most one a day), "every" (each reminder time)
     "last_email_date": "",          # local date of the last reminder email, for "daily"
     "reminder_times": ",".join(config.REMINDER_TIMES),  # "HH:MM,HH:MM" local time
-    "study_days": "0,1,2,3,4,5,6",
-    "timer_seconds": "0",           # optional countdown per card; "0" = no timer  # weekdays reminders may fire: 0 = Monday ... 6 = Sunday
+    "study_days": "0,1,2,3,4,5,6",  # weekdays reminders may fire: 0 = Monday ... 6 = Sunday
+    "timer_seconds": "0",           # optional countdown per card; "0" = no timer
+    "session_size": "25",           # questions per study session (see config.SESSION_SIZES)
 }
 
 

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Session complete · {{ app_name }}{% endblock %}
+{% block content %}
+<section class="done">
+  <p class="eyebrow">Session complete</p>
+  <h1>{{ session.done }} question{{ '' if session.done == 1 else 's' }}, done.</h1>
+  <p class="muted">{% if deck %}{{ deck }}{% else %}All decks{% endif %}</p>
+
+  <div class="ledger session-ledger">
+    <div class="ledger-item">
+      <span class="ledger-num">{{ session.done }}</span>
+      <span class="ledger-label">answered</span>
+    </div>
+    <div class="ledger-item">
+      <span class="ledger-num">{{ session.avg_retention if session.avg_retention is not none else '–' }}</span>
+      <span class="ledger-label">avg retained /100</span>
+    </div>
+    <div class="ledger-item">
+      <span class="ledger-num">{{ '%d:%02d' % (session.seconds // 60, session.seconds % 60) }}</span>
+      <span class="ledger-label">thinking time</span>
+    </div>
+  </div>
+
+  <div class="hero-actions">
+    <a class="button primary big" href="{{ url_for('start_session', deck=deck, mode=mode) }}">Another round <span aria-hidden="true">→</span></a>
+    <a class="button ghost" href="{{ url_for('home') }}">Back to decks</a>
+  </div>
+</section>
+{% endblock %}

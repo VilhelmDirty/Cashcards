@@ -164,7 +164,7 @@ def version(conn, card_id):
 
 def record_review(conn, card_id, rating, expected_version, graded_by="self",
                   duration_ms=None, timed_out=False, feedback_id=None, retention=None,
-                  due_override=None):
+                  due_override=None, session_id=None):
     """Apply a rating (1-4) via FSRS and save the result.
 
     expected_version guards against double-submits: if the card's schedule has
@@ -195,14 +195,44 @@ def record_review(conn, card_id, rating, expected_version, graded_by="self",
     )
     conn.execute(
         "INSERT INTO review_log (card_id, rating, reviewed_at, was_new, graded_by, "
-        "duration_ms, timed_out, feedback_id, retention, custom_due) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "duration_ms, timed_out, feedback_id, retention, custom_due, session_id) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (card_id, rating, _iso(now), current_version == "new", graded_by,
          duration_ms, timed_out, feedback_id, retention,
-         _iso(due_override) if due_override else None),
+         _iso(due_override) if due_override else None, session_id),
     )
     conn.commit()
     return True
+
+
+# ---------------------------------------------------------------- study sessions
+
+def start_session(conn, deck, size):
+    """Begin a session of the smaller of `size` and the cards waiting now.
+    Returns the new session's id, or None if nothing is waiting."""
+    counts = queue_counts(conn, deck)
+    waiting = counts["due"] + counts["new"]
+    if waiting == 0:
+        return None
+    cursor = conn.execute("INSERT INTO study_sessions (deck, target, started_at) VALUES (?, ?, ?)",
+                          (deck, min(size, waiting), _iso(_now())))
+    conn.commit()
+    return cursor.lastrowid
+
+
+def session_progress(conn, session_id):
+    """{"id", "deck", "target", "done", "avg_retention", "seconds"} or None if unknown.
+    "done" counts answers, so a card I forgot and see again later counts twice."""
+    row = conn.execute("SELECT * FROM study_sessions WHERE id = ?", (session_id,)).fetchone()
+    if row is None:
+        return None
+    done, avg_retention, total_ms = conn.execute(
+        "SELECT COUNT(*), AVG(retention), SUM(duration_ms) FROM review_log WHERE session_id = ?",
+        (session_id,),
+    ).fetchone()
+    return {"id": row["id"], "deck": row["deck"], "target": row["target"], "done": done,
+            "avg_retention": round(avg_retention) if avg_retention is not None else None,
+            "seconds": (total_ms or 0) // 1000}
 
 
 # ---------------------------------------------------------------- reminders

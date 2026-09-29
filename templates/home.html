@@ -23,7 +23,7 @@
 
   <div class="hero-actions">
     {% if counts.due or counts.new %}
-      <a class="button primary big" href="{{ url_for('review') }}">Study all decks <span aria-hidden="true">→</span></a>
+      <a class="button primary big" href="{{ url_for('start_session') }}">Study all decks <span aria-hidden="true">→</span></a>
     {% else %}
       <p class="muted">Nothing to study right now. Your next cards come due soon.</p>
     {% endif %}
@@ -58,7 +58,7 @@
       {% set seen = d.total - d.unseen %}
       <li class="deck">
         <div class="deck-main">
-          <a class="deck-name" href="{{ url_for('review', deck=d.deck) }}">{{ d.deck }}</a>
+          <a class="deck-name" href="{{ url_for('start_session', deck=d.deck) }}">{{ d.deck }}</a>
           <div class="progress" title="{{ seen }} of {{ d.total }} cards seen">
             <span style="width: {{ (100 * seen / d.total) | round(1) if d.total else 0 }}%"></span>
           </div>
@@ -75,7 +75,7 @@
                    aria-label="Remind me about {{ d.deck }}">
             <span>Remind</span>
           </label>
-          <a class="button small" href="{{ url_for('review', deck=d.deck) }}">Study</a>
+          <a class="button small" href="{{ url_for('start_session', deck=d.deck) }}">Study</a>
         </div>
       </li>
       {% endfor %}

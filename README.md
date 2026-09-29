@@ -88,6 +88,14 @@ The screens are a small **Flask** web app that runs on my own computer and opens
 in the browser. Keyboard shortcuts: <kbd>Space</kbd> shows the answer,
 <kbd>1</kbd>–<kbd>4</kbd> rate it Again / Hard / Good / Easy.
 
+**Study sessions.** Every *Study* button starts a session of the smaller of my
+session size (25, 50, 75 or 100, chosen in Settings) and the cards actually
+waiting, so a deck with 12 due cards gives a 12-question session. The card shows
+my progress ("7 / 25"), and the session ends on a summary: questions answered,
+average retention and total thinking time, with an "Another round" button.
+A card I forget and see again later counts as another question. Each review
+records its session (`study_sessions` table, `review_log.session_id`).
+
 **Timing.** How long I take on each card is always measured quietly and stored per
 review; the home page shows my average per deck, because in an interview speed of
 recall matters too. An optional **countdown** (off by default; 30 seconds to 5 minutes,
@@ -286,6 +294,7 @@ _More rows added as each tool is introduced._
 - [x] Stage 1 — Import cards from HTML into SQLite (767 cards across 13 decks)
 - [x] Stage 2 — Review screen with FSRS scheduling (self-rated)
 - [x] Answer timing (average time per deck; optional countdown of 30 s to 5 min)
+- [x] Study sessions of 25 / 50 / 75 / 100 questions, with a summary at the end
 - [x] Stage 3 — Own-words grading with the Claude API
 - [x] Stage 4 — Due-card reminders (Windows desktop + email)
 - [x] Forgotten → Retained slider, suggested next date with override

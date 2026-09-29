@@ -107,7 +107,7 @@ def show_notification(text):
     </binding>
   </visual>
   <actions>
-    <action content="Study now" activationType="protocol" arguments={quoteattr(URL + "/review")}/>
+    <action content="Study now" activationType="protocol" arguments={quoteattr(URL + "/study")}/>
     <action content="Later" activationType="system" arguments="dismiss"/>
   </actions>
 </toast>"""

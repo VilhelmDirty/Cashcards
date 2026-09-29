@@ -44,6 +44,16 @@
     also remind you about new cards.{% endif %}
   </p>
 
+  <h2>Study sessions</h2>
+  <label for="session_size">Questions per session</label>
+  <select id="session_size" name="session_size">
+    {% for n in session_sizes %}
+    <option value="{{ n }}" {% if n == session_size %}selected{% endif %}>{{ n }}</option>
+    {% endfor %}
+  </select>
+  <p class="muted small">Clicking <em>Study</em> starts a session of this many questions, or fewer
+    if that's all that's waiting. A card you forget and see again counts as another question.</p>
+
   <h2>Study timer</h2>
   <label for="timer_seconds">Time limit per card</label>
   <select id="timer_seconds" name="timer_seconds">

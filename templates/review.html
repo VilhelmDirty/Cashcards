@@ -2,9 +2,12 @@
 {% block title %}Review · {{ deck or "All decks" }}{% endblock %}
 {% block content %}
 <div class="review-bar">
-  <span>{{ deck or "All decks" }} · <a href="{{ url_for('review', deck=deck, mode='type') }}">switch to typed answers</a></span>
-  <span>{{ counts.due }} due · {{ counts.new }} new</span>
+  <span>{{ deck or "All decks" }} · <a href="{{ url_for('review', deck=deck, mode='type', s=session.id) }}">switch to typed answers</a></span>
+  <span class="session-count" title="Questions answered this session">
+    <strong>{{ session.done + 1 }}</strong> / {{ session.target }}
+  </span>
 </div>
+<div class="session-track" aria-hidden="true"><span style="width: {{ (100 * session.done / session.target) | round(1) }}%"></span></div>
 
 {% if time_limit %}{# optional countdown, switched on in Settings #}
 <div class="timer" id="timer" data-limit="{{ time_limit }}">
@@ -33,6 +36,7 @@
 
   <form id="rate-form" method="post" action="{{ url_for('rate', card_id=card.id) }}" hidden>
     <input type="hidden" name="deck" value="{{ deck or '' }}">
+    <input type="hidden" name="s" value="{{ session.id }}">
     <input type="hidden" name="version" value="{{ version }}">
     <input type="hidden" name="duration_ms" id="duration-ms">
     <input type="hidden" name="timed_out" id="timed-out" value="0">

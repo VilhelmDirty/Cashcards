@@ -155,6 +155,7 @@ def render_settings(conn, message=None, error=None):
         times=db.reminder_times(conn), study_days=days, weekdays=WEEKDAYS,
         outlook=outlook, unseen=unseen, schedule=schedule_status(),
         timer_seconds=int(db.get_setting(conn, "timer_seconds")), timer_choices=config.TIMER_CHOICES,
+        session_size=int(db.get_setting(conn, "session_size")), session_sizes=config.SESSION_SIZES,
         reminded=[d["deck"] for d in srs.deck_summary(conn) if d["remind"]],
         message=message, error=error,
     )
@@ -182,6 +183,9 @@ def save_settings():
     if not timer_text.isdigit() or int(timer_text) not in config.TIMER_CHOICES:
         abort(400)  # only the lengths offered on the page
     timer = int(timer_text)
+    size_text = request.form.get("session_size", db.get_setting(conn, "session_size"))
+    if not size_text.isdigit() or int(size_text) not in config.SESSION_SIZES:
+        abort(400)
 
     old_times = db.reminder_times(conn)
     db.set_setting(conn, "email_to", email_to)
@@ -190,6 +194,7 @@ def save_settings():
     db.set_setting(conn, "reminder_times", ",".join(times))
     db.set_setting(conn, "study_days", ",".join(map(str, days)))
     db.set_setting(conn, "timer_seconds", str(timer))
+    db.set_setting(conn, "session_size", size_text)
 
     message = "Saved."
     if times != old_times and schedule_status().get("installed"):
@@ -316,18 +321,41 @@ def save_drafts():
     return redirect(url_for("suggest", deck=deck, msg=message))
 
 
+def render_caught_up(conn, deck, session=None):
+    """Nothing to study right now: say when the next card comes due."""
+    next_due = srs.next_due(conn, deck)
+    wait = next_due - datetime.now(timezone.utc) if next_due else None
+    return render_template("done.html", deck=deck, session=session, wait=wait,
+                           wait_text=srs.format_interval(wait) if wait else None)
+
+
+@app.route("/study")
+def start_session():
+    """Every Study button lands here: start a session of the smaller of my
+    session size (Settings) and the cards actually waiting, then begin."""
+    deck = request.args.get("deck") or None
+    conn = get_conn()
+    session_id = srs.start_session(conn, deck, int(db.get_setting(conn, "session_size")))
+    if session_id is None:
+        return render_caught_up(conn, deck)
+    return redirect(url_for("review", deck=deck, s=session_id, mode=request.args.get("mode")))
+
+
 @app.route("/review")
 def review():
     deck = request.args.get("deck") or None
     mode = current_mode()
     conn = get_conn()
+    session = srs.session_progress(conn, request.args.get("s", type=int) or 0)
+    if session is None:  # an old link or bookmark: start a proper session
+        return redirect(url_for("start_session", deck=deck, mode=request.args.get("mode")))
+    if session["done"] >= session["target"]:
+        return render_template("session_done.html", deck=deck, session=session, mode=mode)
     card = srs.next_card(conn, deck)
     if card is None:
-        next_due = srs.next_due(conn, deck)
-        wait = next_due - datetime.now(timezone.utc) if next_due else None
-        return render_template("done.html", deck=deck, wait=wait,
-                               wait_text=srs.format_interval(wait) if wait else None)
-    common = dict(card=card, deck=deck, mode=mode, counts=srs.queue_counts(conn, deck))
+        return render_caught_up(conn, deck, session)
+    common = dict(card=card, deck=deck, mode=mode, session=session,
+                  counts=srs.queue_counts(conn, deck))
     timer_limit = int(db.get_setting(conn, "timer_seconds"))  # 0 = no countdown
     if mode == "type":
         return render_template("type.html", **common, time_limit=timer_limit)
@@ -347,6 +375,7 @@ def grade(card_id):
     conn = get_conn()
     card = get_card(conn, card_id)
     deck = request.form.get("deck") or None
+    session_id = request.form.get("s", type=int)
     answer = request.form.get("answer", "").strip()[:5000]  # cap length: cost control
     duration_ms = read_duration()
     timed_out = request.form.get("timed_out") == "1"
@@ -364,13 +393,13 @@ def grade(card_id):
                 user_answer=answer, suggested=None, initial=50,
                 bands=config.SCORE_TO_RATING,
                 previews=srs.preview(conn, card_id), version=srs.version(conn, card_id),
-                duration_ms=duration_ms, timed_out=timed_out,
+                duration_ms=duration_ms, timed_out=timed_out, session_id=session_id,
             )
 
     feedback_id = grader.save_feedback(conn, card_id, answer, result, model,
                                        tokens_in, tokens_out, duration_ms, timed_out)
     # Redirect so refreshing the feedback page doesn't pay for a second grade.
-    return redirect(url_for("feedback", feedback_id=feedback_id, deck=deck))
+    return redirect(url_for("feedback", feedback_id=feedback_id, deck=deck, s=session_id))
 
 
 @app.route("/feedback/<int:feedback_id>")
@@ -380,10 +409,11 @@ def feedback(feedback_id):
     if row is None:
         abort(404)
     deck = request.args.get("deck") or None
+    session_id = request.args.get("s", type=int)
     already_rated = conn.execute("SELECT 1 FROM review_log WHERE feedback_id = ?",
                                  (feedback_id,)).fetchone()
     if already_rated:  # e.g. the Back button after rating
-        return redirect(url_for("review", deck=deck))
+        return redirect(url_for("review", deck=deck, s=session_id, mode="type"))
     card = get_card(conn, row["card_id"])
     return render_template(
         "feedback.html", card=card, deck=deck, error=None,
@@ -392,7 +422,7 @@ def feedback(feedback_id):
         initial=row["score"],  # Claude's assessment sets the slider
         bands=config.SCORE_TO_RATING, previews=srs.preview(conn, card["id"]),
         version=srs.version(conn, card["id"]),
-        duration_ms=row["duration_ms"], timed_out=row["timed_out"],
+        duration_ms=row["duration_ms"], timed_out=row["timed_out"], session_id=session_id,
     )
 
 
@@ -418,6 +448,10 @@ def rate(card_id):
             abort(400)  # from tomorrow up to a year ahead
         due_override = srs.local_date_to_due(chosen)
 
+    session_id = request.form.get("s", type=int)
+    if session_id is not None and srs.session_progress(conn, session_id) is None:
+        abort(400)
+
     graded_by, feedback_id = "self", request.form.get("feedback_id", type=int)
     if feedback_id is not None:
         row = conn.execute("SELECT score FROM ai_feedback WHERE id = ? AND card_id = ?",
@@ -435,10 +469,11 @@ def rate(card_id):
         feedback_id=feedback_id,
         retention=retention,
         due_override=due_override,
+        session_id=session_id,
     )
     # Redirect after saving, so refreshing the page can't submit the rating twice.
     mode = request.form.get("mode")
-    return redirect(url_for("review", deck=request.form.get("deck") or None,
+    return redirect(url_for("review", deck=request.form.get("deck") or None, s=session_id,
                             mode=mode if mode in ("type", "flip") else None))
 
 

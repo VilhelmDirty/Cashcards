@@ -30,6 +30,9 @@ DESIRED_RETENTION = 0.9
 # Optional study timer, switched on and set on the Settings page (off by default).
 # These are the lengths offered there, in seconds; 0 = off.
 TIMER_CHOICES = [0, 30, 60, 120, 180, 240, 300]
+# Questions per study session, chosen on the Settings page. A session is the
+# smaller of this and the number of cards actually waiting.
+SESSION_SIZES = [25, 50, 75, 100]
 
 # --- AI grading (Claude API) ---
 # The ONE place the model is named. Haiku is Anthropic's cheapest current model.
