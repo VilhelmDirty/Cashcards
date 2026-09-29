@@ -392,8 +392,15 @@ def draft_numbers():
 def decide_numbers():
     conn = get_conn()
     deck = request.form.get("deck", "")
-    card_id = request.form.get("card_id", type=int)
     action = request.form.get("action")
+    if action == "approve_all":  # every template in the deck that passed the check
+        ready = [r["card"]["id"] for r in variants.templates_for_deck(conn, deck)
+                 if r["template"] and r["template"]["status"] == "draft"]
+        for card_id in ready:
+            variants.set_status(conn, card_id, "approved")
+        return redirect(url_for("numbers", deck=deck, msg=f"Approved {len(ready)} template"
+                                f"{'' if len(ready) == 1 else 's'}. Turn any off below."))
+    card_id = request.form.get("card_id", type=int)
     row = conn.execute("SELECT status FROM card_templates WHERE card_id = ?", (card_id,)).fetchone()
     if row is None or action not in ("approve", "reject", "off"):
         abort(400)

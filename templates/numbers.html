@@ -24,6 +24,15 @@
   {% elif waiting %}
   <p class="muted small">Add ANTHROPIC_API_KEY to .env and restart to draft templates.</p>
   {% endif %}
+  {% set ready = rows | selectattr('template') | selectattr('template.status', 'equalto', 'draft') | list %}
+  {% if ready %}
+  <form method="post" action="{{ url_for('decide_numbers') }}" class="suggest-form">
+    <input type="hidden" name="deck" value="{{ deck }}">
+    <button class="button" name="action" value="approve_all">Approve all {{ ready | length }} that passed the check</button>
+    <span class="muted small">Or approve them one at a time below. Skim the examples first: the check
+      proves the maths, but only you can judge whether a question reads well.</span>
+  </form>
+  {% endif %}
 </section>
 
 {% for row in rows %}
