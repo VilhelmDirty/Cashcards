@@ -44,8 +44,19 @@ _BINARY = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul,
 _UNARY = {ast.USub: operator.neg, ast.UAdd: operator.pos}
 _COMPARE = {ast.Gt: operator.gt, ast.GtE: operator.ge, ast.Lt: operator.lt,
             ast.LtE: operator.le, ast.Eq: operator.eq, ast.NotEq: operator.ne}
+def annuity_pv(rate, periods):
+    """Present value of 1 per period for `periods` periods at `rate` (a decimal)."""
+    return periods if rate == 0 else (1 - (1 + rate) ** -periods) / rate
+
+
+def annuity_fv(rate, periods):
+    """Future value of 1 per period for `periods` periods at `rate` (a decimal)."""
+    return periods if rate == 0 else ((1 + rate) ** periods - 1) / rate
+
+
 FUNCTIONS = {"round": round, "min": min, "max": max, "abs": abs,
-             "sqrt": math.sqrt, "log": math.log, "ln": math.log, "exp": math.exp}
+             "sqrt": math.sqrt, "log": math.log, "ln": math.log, "exp": math.exp,
+             "annuity_pv": annuity_pv, "annuity_fv": annuity_fv}
 NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]{0,30}$")
 
 
@@ -57,6 +68,8 @@ def evaluate(expression, names):
     """
     if not isinstance(expression, str) or len(expression) > 400:
         raise TemplateError("a formula is missing or too long")
+    # Claude sometimes writes {r} for r inside formulas; the braces add nothing.
+    expression = re.sub(r"\{([A-Za-z_][A-Za-z0-9_]*)\}", r"\1", expression)
     try:
         tree = ast.parse(expression, mode="eval")
     except SyntaxError:
@@ -102,6 +115,8 @@ def evaluate(expression, names):
 
 # ------------------------------------------------------------------ filling in blanks
 
+INVISIBLE = re.compile("[\u200b\u200c\u200d\u2060\ufeff]")  # zero-width characters
+
 # A blank is {name}, {name:format} or a small calculation like {(r - g)/100:.2f},
 # which goes through the same safe calculator as the formulas.
 PLACEHOLDER = re.compile(r"\{([^{}:]+)(?::([^{}]*))?\}")
@@ -128,7 +143,7 @@ def fill(text, values):
             return _format(value, spec)
         except (ValueError, TypeError):
             raise TemplateError(f"bad number format '{spec}' for {name}")
-    result = PLACEHOLDER.sub(replace, text)
+    result = PLACEHOLDER.sub(replace, INVISIBLE.sub("", text))
     leftover = re.search(r"\{[^{}]*\}", result)
     if leftover:  # e.g. {E.__class__}: never evaluated, but it would read as a broken blank
         raise TemplateError(f"the text has a blank that can't be filled: {leftover.group(0)}")
@@ -234,7 +249,7 @@ def check(spec, card):
 
     # 2. With the original numbers, the question reads like the original.
     rebuilt = numbers_in(question)
-    missing = [n for n in numbers_in(card["question"]) if not _appears(n, rebuilt)]
+    missing = [n for n in numbers_in(card["question"]) if not _appears(n, rebuilt, units=True)]
     if missing:
         problems.append("the rebuilt question is missing the number(s) "
                         + ", ".join(f"{n:,g}" for n in missing[:4]))
@@ -244,16 +259,38 @@ def check(spec, card):
     try:
         for seed in range(25):
             s = sample(spec, seed)
-            for text in (fill(spec["question"], s), fill(spec["answer"], s)):
+            for text in (fill(spec["question"], s), fill(spec["answer"], s),
+                         fill(spec["question"], values), fill(spec["answer"], values)):
                 garbled = GARBLED.search(text)
                 if garbled:
                     raise TemplateError(f"a number comes out garbled: '{garbled.group(0)}'")
     except TemplateError as err:
         problems.append(f"with random numbers: {err}")
+
+    # 4. The working must actually change with the numbers: a figure from the original
+    #    answer that stays identical across random versions (and isn't fixed text in the
+    #    question, or a common constant like 12 months or 360 days) was left behind.
+    if not problems:
+        samples = [sample(spec, seed) for seed in (101, 202, 303, 404, 505, 606)]
+        # abs(): a minus sign is usually an exponent, as in (1 + r)^-2
+        sizes = lambda text: {abs(n) for n in numbers_in(text)}
+        in_every = lambda texts: set.intersection(*(sizes(t) for t in texts))
+        answer_constants = in_every([fill(spec["answer"], s) for s in samples])
+        question_constants = in_every([fill(spec["question"], s) for s in samples])
+        leftovers = sorted(n for n in answer_constants - question_constants - COMMON_CONSTANTS
+                           if n in sizes(card["answer"]))
+        if leftovers:
+            problems.append("the working keeps the original number(s) "
+                            + ", ".join(f"{n:g}" for n in leftovers[:4])
+                            + " whatever the new inputs are")
     return not problems, problems
 
 
-GARBLED = re.compile(r"\d\.\d+\.\d")
+COMMON_CONSTANTS = {float(n) for n in (*range(0, 13), 24, 30, 52, 70, 72, 100, 360, 365, 1000)}
+
+
+# "1.7.5" (a blank glued onto digits) or "10,000,000M" (millions that kept an "M"; "$1,700M" is fine).
+GARBLED = re.compile(r"\d\.\d+\.\d|\d{1,3}(?:,\d{3}){2,}(?:\.\d+)?\s?(?:K|M|MM|B|bn)\b")
 
 
 # ------------------------------------------------------------------ which cards are math cards
@@ -289,8 +326,14 @@ original (exactly as in the question), min/max/step for realistic random values 
 (roughly 50%-150% of the original, rounded to a sensible step). Write percentages as \
 plain numbers (10 for 10%) and divide by 100 inside formulas.
 - derived: each result, in the order to calculate it, as a Python-style expression \
-using the variable names and earlier results. Use ** for powers. Allowed functions: \
-round, min, max, abs, sqrt, log, exp.
+using the variable names and earlier results, WITHOUT braces (write r, not {r}). \
+Use ** for powers. Allowed functions: round, min, max, abs, sqrt, log, exp, and for \
+level cash-flow streams annuity_pv(rate, n) = (1 - (1+rate)**-n)/rate and \
+annuity_fv(rate, n) = ((1+rate)**n - 1)/rate, with rate as a decimal. No loops, \
+sum() or list comprehensions: use the annuity functions, or write uneven cash flows \
+out term by term.
+- units: a variable's original is the number exactly as written ("$8M" -> original 8, \
+text "${par}M"; "$250K" -> 250, text "${price}K").
 - constraints: conditions the inputs must satisfy for the problem to make sense \
 (e.g. "r > g"). IMPORTANT: if the answer reaches a conclusion that depends on the \
 numbers (e.g. "will convert", "accretive", "in the money", "A is more convex"), add \

@@ -222,12 +222,18 @@ grades against is exact. Feedback and the review log use the same numbers I saw.
   (`evaluate`, built on Python's `ast` module) that only allows arithmetic, comparisons
   and a few math functions; anything else, like file or system access, is refused.
 
-Pilot on the DCF deck (16 math cards): 10 templates passed and were reviewed,
-4 failed the check, and 2 cards keep their numbers because the specific numbers are
-the point. Drafting cost about 12 cents. What the check caught, and how it was
-improved, is a good example of why AI output needs verification: formulas that
-didn't reproduce the original, a "$10,000,000M" slip, rates glued onto text
-("1.7.5"), and a conclusion ("convert") that didn't follow from the new numbers.
+**Results across all 13 decks (216 math-looking cards, about $1 of Claude usage):**
+76 templates pass every check and wait for approval, 30 failed, and 110 cards keep
+their numbers (mostly statistics questions about one specific data set).
+
+What the checks caught, and how they were improved, is the most useful part of this
+feature: formulas that didn't reproduce the original answer, a "$10,000,000M" slip,
+rates glued onto text ("1.7.5"), a conclusion ("convert") that stopped being true, and
+original figures left behind in the working ("× 1.08⁵" under a 10% growth question),
+found by comparing several random versions. The check was also *too strict* at first,
+rejecting "$8,000,000" for "$8M", and was loosened with evidence. A final manual read of
+14 random passing templates still found wording slips in about 1 in 3 (for example
+"−2.13 SDs above the mean"), which is why every template still needs human approval.
 
 ### Merged multi-part cards
 
@@ -327,7 +333,7 @@ _More rows added as each tool is introduced._
 - [x] Answer timing (average time per deck; optional countdown of 30 s to 5 min)
 - [x] Study sessions of 25 / 50 / 75 / 100 questions, with a summary at the end
 - [x] Fresh numbers for math cards (piloted on DCF)
-- [ ] Fresh numbers for the other decks (~200 more math cards)
+- [x] Fresh numbers drafted for all decks (76 templates ready to review)
 - [x] Stage 3 — Own-words grading with the Claude API
 - [x] Stage 4 — Due-card reminders (Windows desktop + email)
 - [x] Forgotten → Retained slider, suggested next date with override

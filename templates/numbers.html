@@ -29,8 +29,10 @@
   <form method="post" action="{{ url_for('decide_numbers') }}" class="suggest-form">
     <input type="hidden" name="deck" value="{{ deck }}">
     <button class="button" name="action" value="approve_all">Approve all {{ ready | length }} that passed the check</button>
-    <span class="muted small">Or approve them one at a time below. Skim the examples first: the check
-      proves the maths, but only you can judge whether a question reads well.</span>
+    <span class="muted small"><strong>Skim the examples first.</strong> The check proves the maths,
+      but in testing about 1 in 3 passing templates still had a wording slip, like a conclusion
+      ("above the mean") or a detail ("50→53 apples") that didn't change with the numbers.
+      Reject those, or approve cards one at a time below.</span>
   </form>
   {% endif %}
 </section>
