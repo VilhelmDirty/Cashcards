@@ -51,6 +51,15 @@ CREATE TABLE IF NOT EXISTS study_sessions (
     started_at TEXT NOT NULL      -- UTC
 );
 
+-- Math cards turned into templates so they come up with fresh numbers (variants.py).
+CREATE TABLE IF NOT EXISTS card_templates (
+    card_id    INTEGER PRIMARY KEY REFERENCES cards(id),
+    status     TEXT NOT NULL,   -- draft (passed the check) / failed / unsuitable / approved / off
+    spec       TEXT NOT NULL,   -- variables, formulas, question and answer with blanks (JSON)
+    notes      TEXT NOT NULL,   -- why the check failed, if it did (JSON list)
+    updated_at TEXT NOT NULL
+);
+
 -- Per-deck choices. A deck with no row here uses the defaults.
 CREATE TABLE IF NOT EXISTS deck_settings (
     deck   TEXT PRIMARY KEY,
@@ -113,6 +122,8 @@ MIGRATIONS = [
     ("review_log", "custom_due", "TEXT"),
     ("cards", "origin", "TEXT NOT NULL DEFAULT 'import'"),  # 'import', 'manual' or 'claude'
     ("review_log", "session_id", "INTEGER REFERENCES study_sessions(id)"),
+    ("review_log", "variant_seed", "INTEGER"),  # which fresh numbers I was shown, if any
+    ("ai_feedback", "variant_seed", "INTEGER"),
 ]
 
 

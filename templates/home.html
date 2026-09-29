@@ -66,6 +66,7 @@
             {{ seen }}/{{ d.total }} seen
             {% if d.avg_seconds is not none %}· avg {{ '%.0f' % d.avg_seconds }}s{% endif %}
             {% if d.unseen == 0 %}· <a href="{{ url_for('suggest', deck=d.deck) }}">finished, add new cards?</a>{% endif %}
+            {% if math_cards.get(d.deck) %}· <a href="{{ url_for('numbers', deck=d.deck) }}">fresh numbers</a>{% endif %}
           </span>
         </div>
         <div class="deck-side">

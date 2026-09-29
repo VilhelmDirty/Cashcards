@@ -12,6 +12,7 @@
 <article class="card">
   <p class="card-meta">
     {{ card.deck }}{% if card.topic %} · {{ card.topic }}{% endif %}{% if card.source_ref %} · {{ card.source_ref }}{% endif %}
+    {% if card.randomised %}<span class="pill pill-on" title="The numbers change every time; the answer is worked out for them">fresh numbers</span>{% endif %}
   </p>
   <h1 class="question">{{ card.question }}</h1>
 
@@ -61,6 +62,7 @@
 <form id="rate-form" class="actions" method="post" action="{{ url_for('rate', card_id=card.id) }}">
   <input type="hidden" name="deck" value="{{ deck or '' }}">
   {% if session_id %}<input type="hidden" name="s" value="{{ session_id }}">{% endif %}
+  {% if variant_seed %}<input type="hidden" name="v" value="{{ variant_seed }}">{% endif %}
   <input type="hidden" name="version" value="{{ version }}">
   <input type="hidden" name="mode" value="type">
   {% if feedback %}<input type="hidden" name="feedback_id" value="{{ feedback.id }}">{% endif %}

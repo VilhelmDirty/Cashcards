@@ -200,6 +200,35 @@ Each run writes a line to `data/reminders.log`, because scheduled runs have no w
 - Cards record where they came from (`origin`: import / manual / claude), and the
   importer never touches cards I added.
 
+### 6. Fresh numbers for math cards (`variants.py`)
+
+Re-solving a DCF problem with new numbers is better practice than remembering
+"the answer is $900". A math card can get a **template**: its question and
+answer with the numbers replaced by named blanks, realistic ranges for each input,
+and the formulas that produce the answer. Each time the card comes up, the app picks
+new numbers and **computes the answer itself**, so the reference answer Claude
+grades against is exact. Feedback and the review log use the same numbers I saw.
+
+- **Claude drafts each template once**; it is never trusted on its own.
+- **An automatic check** rebuilds the card with its *original* numbers and rejects
+  the template unless it reproduces the card's *original* answer and question, then
+  tries 25 random sets of numbers (no impossible values, no garbled numbers like "1.7.5").
+- **Rules keep conclusions true**: if the answer concludes "bondholders convert", the
+  template carries a constraint (conversion price < share price) so random numbers
+  never contradict the wording.
+- **I approve each template** on the deck's *Fresh numbers* page, which shows a random
+  example next to the original.
+- **Claude's formulas are never run as Python.** They go through a small calculator
+  (`evaluate`, built on Python's `ast` module) that only allows arithmetic, comparisons
+  and a few math functions; anything else, like file or system access, is refused.
+
+Pilot on the DCF deck (16 math cards): 10 templates passed and were reviewed,
+4 failed the check, and 2 cards keep their numbers because the specific numbers are
+the point. Drafting cost about 12 cents. What the check caught, and how it was
+improved, is a good example of why AI output needs verification: formulas that
+didn't reproduce the original, a "$10,000,000M" slip, rates glued onto text
+("1.7.5"), and a conclusion ("convert") that didn't follow from the new numbers.
+
 ### Merged multi-part cards
 
 Some cards only made sense after the previous one ("…of this same bond").
@@ -281,6 +310,8 @@ folder, set `CARDS_DIR` in `.env`. The list of files to import lives in `config.
 | **Design: "money meets index card"** | Cream paper, banknote green and coin gold; Fraunces for headings, Instrument Sans for text, JetBrains Mono for figures; study cards styled as real index cards. Follows the system light/dark setting. |
 | **App name in one setting (`APP_NAME`)** | Pages, emails, notifications and the Windows task all read it, so renaming is one line. |
 | **Email copy in its own module + template** | Wording and layout change without touching the scheduling code; card text is HTML-escaped. |
+| **Math templates computed by code, not by Claude at study time** | Language models make arithmetic slips; formulas checked against the original answer and evaluated locally are exact, instant and free. |
+| **A restricted calculator instead of `eval`** | Never execute AI-written text as code; parse it and allow only arithmetic. |
 | **Claude drafts, I approve** | AI-written study material can be confidently wrong (1 in 5 drafts in testing); a human check before anything enters a deck. |
 | **Drafts stored before review, then redirect** | Refreshing the page never pays for a second batch, and closing the tab doesn't lose them. |
 | **One shared `call_claude` helper** | Grading and drafting get the same plain-English error handling (no key, no credit, offline). |
@@ -295,6 +326,8 @@ _More rows added as each tool is introduced._
 - [x] Stage 2 — Review screen with FSRS scheduling (self-rated)
 - [x] Answer timing (average time per deck; optional countdown of 30 s to 5 min)
 - [x] Study sessions of 25 / 50 / 75 / 100 questions, with a summary at the end
+- [x] Fresh numbers for math cards (piloted on DCF)
+- [ ] Fresh numbers for the other decks (~200 more math cards)
 - [x] Stage 3 — Own-words grading with the Claude API
 - [x] Stage 4 — Due-card reminders (Windows desktop + email)
 - [x] Forgotten → Retained slider, suggested next date with override

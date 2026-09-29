@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Fresh numbers · {{ deck }}{% endblock %}
+{% block content %}
+<p class="eyebrow">Fresh numbers</p>
+<h1 class="page-title">{{ deck }}</h1>
+
+{% if message %}<p class="notice">{{ message }}</p>{% endif %}
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+{% set waiting = rows | selectattr('template', 'none') | list %}
+<section class="card settings">
+  <p>These are the deck's calculation cards. Approve a card and it comes up with <strong>new numbers
+    every time</strong>; the app works out the answer itself, so it's always exact.</p>
+  <p class="muted small">Claude drafts each template once. An automatic check then runs it with the
+    card's <em>original</em> numbers and only lets it through if it reproduces the card's
+    <em>original</em> answer. You approve the rest.</p>
+  {% if waiting and ai_ready %}
+  <form method="post" action="{{ url_for('draft_numbers') }}" class="suggest-form" id="draft-all">
+    <input type="hidden" name="deck" value="{{ deck }}">
+    <button class="button primary" type="submit">Draft templates for {{ waiting | length }} card{{ '' if waiting | length == 1 else 's' }}</button>
+    <span class="muted small">About {{ (waiting | length * 0.6) | round | int }}¢ with Claude. Takes roughly {{ (waiting | length * 5) }} seconds.</span>
+  </form>
+  <p class="grading" id="drafting" hidden>Claude is drafting templates… keep this tab open.</p>
+  {% elif waiting %}
+  <p class="muted small">Add ANTHROPIC_API_KEY to .env and restart to draft templates.</p>
+  {% endif %}
+</section>
+
+{% for row in rows %}
+{% set t = row.template %}
+<article class="card variant" id="card-{{ row.card.id }}">
+  <div class="variant-head">
+    <span class="card-meta">{{ row.card.topic or '' }}{% if row.card.source_ref %} · {{ row.card.source_ref }}{% endif %}</span>
+    {% if not t %}<span class="pill">no template yet</span>
+    {% elif t.status == 'approved' %}<span class="pill pill-on">fresh numbers on</span>
+    {% elif t.status == 'draft' %}<span class="pill pill-ready">passed the check</span>
+    {% elif t.status == 'failed' %}<span class="pill pill-bad">failed the check</span>
+    {% elif t.status == 'unsuitable' %}<span class="pill">keeps its numbers</span>
+    {% else %}<span class="pill">rejected</span>{% endif %}
+  </div>
+
+  <p class="variant-label">Original</p>
+  <p class="variant-q">{{ row.card.question }}</p>
+
+  {% if row.example %}
+    <p class="variant-label">Example with fresh numbers <a href="{{ url_for('numbers', deck=deck) }}#card-{{ row.card.id }}" class="small">(show another)</a></p>
+    <div class="variant-example">
+      <p class="variant-q">{{ row.example[0] }}</p>
+      <p class="fb-text">{{ row.example[1] }}</p>
+    </div>
+  {% endif %}
+
+  {% if t and t.status in ('failed', 'unsuitable') and row.notes %}
+    <p class="variant-label">{{ 'Why it failed' if t.status == 'failed' else "Claude's reason" }}</p>
+    <ul class="small">{% for n in row.notes %}<li>{{ n }}</li>{% endfor %}</ul>
+  {% endif %}
+
+  <div class="draft-actions">
+    {% if t and t.status == 'draft' %}
+      <form method="post" action="{{ url_for('decide_numbers') }}">
+        <input type="hidden" name="deck" value="{{ deck }}"><input type="hidden" name="card_id" value="{{ row.card.id }}">
+        <button class="button small" name="action" value="reject">Reject</button>
+        <button class="button small primary" name="action" value="approve">Approve</button>
+      </form>
+    {% elif t and t.status == 'approved' %}
+      <form method="post" action="{{ url_for('decide_numbers') }}">
+        <input type="hidden" name="deck" value="{{ deck }}"><input type="hidden" name="card_id" value="{{ row.card.id }}">
+        <button class="button small" name="action" value="off">Turn off</button>
+      </form>
+    {% elif t and ai_ready %}
+      <form method="post" action="{{ url_for('draft_numbers') }}">
+        <input type="hidden" name="deck" value="{{ deck }}"><input type="hidden" name="card_id" value="{{ row.card.id }}">
+        <button class="button small">Try again</button>
+      </form>
+    {% endif %}
+  </div>
+</article>
+{% endfor %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const f = document.getElementById("draft-all");
+  if (f) f.addEventListener("submit", () => {
+    document.getElementById("drafting").hidden = false;
+    setTimeout(() => f.querySelector("button").disabled = true, 0);
+  });
+</script>
+{% endblock %}

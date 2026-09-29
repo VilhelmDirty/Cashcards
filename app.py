@@ -16,6 +16,7 @@ Options:
 """
 import json
 import os
+import random
 import re
 import socket
 import sys
@@ -33,6 +34,7 @@ import grader
 import mailer
 import setup_reminders
 import srs
+import variants
 
 app = Flask(__name__)
 URL = f"http://127.0.0.1:{config.APP_PORT}"
@@ -118,6 +120,7 @@ def home():
         counts=srs.queue_counts(conn),
         reviewed_today=srs.reviewed_today(conn),
         ai_ready=grader.api_key_configured(),
+        math_cards=variants.candidate_counts(conn),
     )
 
 
@@ -341,6 +344,65 @@ def start_session():
     return redirect(url_for("review", deck=deck, s=session_id, mode=request.args.get("mode")))
 
 
+def render_numbers(conn, deck, message=None, error=None):
+    rows = variants.templates_for_deck(conn, deck)
+    for row in rows:  # a random example for each usable template
+        row["example"] = None
+        if row["template"] and row["template"]["status"] in ("draft", "approved"):
+            try:
+                row["example"] = variants.preview(row["spec"], random.randrange(1, 2**31))
+            except variants.TemplateError as err:
+                row["example_error"] = str(err)
+    return render_template("numbers.html", deck=deck, rows=rows,
+                           ai_ready=grader.api_key_configured(),
+                           message=message, error=error)
+
+
+@app.route("/decks/numbers")
+def numbers():
+    """Fresh numbers for a deck's math cards: draft templates, check them, approve them."""
+    return render_numbers(get_conn(), request.args.get("deck", ""), message=request.args.get("msg"))
+
+
+@app.post("/decks/numbers/draft")
+def draft_numbers():
+    """Ask Claude for templates: one card, or every math card in the deck without one."""
+    conn = get_conn()
+    deck = request.form.get("deck", "")
+    only = request.form.get("card_id", type=int)
+    rows = variants.templates_for_deck(conn, deck)
+    if only:  # "Try again" on one card
+        todo = [r["card"] for r in rows if r["card"]["id"] == only]
+    else:     # every math card that doesn't have a template yet
+        todo = [r["card"] for r in rows if r["template"] is None]
+    results = {}
+    try:
+        for card in todo:
+            status = variants.draft_template(conn, card)
+            results[status] = results.get(status, 0) + 1
+    except grader.GradingError as err:
+        return render_numbers(conn, deck, error=f"Stopped early: {err}")
+    summary = ", ".join(f"{n} {label}" for label, n in (
+        ("passed the check", results.get("draft", 0)), ("failed it", results.get("failed", 0)),
+        ("not suitable", results.get("unsuitable", 0))) if n)
+    return redirect(url_for("numbers", deck=deck, msg=f"Drafted {len(todo)}: {summary or 'nothing to do'}."))
+
+
+@app.post("/decks/numbers/decide")
+def decide_numbers():
+    conn = get_conn()
+    deck = request.form.get("deck", "")
+    card_id = request.form.get("card_id", type=int)
+    action = request.form.get("action")
+    row = conn.execute("SELECT status FROM card_templates WHERE card_id = ?", (card_id,)).fetchone()
+    if row is None or action not in ("approve", "reject", "off"):
+        abort(400)
+    if action == "approve" and row["status"] != "draft":
+        abort(400)  # only templates that passed the automatic check
+    variants.set_status(conn, card_id, {"approve": "approved", "reject": "rejected", "off": "draft"}[action])
+    return redirect(url_for("numbers", deck=deck) + f"#card-{card_id}")
+
+
 @app.route("/review")
 def review():
     deck = request.args.get("deck") or None
@@ -354,7 +416,8 @@ def review():
     card = srs.next_card(conn, deck)
     if card is None:
         return render_caught_up(conn, deck, session)
-    common = dict(card=card, deck=deck, mode=mode, session=session,
+    card, variant_seed = variants.present(conn, card)  # fresh numbers for templated math cards
+    common = dict(card=card, deck=deck, mode=mode, session=session, variant_seed=variant_seed,
                   counts=srs.queue_counts(conn, deck))
     timer_limit = int(db.get_setting(conn, "timer_seconds"))  # 0 = no countdown
     if mode == "type":
@@ -373,7 +436,8 @@ def review():
 def grade(card_id):
     """Send my typed answer to Claude, save the grade, then show the feedback page."""
     conn = get_conn()
-    card = get_card(conn, card_id)
+    variant_seed = request.form.get("v", type=int)
+    card, variant_seed = variants.present(conn, get_card(conn, card_id), variant_seed or None)
     deck = request.form.get("deck") or None
     session_id = request.form.get("s", type=int)
     answer = request.form.get("answer", "").strip()[:5000]  # cap length: cost control
@@ -394,10 +458,11 @@ def grade(card_id):
                 bands=config.SCORE_TO_RATING,
                 previews=srs.preview(conn, card_id), version=srs.version(conn, card_id),
                 duration_ms=duration_ms, timed_out=timed_out, session_id=session_id,
+                variant_seed=variant_seed,
             )
 
     feedback_id = grader.save_feedback(conn, card_id, answer, result, model,
-                                       tokens_in, tokens_out, duration_ms, timed_out)
+                                       tokens_in, tokens_out, duration_ms, timed_out, variant_seed)
     # Redirect so refreshing the feedback page doesn't pay for a second grade.
     return redirect(url_for("feedback", feedback_id=feedback_id, deck=deck, s=session_id))
 
@@ -414,7 +479,8 @@ def feedback(feedback_id):
                                  (feedback_id,)).fetchone()
     if already_rated:  # e.g. the Back button after rating
         return redirect(url_for("review", deck=deck, s=session_id, mode="type"))
-    card = get_card(conn, row["card_id"])
+    card, variant_seed = variants.present(conn, get_card(conn, row["card_id"]),
+                                          row["variant_seed"])
     return render_template(
         "feedback.html", card=card, deck=deck, error=None,
         feedback=row, missed=json.loads(row["missed"]), wrong=json.loads(row["wrong"]),
@@ -423,6 +489,7 @@ def feedback(feedback_id):
         bands=config.SCORE_TO_RATING, previews=srs.preview(conn, card["id"]),
         version=srs.version(conn, card["id"]),
         duration_ms=row["duration_ms"], timed_out=row["timed_out"], session_id=session_id,
+        variant_seed=variant_seed,
     )
 
 
@@ -470,6 +537,7 @@ def rate(card_id):
         retention=retention,
         due_override=due_override,
         session_id=session_id,
+        variant_seed=request.form.get("v", type=int),
     )
     # Redirect after saving, so refreshing the page can't submit the rating twice.
     mode = request.form.get("mode")

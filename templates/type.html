@@ -19,6 +19,7 @@
 <article class="card">
   <p class="card-meta">
     {{ card.deck }}{% if card.topic %} · {{ card.topic }}{% endif %}{% if card.source_ref %} · {{ card.source_ref }}{% endif %}
+    {% if card.randomised %}<span class="pill pill-on" title="The numbers change every time; the answer is worked out for them">fresh numbers</span>{% endif %}
   </p>
   {% if card.flag %}<p class="flag">Heads-up: this card {{ card.flag }}.</p>{% endif %}
   <h1 class="question">{{ card.question }}</h1>
@@ -26,6 +27,7 @@
   <form id="answer-form" method="post" action="{{ url_for('grade', card_id=card.id) }}">
     <input type="hidden" name="deck" value="{{ deck or '' }}">
     <input type="hidden" name="s" value="{{ session.id }}">
+    {% if variant_seed %}<input type="hidden" name="v" value="{{ variant_seed }}">{% endif %}
     <input type="hidden" name="duration_ms" id="duration-ms">
     <input type="hidden" name="timed_out" id="timed-out" value="0">
     <label for="answer" class="answer-label">Explain it in your own words</label>

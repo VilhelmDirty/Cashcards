@@ -143,14 +143,14 @@ def blank_grade():
 
 
 def save_feedback(conn, card_id, user_answer, grade, model, input_tokens, output_tokens,
-                  duration_ms, timed_out):
+                  duration_ms, timed_out, variant_seed=None):
     cursor = conn.execute(
         "INSERT INTO ai_feedback (card_id, created_at, user_answer, score, missed, wrong, "
-        "rewrite, model, input_tokens, output_tokens, duration_ms, timed_out) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "rewrite, model, input_tokens, output_tokens, duration_ms, timed_out, variant_seed) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (card_id, datetime.now(timezone.utc).isoformat(timespec="seconds"), user_answer,
          grade.score, json.dumps(grade.missed), json.dumps(grade.wrong), grade.rewrite,
-         model, input_tokens, output_tokens, duration_ms, timed_out),
+         model, input_tokens, output_tokens, duration_ms, timed_out, variant_seed),
     )
     conn.commit()
     return cursor.lastrowid
