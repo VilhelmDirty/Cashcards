@@ -6,10 +6,12 @@
   <span>{{ counts.due }} due · {{ counts.new }} new</span>
 </div>
 
+{% if time_limit %}{# optional countdown, switched on in Settings #}
 <div class="timer" id="timer" data-limit="{{ time_limit }}">
   <div class="timer-track"><div class="timer-fill" id="timer-fill"></div></div>
   <span class="timer-text" id="timer-text">0:00 / {{ '%d:%02d' % (time_limit // 60, time_limit % 60) }}</span>
 </div>
+{% endif %}
 
 <article class="card">
   <p class="card-meta">
@@ -38,10 +40,12 @@
 <script>
   const form = document.getElementById("answer-form");
   const answer = document.getElementById("answer");
+  // The countdown only exists if it's switched on in Settings. Either way the
+  // time I take is measured, for the per-deck "avg" time on the home page.
   const timer = document.getElementById("timer");
   const fill = document.getElementById("timer-fill");
   const timerText = document.getElementById("timer-text");
-  const limitMs = Number(timer.dataset.limit) * 1000;
+  const limitMs = timer ? Number(timer.dataset.limit) * 1000 : Infinity;
   const started = performance.now();
   let submitted = false;
 
@@ -57,7 +61,7 @@
     const elapsed = Math.min(performance.now() - started, limitMs);
     document.getElementById("duration-ms").value = Math.round(elapsed);
     document.getElementById("timed-out").value = timedOut ? "1" : "0";
-    timer.classList.add(timedOut ? "timed-out" : "stopped");
+    if (timer) timer.classList.add(timedOut ? "timed-out" : "stopped");
     document.getElementById("grading").hidden = false;
     // Disable after the browser has captured which button was pressed.
     setTimeout(() => form.querySelectorAll("button").forEach(b => b.disabled = true), 0);
@@ -73,7 +77,7 @@
       document.getElementById("submit").click();  // time's up: submit what I've typed
     }
   }
-  const ticker = setInterval(tick, 200);
+  const ticker = timer ? setInterval(tick, 200) : null;
 
   form.addEventListener("submit", (e) => {
     if (e.submitter && e.submitter.id === "skip") answer.value = "";

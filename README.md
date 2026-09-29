@@ -88,11 +88,12 @@ The screens are a small **Flask** web app that runs on my own computer and opens
 in the browser. Keyboard shortcuts: <kbd>Space</kbd> shows the answer,
 <kbd>1</kbd>–<kbd>4</kbd> rate it Again / Hard / Good / Easy.
 
-**Timer.** Each card has a 60-second thinking clock (card shown → answer revealed).
-At 60 seconds the answer is revealed automatically and the attempt is marked as
-over time. Times are stored per review, and the home page shows my average per deck —
-in an interview, speed of recall matters as much as accuracy. For self-rated
-flashcards, time is recorded but doesn't change the schedule; my rating does.
+**Timing.** How long I take on each card is always measured quietly and stored per
+review; the home page shows my average per deck, because in an interview speed of
+recall matters too. An optional **countdown** (off by default; 30 seconds to 5 minutes,
+set on the Settings page) adds a timer bar: when it runs out, the answer is revealed,
+or in typed mode what I've written is submitted, and the attempt is marked as over
+time. Time never changes the schedule directly; the retention rating does.
 
 ### 3. Own-words grading with Claude (`grader.py`)
 
@@ -284,7 +285,7 @@ _More rows added as each tool is introduced._
 
 - [x] Stage 1 — Import cards from HTML into SQLite (767 cards across 13 decks)
 - [x] Stage 2 — Review screen with FSRS scheduling (self-rated)
-- [x] Answer timer (60 s limit, average time per deck)
+- [x] Answer timing (average time per deck; optional countdown of 30 s to 5 min)
 - [x] Stage 3 — Own-words grading with the Claude API
 - [x] Stage 4 — Due-card reminders (Windows desktop + email)
 - [x] Forgotten → Retained slider, suggested next date with override

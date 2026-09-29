@@ -6,10 +6,12 @@
   <span>{{ counts.due }} due · {{ counts.new }} new</span>
 </div>
 
+{% if time_limit %}{# optional countdown, switched on in Settings #}
 <div class="timer" id="timer" data-limit="{{ time_limit }}">
   <div class="timer-track"><div class="timer-fill" id="timer-fill"></div></div>
   <span class="timer-text" id="timer-text">0:00 / {{ '%d:%02d' % (time_limit // 60, time_limit % 60) }}</span>
 </div>
+{% endif %}
 
 <article class="card">
   <p class="card-meta">
@@ -48,10 +50,12 @@
   const showBtn = document.getElementById("show");
   const answer = document.getElementById("answer");
   const form = document.getElementById("rate-form");
+  // The countdown only exists if it's switched on in Settings. Either way the
+  // time I take is measured, for the per-deck "avg" time on the home page.
   const timer = document.getElementById("timer");
   const fill = document.getElementById("timer-fill");
   const timerText = document.getElementById("timer-text");
-  const limitMs = Number(timer.dataset.limit) * 1000;
+  const limitMs = timer ? Number(timer.dataset.limit) * 1000 : Infinity;
 
   const started = performance.now();  // a clock that isn't affected by the system time changing
   const fmt = (ms) => {
@@ -66,7 +70,7 @@
     timerText.textContent = `${fmt(elapsed)} / ${fmt(limitMs)}`;
     if (elapsed >= limitMs) reveal(true);
   }
-  const ticker = setInterval(tick, 200);
+  const ticker = timer ? setInterval(tick, 200) : null;
 
   function reveal(timedOut = false) {
     if (!answer.hidden) return;  // already revealed
@@ -77,7 +81,7 @@
     document.getElementById("time-result").textContent = timedOut
       ? "Time's up — answer shown automatically."
       : `You took ${fmt(elapsed)}.`;
-    timer.classList.add(timedOut ? "timed-out" : "stopped");
+    if (timer) timer.classList.add(timedOut ? "timed-out" : "stopped");
     answer.hidden = false;
     form.hidden = false;
     showBtn.hidden = true;

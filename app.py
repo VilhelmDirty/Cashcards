@@ -154,6 +154,7 @@ def render_settings(conn, message=None, error=None):
         sender=mailer.sender(), email_ready=mailer.email_configured(),
         times=db.reminder_times(conn), study_days=days, weekdays=WEEKDAYS,
         outlook=outlook, unseen=unseen, schedule=schedule_status(),
+        timer_seconds=int(db.get_setting(conn, "timer_seconds")), timer_choices=config.TIMER_CHOICES,
         reminded=[d["deck"] for d in srs.deck_summary(conn) if d["remind"]],
         message=message, error=error,
     )
@@ -177,6 +178,10 @@ def save_settings():
     if not times or len(times) > 6 or not all(TIME_PATTERN.match(t) for t in times):
         return render_settings(conn, error="Choose between 1 and 6 reminder times.")
     days = sorted({int(d) for d in request.form.getlist("study_day") if d in "0123456" and d})
+    timer_text = request.form.get("timer_seconds", "0")
+    if not timer_text.isdigit() or int(timer_text) not in config.TIMER_CHOICES:
+        abort(400)  # only the lengths offered on the page
+    timer = int(timer_text)
 
     old_times = db.reminder_times(conn)
     db.set_setting(conn, "email_to", email_to)
@@ -184,6 +189,7 @@ def save_settings():
     db.set_setting(conn, "desktop_notifications", "1" if request.form.get("desktop") else "0")
     db.set_setting(conn, "reminder_times", ",".join(times))
     db.set_setting(conn, "study_days", ",".join(map(str, days)))
+    db.set_setting(conn, "timer_seconds", str(timer))
 
     message = "Saved."
     if times != old_times and schedule_status().get("installed"):
@@ -322,16 +328,16 @@ def review():
         return render_template("done.html", deck=deck, wait=wait,
                                wait_text=srs.format_interval(wait) if wait else None)
     common = dict(card=card, deck=deck, mode=mode, counts=srs.queue_counts(conn, deck))
+    timer_limit = int(db.get_setting(conn, "timer_seconds"))  # 0 = no countdown
     if mode == "type":
-        return render_template("type.html", **common,
-                               time_limit=config.TYPED_TIME_LIMIT_SECONDS)
+        return render_template("type.html", **common, time_limit=timer_limit)
     return render_template(
         "review.html", **common,
         previews=srs.preview(conn, card["id"]),
         version=srs.version(conn, card["id"]),
         bands=config.SCORE_TO_RATING,
         initial=50,  # self-rating starts mid-way; I move it
-        time_limit=config.TIME_LIMIT_SECONDS,
+        time_limit=timer_limit,
     )
 
 

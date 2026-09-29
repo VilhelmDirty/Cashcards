@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Settings · {{ app_name }}{% endblock %}
 {% block content %}
-<h1 class="page-title">Reminder settings</h1>
+<h1 class="page-title">Settings</h1>
 
 {% if message %}<p class="notice">{{ message }}</p>{% endif %}
 {% if error %}<p class="error">{{ error }}</p>{% endif %}
@@ -43,6 +43,18 @@
     {% if unseen %}{{ unseen }} cards in your reminded decks haven't been started yet, so study days
     also remind you about new cards.{% endif %}
   </p>
+
+  <h2>Study timer</h2>
+  <label for="timer_seconds">Time limit per card</label>
+  <select id="timer_seconds" name="timer_seconds">
+    {% for s in timer_choices %}
+    <option value="{{ s }}" {% if s == timer_seconds %}selected{% endif %}>
+      {% if s == 0 %}Off{% elif s < 60 %}{{ s }} seconds{% elif s == 60 %}1 minute{% else %}{{ s // 60 }} minutes{% endif %}
+    </option>
+    {% endfor %}
+  </select>
+  <p class="muted small">When it's on, a countdown bar sits above each card. When time runs out, the
+    answer is revealed (or, in typed mode, what you've written is submitted).</p>
 
   <h2>Email</h2>
   <label for="email_to">Send reminder emails to</label>

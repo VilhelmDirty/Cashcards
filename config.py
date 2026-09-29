@@ -27,19 +27,17 @@ NEW_CARDS_PER_DAY = 20
 # FSRS schedules each card for when you have this chance of still remembering it.
 # Higher = more frequent reviews. 0.9 (90%) is the FSRS default.
 DESIRED_RETENTION = 0.9
-# Seconds to think before the answer is revealed automatically.
-TIME_LIMIT_SECONDS = 60
+# Optional study timer, switched on and set on the Settings page (off by default).
+# These are the lengths offered there, in seconds; 0 = off.
+TIMER_CHOICES = [0, 30, 60, 120, 180, 240, 300]
 
 # --- AI grading (Claude API) ---
 # The ONE place the model is named. Haiku is Anthropic's cheapest current model.
 CLAUDE_MODEL = "claude-haiku-4-5"
-# Price per million tokens for CLAUDE_MODEL, used only to show my running spend.
+# Price per million tokens for CLAUDE_MODEL, used to estimate spend (grader.total_spend).
 # Check https://www.anthropic.com/pricing if you change the model.
 PRICE_PER_M_INPUT = 1.00
 PRICE_PER_M_OUTPUT = 5.00
-# Typing an explanation takes longer than recalling one, so typed answers get
-# their own limit. At the limit, whatever I've typed is submitted.
-TYPED_TIME_LIMIT_SECONDS = 60
 # The Forgotten (0) -> Retained (100) slider, set by Claude or by me, is turned
 # into one of FSRS's four grades behind the scenes. Highest band reached wins.
 SCORE_TO_RATING = [

@@ -126,7 +126,8 @@ SETTING_DEFAULTS = {
     "email_frequency": "daily",     # "off", "daily" (at most one a day), "every" (each reminder time)
     "last_email_date": "",          # local date of the last reminder email, for "daily"
     "reminder_times": ",".join(config.REMINDER_TIMES),  # "HH:MM,HH:MM" local time
-    "study_days": "0,1,2,3,4,5,6",  # weekdays reminders may fire: 0 = Monday ... 6 = Sunday
+    "study_days": "0,1,2,3,4,5,6",
+    "timer_seconds": "0",           # optional countdown per card; "0" = no timer  # weekdays reminders may fire: 0 = Monday ... 6 = Sunday
 }
 
 
