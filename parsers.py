@@ -19,7 +19,7 @@ import json5
 from bs4 import BeautifulSoup
 
 # The variable names my HTML files use for their list of cards.
-CARD_LIST_START = re.compile(r"\b(?:CARDS|allCards|cards)\s*=\s*\[")
+CARD_LIST_START = re.compile(r"\b(?:CARDS|allCards|cards|defaultCards)\s*=\s*\[")
 TAG_LABELS_START = re.compile(r"\bTAG_LABELS\s*=\s*\{")
 
 

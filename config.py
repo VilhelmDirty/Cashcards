@@ -104,6 +104,7 @@ DECKS = [
     ("WSP: M&A", "WSP Quizzes/ma_flashcards2.0.html"),
     ("WSP: Private Equity & LBOs", "WSP Quizzes/PE_Flashcards_Q1_Q109_v5.html"),
     ("WSP: Trading Comps", "WSP Quizzes/trading_comps_new_cards 2.0.html"),
+    ("Book Notes: Financial History", "Book Notes/book_notes_flashcards_full.html"),
 ]
 
 # Cards that only make sense together ("this same bond...", "Same company...").
