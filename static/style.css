@@ -92,8 +92,8 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing:
 .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); text-decoration: none; }
 .brand:hover { color: var(--ink); }
 .brand-mark { width: 46px; height: 46px; flex: none; }
-.mark-ink { stroke: var(--ink); }      /* pale ink on dark, dark ink on light */
-.mark-seal { fill: #b8392b; }          /* vermilion seal paste */
+.mark-ink { fill: var(--ink); }        /* the ring: pale ink on dark, dark ink on light */
+.mark-ridge { fill: var(--accent); }   /* the ridge: copper (walnut in the light theme) */
 .brand-text { display: flex; flex-direction: column; line-height: 1; }
 .brand-name { font: 600 28px/1 var(--font-display); letter-spacing: .01em; }
 /* While studying: a compact header (smaller logo and name) so the card has the stage. */
