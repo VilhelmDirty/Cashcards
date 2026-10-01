@@ -8,10 +8,11 @@ the reference answer. The grade feeds a spaced-repetition scheduler (FSRS), so c
 you explain poorly come back sooner. I use it on my own computer with my finance
 cards; a public demo runs the same code with a sample deck on general subjects.
 
-> **The name.** In the *Zhuangzi*, Wheelwright Bian tells Duke Huan that the books he is
-> reading are only "the dregs of the men of old": the feel of a craft can't be put into
-> words, so Bian couldn't even pass his skill on to his own son. Reading isn't knowing.
-> The app can give you the cards; the hand-feel only comes from practice.
+> **The name.** The name comes from a parable in the *Zhuangzi*: a wheelwright named Bian
+> tells Duke Huan that the books he's reading are just the dregs of men long dead, because
+> the real skill, how hard to chisel, how loose to cut, lives only in the hand. While
+> flashcards and spaced repetition are useful tools, this app is a reminder that no amount
+> of memorization replaces that: real mastery comes from experience.
 
 > **Status:** in progress — being built in stages (see [Roadmap](#roadmap)).
 
