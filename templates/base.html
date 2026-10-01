@@ -16,7 +16,8 @@
   <meta property="og:title" content="{{ page_title }}">
   <meta property="og:description" content="{{ site_description }}">
   <meta property="og:url" content="{{ site_url }}{{ request.path }}">
-  <meta property="og:image" content="{{ site_url }}{{ url_for('static', filename='og-image.png') }}">
+  {# ?v= changes whenever the image does: link previews are cached by address. #}
+  <meta property="og:image" content="{{ site_url }}{{ url_for('static', filename='og-image.png') }}?v=2">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="{{ app_name }}: flashcards you explain in your own words">

@@ -29,9 +29,9 @@ DEMO_MAX_VISITORS = 1000  # beyond this, the least recently active visitors are 
 # page was requested at.
 SITE_URL = os.getenv("SITE_URL", "").rstrip("/")
 # What search results and link previews say about the site.
-SITE_DESCRIPTION = ("Flashcards you explain in your own words. Claude grades each answer "
-                    "(what you retained, what you missed) and spaced repetition brings it "
-                    "back just before you'd forget.")
+SITE_DESCRIPTION = ("Knowledge, built by hand. Flashcards you explain in your own words: "
+                    "Claude grades each answer (what you retained, what you missed) and "
+                    "spaced repetition brings it back just before you'd forget.")
 # Largest progress file the restore page accepts (my own full backup is well under 1 MB).
 BACKUP_MAX_BYTES = (5 if DEMO_MODE else 50) * 1024 * 1024
 GITHUB_URL = "https://github.com/VilhelmDirty/Cashcards"
