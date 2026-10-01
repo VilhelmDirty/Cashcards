@@ -61,6 +61,8 @@ _last_request = time.monotonic()
 # which would spend the site owner's credit).
 DEMO_OFF = {"save_reminders", "test_email", "change_schedule", "suggest", "make_suggestions",
             "save_drafts", "numbers", "draft_numbers", "decide_numbers"}
+# Pages anyone (including search engines, which keep no cookies) can open directly.
+PUBLIC_PAGES = {"about", "robots_txt", "sitemap_xml"}
 if config.DEMO_MODE:
     demo.build_template_db()  # rebuilt at every start, so deck edits go live on deploy
 
@@ -95,6 +97,8 @@ def guard_requests():
         return
     if request.endpoint in DEMO_OFF:
         abort(404)
+    if request.endpoint in PUBLIC_PAGES:
+        return  # no study data on these, so no visitor file is needed
     visitor = session.get("visitor")
     if demo.is_valid_visitor(visitor):
         g.db_path = demo.visitor_db(visitor)
@@ -197,7 +201,13 @@ def app_name():
     studying: True on the study screens, which get a compact header without the tagline."""
     return {"app_name": config.APP_NAME, "app_tagline": config.APP_TAGLINE,
             "demo": config.DEMO_MODE, "github_url": config.GITHUB_URL,
-            "studying": request.endpoint in STUDY_PAGES}
+            "studying": request.endpoint in STUDY_PAGES,
+            "site_url": site_url(), "site_description": config.SITE_DESCRIPTION}
+
+
+def site_url():
+    """The site's public address, for links that must be complete (previews, sitemap)."""
+    return config.SITE_URL or request.url_root.rstrip("/")
 
 
 STUDY_PAGES = {"review", "grade", "feedback", "rate", "start_session"}
@@ -273,6 +283,27 @@ def render_settings(conn, message=None, error=None):
 def about():
     """What the app is, where the name comes from, and how it works."""
     return render_template("about.html")
+
+
+@app.route("/robots.txt")
+def robots_txt():
+    """Tells search engines what to look at. The personal app asks them to stay away."""
+    if not config.DEMO_MODE:
+        lines = ["User-agent: *", "Disallow: /"]
+    else:
+        lines = ["User-agent: *", "Allow: /$", "Allow: /about", "Allow: /static/", "Disallow: /",
+                 f"Sitemap: {site_url()}/sitemap.xml"]
+    body = "\n".join(lines) + "\n"
+    return Response(body, mimetype="text/plain")
+
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    """The pages search engines should list: the home page and About."""
+    urls = "".join(f"<url><loc>{site_url()}{path}</loc></url>" for path in ("/", "/about"))
+    body = ('<?xml version="1.0" encoding="UTF-8"?>'
+            f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>')
+    return Response(body, mimetype="application/xml")
 
 
 @app.route("/settings")

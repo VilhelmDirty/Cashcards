@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}{{ app_name }}{% endblock %}</title>
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <meta name="theme-color" content="#16110c">
+  {% if demo %}
+  {# What search engines show, and the card LinkedIn and others show when the link is shared. #}
+  {% set page_title %}{% block share_title %}{{ app_name }}: flashcards you explain in your own words{% endblock %}{% endset %}
+  <meta name="description" content="{{ site_description }}">
+  <link rel="canonical" href="{{ site_url }}{{ request.path }}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ app_name }}">
+  <meta property="og:title" content="{{ page_title }}">
+  <meta property="og:description" content="{{ site_description }}">
+  <meta property="og:url" content="{{ site_url }}{{ request.path }}">
+  <meta property="og:image" content="{{ site_url }}{{ url_for('static', filename='og-image.png') }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ app_name }}: an ink-wash wheel, and the words 'The hand-feel's not included.'">
+  <meta name="twitter:card" content="summary_large_image">
+  {% endif %}
   {# Fonts: Spectral (headings), Work Sans (text), IBM Plex Mono (numbers),
      IM Fell English italic (the tagline).
      Without internet the page falls back to fonts already on the computer. #}

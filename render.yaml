@@ -18,5 +18,7 @@ services:
         generateValue: true
       - key: ANTHROPIC_API_KEY       # the free grades; entered by hand in Render's dashboard, never in git
         sync: false
+      - key: SITE_URL                # the public address once there is a domain, e.g. https://wheelwright.app
+        sync: false
       - key: PYTHON_VERSION
         value: "3.12.3"

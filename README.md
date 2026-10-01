@@ -281,6 +281,12 @@ safely without touching my own cards:
   headers are sent, and personal-only features (reminders, email, Claude drafting) return 404.
 - **Hosting**: Render, configured by `render.yaml`, running the app under gunicorn. Every
   `git push` redeploys it. The free tier sleeps when idle, which also resets demo progress.
+- **Found by search engines, previewed when shared**: the demo pages carry a description,
+  a canonical address and Open Graph tags, so a shared link shows a proper card with
+  `static/og-image.png` (drawn in the site's own HTML and fonts, then captured at
+  1200×630 with headless Edge). `/robots.txt` and `/sitemap.xml` point crawlers at the home
+  and About pages only, and those pages open without a cookie so crawlers never create
+  visitor files. `SITE_URL` (set on the host) makes every link use the custom domain.
 - **Keeping progress without accounts** (`backup.py`): Settings → *Download my progress*
   saves one JSON file (cards, schedules, history, feedback, study settings); *Restore*
   loads it back on any later visit. The upload is treated as hostile: size and row caps,
