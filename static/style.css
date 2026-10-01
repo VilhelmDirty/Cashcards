@@ -1,4 +1,4 @@
-/* Cashcards: "money meets index card".
+/* Son of Bian: index cards on cream paper, with a wheelwright's wheel for a logo.
    Cream paper, banknote green and a touch of coin gold; serif headings, a clean
    sans for reading, monospaced figures so numbers line up like a ledger.
    Light and dark themes follow the computer's setting. */
@@ -89,9 +89,9 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 650; letter-spacing:
 }
 .brand:hover { color: var(--ink); }
 .brand-mark { width: 30px; height: 30px; flex: none; }
-.mark-back { fill: var(--gold); }
-.mark-front { fill: var(--accent); }
-.mark-glyph { font: 700 15px var(--font-display); fill: var(--on-accent); }
+.mark-rim { fill: none; stroke: var(--accent); stroke-width: 3; }
+.mark-spokes { stroke: var(--accent); stroke-width: 1.8; stroke-linecap: round; }
+.mark-hub { fill: var(--gold); }
 .nav-link { font-size: 15px; color: var(--muted); text-decoration: none; }
 .nav-link:hover { color: var(--ink); }
 

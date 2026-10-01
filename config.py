@@ -12,8 +12,11 @@ from dotenv import load_dotenv
 PROJECT_DIR = Path(__file__).resolve().parent
 load_dotenv(PROJECT_DIR / ".env")
 
-# The app's name, shown on every page, in emails and in notifications.
-APP_NAME = "Cashcards"
+# The app's name, shown on every page, in emails and in notifications. From the
+# Zhuangzi: Wheelwright Bian tells Duke Huan that books are only "the dregs of the men
+# of old", because a real knack can't be put into words; he couldn't even teach it to
+# his own son. An app that makes you practise until it sticks is the son, at last.
+APP_NAME = "Son of Bian"
 
 # --- Public demo mode (see demo.py) ---
 # On for the live site (DEMO_MODE=1 in its settings), or locally with --demo.

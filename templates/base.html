@@ -18,9 +18,9 @@
     <nav class="nav">
       <a href="{{ url_for('home') }}" class="brand" aria-label="{{ app_name }} home">
         <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
-          <rect x="9" y="5" width="18" height="23" rx="3" transform="rotate(12 18 16)" class="mark-back"/>
-          <rect x="5" y="4" width="18" height="23" rx="3" class="mark-front"/>
-          <text x="14" y="21.5" text-anchor="middle" class="mark-glyph">$</text>
+          <circle cx="16" cy="16" r="12" class="mark-rim"/>
+          <path d="M4 16h24M16 4v24M7.5 7.5l17 17M24.5 7.5l-17 17" class="mark-spokes"/>
+          <circle cx="16" cy="16" r="3.5" class="mark-hub"/>
         </svg>
         <span>{{ app_name }}</span>
       </a>

@@ -1,118 +1,200 @@
 {
-  "_about": "The public demo's sample deck. Original cards written for this project (no third-party course material). Cards with a 'template' get fresh numbers every time: their question and answer are generated from it, with the 'original' values used for the first version and checks.",
+  "_about": "The public demo's sample deck: original cards on a mix of subjects, written for this project (no third-party course material). Cards with a 'template' get fresh numbers every time: their question and answer are generated from it, with the 'original' values used for the first version and for the start-up checks.",
   "cards": [
     {
-      "deck": "Valuation & DCF",
-      "topic": "Enterprise value",
-      "question": "What does enterprise value represent, and why is it called capital-structure neutral?",
-      "answer": "Enterprise value is the value of a company's core operations to all of its capital providers: shareholders, lenders and other claim-holders together.\n\nIt's capital-structure neutral because it doesn't change with how the business is financed. Swap debt for equity and the split of value between the groups changes, but the value of the operations, and so EV, stays the same."
+      "deck": "How Memory Works",
+      "topic": "Forgetting",
+      "question": "What is the forgetting curve?",
+      "answer": "It's the pattern, first measured by Hermann Ebbinghaus in the 1880s, that we forget new information quickly at first and then more slowly. Without review, much of what you learn is gone within days. Each well-timed review makes the curve flatter, so the memory lasts longer before it fades again."
     },
     {
-      "deck": "Valuation & DCF",
-      "topic": "Enterprise value",
-      "question": "Why do we subtract cash when going from equity value to enterprise value?",
-      "answer": "Cash is a non-operating asset. Enterprise value is meant to capture only the operating business, and a buyer of the whole company effectively gets the cash back, which offsets part of the price. So cash is subtracted, while debt and other claims that must be settled are added."
+      "deck": "How Memory Works",
+      "topic": "Spacing",
+      "question": "Why does spaced repetition beat cramming?",
+      "answer": "Reviewing just as you're starting to forget strengthens a memory far more than reviewing something you still remember easily. Spacing reviews out, with gaps that grow each time you succeed, gives you those effortful recalls. Cramming packs reviews together, so it works for tomorrow's test but fades quickly afterwards."
     },
     {
-      "deck": "Valuation & DCF",
-      "topic": "Enterprise value",
+      "deck": "How Memory Works",
+      "topic": "Retrieval practice",
+      "question": "What is the testing effect, and how is it different from rereading?",
+      "answer": "The testing effect is the finding that actively pulling information out of memory, by answering questions or recalling without looking, strengthens it much more than rereading. Rereading feels productive because the material looks familiar, but recognising something is not the same as being able to produce it."
+    },
+    {
+      "deck": "How Memory Works",
+      "topic": "Elaboration",
+      "question": "Why does explaining something in your own words help you learn it?",
+      "answer": "Putting an idea into your own words forces you to connect it to what you already know, which makes it easier to recall later. It also exposes gaps: if you can't explain it simply, you haven't fully understood it yet. This is the idea behind the Feynman technique."
+    },
+    {
+      "deck": "How Memory Works",
+      "topic": "The name",
+      "question": "In the Zhuangzi, what does Wheelwright Bian tell Duke Huan about the books he is reading?",
+      "answer": "That they are only the dregs of the men of old. Bian can feel the knack of making a wheel in his hands, but he can't put it into words, so he couldn't even pass it on to his own son, and is still making wheels at seventy. Real skill comes from practice, not from reading about it."
+    },
+    {
+      "deck": "Science",
+      "topic": "Light",
+      "question": "Why is the sky blue?",
+      "answer": "Sunlight contains all colours. As it passes through the atmosphere, air molecules scatter short wavelengths, like blue, much more strongly than long ones, like red (Rayleigh scattering). That scattered blue light reaches your eyes from every part of the sky. Violet is scattered even more, but the sun emits less of it and our eyes are less sensitive to it."
+    },
+    {
+      "deck": "Science",
+      "topic": "Earth",
+      "question": "What causes the seasons?",
+      "answer": "The tilt of Earth's axis, about 23.4 degrees. As Earth orbits the sun, each hemisphere spends part of the year tilted towards it, getting more direct sunlight and longer days (summer), and part tilted away (winter). It isn't distance from the sun: Earth is actually closest to the sun in early January."
+    },
+    {
+      "deck": "Science",
+      "topic": "Biology",
+      "question": "What's the difference between a bacterium and a virus?",
+      "answer": "A bacterium is a living single-celled organism that can feed and reproduce on its own; antibiotics can kill many bacteria. A virus is much smaller and isn't a cell at all: it can only copy itself by getting inside a host's cells. That's why antibiotics don't work on viruses."
+    },
+    {
+      "deck": "Science",
+      "topic": "Biology",
+      "question": "In a sentence or two, what does DNA do?",
+      "answer": "DNA stores the instructions for building and running an organism. Its sequence of bases is read in groups of three, through RNA, to make proteins, and it is copied and passed on to offspring."
+    },
+    {
+      "deck": "Science",
+      "topic": "Method",
+      "question": "What is the placebo effect, and why do drug trials use a control group?",
+      "answer": "The placebo effect is a real improvement people feel after a treatment with no active ingredient, because they expect to get better. Trials compare the drug with a placebo given to a control group, ideally with neither patients nor doctors knowing who got which, so that any extra benefit can be credited to the drug itself."
+    },
+    {
+      "deck": "History & Ideas",
+      "topic": "Writing",
+      "question": "What is the Rosetta Stone, and why did it matter?",
+      "answer": "It's an Egyptian stone slab from 196 BC carrying the same decree in three scripts: hieroglyphs, Demotic and ancient Greek. Because scholars could read the Greek, it gave them the key to deciphering hieroglyphs, which Jean-François Champollion achieved in 1822."
+    },
+    {
+      "deck": "History & Ideas",
+      "topic": "Technology",
+      "question": "Why was Gutenberg's printing press such a big deal?",
+      "answer": "Around 1440, Johannes Gutenberg combined movable metal type with a press, so books could be produced quickly and cheaply instead of copied by hand. Ideas spread faster and further than ever, literacy grew, and the press helped fuel the Reformation and the Scientific Revolution."
+    },
+    {
+      "deck": "History & Ideas",
+      "topic": "Trade",
+      "question": "What was the Silk Road?",
+      "answer": "Not one road but a network of trade routes linking China with Central Asia, the Middle East and Europe, active from around the 2nd century BC. Silk, spices and other goods travelled along it, and so did ideas, religions, technologies and diseases."
+    },
+    {
+      "deck": "History & Ideas",
+      "topic": "Philosophy",
+      "question": "What is the Socratic method?",
+      "answer": "A way of teaching and thinking by asking questions instead of giving answers. By questioning someone's beliefs step by step, you expose hidden assumptions and contradictions, so they reach a clearer understanding themselves."
+    },
+    {
+      "deck": "Everyday Maths",
+      "topic": "Percentages",
       "template": {
         "variables": [
-          {"name": "P", "original": 25, "min": 10, "max": 60, "step": 1},
-          {"name": "S", "original": 40, "min": 20, "max": 120, "step": 5},
-          {"name": "D", "original": 300, "min": 100, "max": 600, "step": 25},
-          {"name": "PS", "original": 50, "min": 0, "max": 100, "step": 10},
-          {"name": "C", "original": 150, "min": 25, "max": 300, "step": 25}
+          {"name": "old", "original": 80, "min": 20, "max": 200, "step": 5},
+          {"name": "new", "original": 92, "min": 25, "max": 300, "step": 5}
         ],
         "derived": [
-          {"name": "EQ", "formula": "P * S"},
-          {"name": "EV", "formula": "EQ + D + PS - C"}
+          {"name": "diff", "formula": "new - old"},
+          {"name": "pct", "formula": "diff / old * 100"}
+        ],
+        "constraints": ["new > old"],
+        "question": "A price rises from ${old} to ${new}. What is the percentage increase?",
+        "answer": "Change = ${new} − ${old} = ${diff}\nPercentage increase = change ÷ original price = ${diff} ÷ ${old} = {pct:.1f}%"
+      }
+    },
+    {
+      "deck": "Everyday Maths",
+      "topic": "Percentages",
+      "template": {
+        "variables": [
+          {"name": "p", "original": 80, "min": 10, "max": 300, "step": 5},
+          {"name": "d", "original": 25, "min": 5, "max": 50, "step": 5},
+          {"name": "t", "original": 8, "min": 3, "max": 15, "step": 1}
+        ],
+        "derived": [
+          {"name": "sale", "formula": "p * (1 - d / 100)"},
+          {"name": "final", "formula": "sale * (1 + t / 100)"}
         ],
         "constraints": [],
-        "question": "A company's shares trade at ${P} and it has {S}M shares outstanding. It carries ${D}M of debt, ${PS}M of preferred stock and ${C}M of cash. What is its enterprise value?",
-        "answer": "Equity value = ${P} × {S}M = ${EQ:,.0f}M\nEV = equity value + debt + preferred stock − cash\n= ${EQ:,.0f}M + ${D}M + ${PS}M − ${C}M = ${EV:,.0f}M"
+        "question": "A jacket costs ${p}. It's {d}% off, and then {t}% sales tax is added. What do you pay?",
+        "answer": "Sale price = ${p} × (1 − {d}%) = ${sale:,.2f}\nWith tax = ${sale:,.2f} × (1 + {t}%) = ${final:,.2f}"
       }
     },
     {
-      "deck": "Valuation & DCF",
-      "topic": "DCF",
-      "question": "Walk me through the main steps of a DCF.",
-      "answer": "1. Project unlevered free cash flow for an explicit period, usually 5 to 10 years.\n2. Estimate a terminal value for everything after that, with either the Gordon growth method or an exit multiple.\n3. Discount the cash flows and the terminal value back to today at the WACC.\n4. Add them up to get enterprise value.\n5. Bridge to equity value by subtracting debt and other claims and adding cash, then divide by diluted shares for a value per share."
-    },
-    {
-      "deck": "Valuation & DCF",
-      "topic": "DCF",
-      "question": "When would you discount unlevered free cash flow, and when levered free cash flow?",
-      "answer": "Unlevered free cash flow is before interest payments, so it belongs to all capital providers: discount it at the WACC to get enterprise value.\n\nLevered free cash flow is after interest and debt payments, so it belongs to shareholders only: discount it at the cost of equity to get equity value.\n\nThe cash flow and the discount rate must match the same group of investors."
-    },
-    {
-      "deck": "Valuation & DCF",
-      "topic": "Discount rate",
+      "deck": "Everyday Maths",
+      "topic": "Averages",
       "template": {
         "variables": [
-          {"name": "E", "original": 600, "min": 300, "max": 900, "step": 50},
-          {"name": "D", "original": 400, "min": 100, "max": 600, "step": 50},
-          {"name": "re", "original": 11, "min": 8, "max": 14, "step": 0.5},
-          {"name": "rd", "original": 6, "min": 4, "max": 8, "step": 0.5},
-          {"name": "t", "original": 25, "min": 20, "max": 35, "step": 1}
+          {"name": "d", "original": 60, "min": 20, "max": 150, "step": 10},
+          {"name": "v1", "original": 60, "min": 30, "max": 120, "step": 10},
+          {"name": "v2", "original": 30, "min": 30, "max": 120, "step": 10}
         ],
         "derived": [
-          {"name": "rd_at", "formula": "rd * (1 - t / 100)"},
-          {"name": "we", "formula": "E / (E + D) * 100"},
-          {"name": "wd", "formula": "D / (E + D) * 100"},
-          {"name": "wacc", "formula": "we / 100 * re + wd / 100 * rd_at"}
+          {"name": "t1", "formula": "d / v1"},
+          {"name": "t2", "formula": "d / v2"},
+          {"name": "tt", "formula": "t1 + t2"},
+          {"name": "dist", "formula": "2 * d"},
+          {"name": "avg", "formula": "dist / tt"}
         ],
-        "constraints": ["rd < re"],
-        "question": "A company has equity worth ${E}M and debt worth ${D}M. Its cost of equity is {re}%, its pre-tax cost of debt is {rd}%, and its tax rate is {t}%. What is its WACC?",
-        "answer": "After-tax cost of debt = {rd}% × (1 − {t}%) = {rd_at:.2f}%\nWeights: equity {we:.1f}%, debt {wd:.1f}%\nWACC = {we:.1f}% × {re}% + {wd:.1f}% × {rd_at:.2f}% = {wacc:.2f}%"
+        "constraints": ["v1 != v2"],
+        "question": "You drive {d} km at {v1} km/h, then another {d} km at {v2} km/h. What is your average speed for the whole trip?",
+        "answer": "Time = {d} ÷ {v1} + {d} ÷ {v2} = {t1:.2f} + {t2:.2f} = {tt:.2f} hours\nAverage speed = total distance ÷ total time = {dist} km ÷ {tt:.2f} h = {avg:.1f} km/h\n\nIt isn't the simple average of the two speeds, because you spend longer driving at the slower one."
       }
     },
     {
-      "deck": "Valuation & DCF",
-      "topic": "Terminal value",
+      "deck": "Everyday Maths",
+      "topic": "Growth",
       "template": {
         "variables": [
-          {"name": "FCF", "original": 100, "min": 50, "max": 200, "step": 10},
-          {"name": "g", "original": 2, "min": 1, "max": 4, "step": 0.5},
-          {"name": "r", "original": 9, "min": 7, "max": 12, "step": 0.5}
+          {"name": "r", "original": 8, "min": 2, "max": 12, "step": 1}
         ],
         "derived": [
-          {"name": "FCF1", "formula": "FCF * (1 + g / 100)"},
-          {"name": "TV", "formula": "FCF1 / (r / 100 - g / 100)"}
-        ],
-        "constraints": ["r - g >= 3"],
-        "question": "A company's free cash flow in the final forecast year is ${FCF}M. It is expected to grow {g}% a year forever, and the discount rate is {r}%. What is the terminal value at the end of the final year?",
-        "answer": "Next year's cash flow = ${FCF}M × (1 + {g}%) = ${FCF1:,.1f}M\nTerminal value = FCF ÷ (r − g) = ${FCF1:,.1f}M ÷ ({r}% − {g}%) = ${TV:,.0f}M"
-      }
-    },
-    {
-      "deck": "Valuation & DCF",
-      "topic": "Terminal value",
-      "template": {
-        "variables": [
-          {"name": "EBITDA", "original": 80, "min": 40, "max": 150, "step": 5},
-          {"name": "m", "original": 9, "min": 6, "max": 14, "step": 0.5},
-          {"name": "r", "original": 10, "min": 7, "max": 13, "step": 0.5},
-          {"name": "n", "original": 5, "min": 4, "max": 7, "step": 1}
-        ],
-        "derived": [
-          {"name": "TV", "formula": "EBITDA * m"},
-          {"name": "disc", "formula": "(1 + r / 100) ** n"},
-          {"name": "PV", "formula": "TV / disc"}
+          {"name": "approx", "formula": "72 / r"},
+          {"name": "exact", "formula": "log(2) / log(1 + r / 100)"}
         ],
         "constraints": [],
-        "question": "In year {n}, the last year of a forecast, a company's EBITDA is ${EBITDA}M. Comparable companies trade at {m}x EV/EBITDA, and the discount rate is {r}%. What is the present value of the terminal value?",
-        "answer": "Terminal value = ${EBITDA}M × {m}x = ${TV:,.0f}M\nPresent value = TV ÷ (1 + {r}%)^{n} = ${TV:,.0f}M ÷ {disc:.3f} = ${PV:,.0f}M"
+        "question": "Using the rule of 72, roughly how many years does an investment take to double at {r}% a year? How close is that to the exact answer?",
+        "answer": "Rule of 72: 72 ÷ {r} ≈ {approx:.1f} years\nExact: ln 2 ÷ ln(1 + {r}%) = {exact:.1f} years, so the shortcut is very close at everyday interest rates."
       }
     },
     {
-      "deck": "Valuation & DCF",
-      "topic": "Terminal value",
-      "question": "Why is the terminal value often 60–80% of a DCF valuation, and what does that imply?",
-      "answer": "The terminal value covers every year after the forecast, which is most of a healthy company's life, while the explicit forecast covers only a few years.\n\nIt implies the valuation is very sensitive to the terminal assumptions: the long-term growth rate or exit multiple, and the discount rate. Always sanity-check them, for example by comparing the implied exit multiple with the implied growth rate."
+      "deck": "Money Basics",
+      "topic": "Interest",
+      "question": "In plain words, what is compound interest?",
+      "answer": "Interest that is earned on your earlier interest as well as on the original amount. Each year's growth is added to the balance, so the next year's interest is calculated on a bigger number. Over long periods this snowballing makes a huge difference, which is why starting early matters."
     },
     {
-      "deck": "Bonds & Time Value",
+      "deck": "Money Basics",
+      "topic": "Interest",
+      "template": {
+        "variables": [
+          {"name": "P", "original": 1000, "min": 500, "max": 20000, "step": 500},
+          {"name": "r", "original": 5, "min": 1, "max": 10, "step": 0.5},
+          {"name": "n", "original": 10, "min": 2, "max": 30, "step": 1}
+        ],
+        "derived": [
+          {"name": "f", "formula": "(1 + r / 100) ** n"},
+          {"name": "V", "formula": "P * f"}
+        ],
+        "constraints": [],
+        "question": "You invest ${P:,.0f} at {r}% a year, compounded annually. How much is it worth after {n} years?",
+        "answer": "Value = ${P:,.0f} × (1 + {r}%)^{n} = ${P:,.0f} × {f:.4f} = ${V:,.2f}"
+      }
+    },
+    {
+      "deck": "Money Basics",
+      "topic": "Inflation",
+      "question": "What is inflation, and what does it do to money sitting in a savings account?",
+      "answer": "Inflation is the general rise in prices over time, so each dollar buys a little less each year. If your savings earn less interest than the inflation rate, their real value, what they can actually buy, shrinks even though the balance goes up."
+    },
+    {
+      "deck": "Money Basics",
+      "topic": "Risk",
+      "question": "Why does diversification reduce risk?",
+      "answer": "Different investments don't all go up and down at the same time. Holding many of them means the losses on some are often offset by gains on others, so the overall result swings less than any single investment would. It reduces the risk specific to individual investments, but not the risk of the whole market falling together."
+    },
+    {
+      "deck": "Money Basics",
       "topic": "Time value of money",
       "template": {
         "variables": [
@@ -126,111 +208,8 @@
         ],
         "constraints": [],
         "question": "How much is ${FV:,.0f} received in {n} years worth today, at a discount rate of {r}% a year?",
-        "answer": "PV = FV ÷ (1 + r)^n = ${FV:,.0f} ÷ (1 + {r}%)^{n} = ${FV:,.0f} ÷ {f:.4f} = ${PV:,.2f}"
+        "answer": "Present value = ${FV:,.0f} ÷ (1 + {r}%)^{n} = ${FV:,.0f} ÷ {f:.4f} = ${PV:,.2f}"
       }
-    },
-    {
-      "deck": "Bonds & Time Value",
-      "topic": "Bond pricing",
-      "template": {
-        "variables": [
-          {"name": "n", "original": 10, "min": 3, "max": 20, "step": 1},
-          {"name": "c", "original": 5, "min": 2, "max": 8, "step": 0.5},
-          {"name": "y", "original": 6, "min": 3, "max": 10, "step": 0.5}
-        ],
-        "derived": [
-          {"name": "C", "formula": "c / 100 * 1000"},
-          {"name": "af", "formula": "annuity_pv(y / 100, n)"},
-          {"name": "df", "formula": "(1 + y / 100) ** n"},
-          {"name": "pvc", "formula": "C * af"},
-          {"name": "pvf", "formula": "1000 / df"},
-          {"name": "price", "formula": "pvc + pvf"}
-        ],
-        "constraints": ["c < y"],
-        "question": "A {n}-year bond pays a {c}% annual coupon on $1,000 face value. If similar bonds yield {y}%, what is its price?",
-        "answer": "Coupon = {c}% × $1,000 = ${C:,.2f} a year\nPrice = coupon × annuity factor + face value ÷ (1 + y)^n\n= ${C:,.2f} × {af:.4f} + $1,000 ÷ {df:.4f}\n= ${pvc:,.2f} + ${pvf:,.2f} = ${price:,.2f}\n\nIt trades below face value (at a discount) because its coupon is lower than the market yield."
-      }
-    },
-    {
-      "deck": "Bonds & Time Value",
-      "topic": "Bond pricing",
-      "question": "Why do bond prices fall when interest rates rise?",
-      "answer": "A bond's coupons are fixed. When market rates rise, new bonds pay more, so an existing bond is only attractive if its price falls far enough that its yield matches the market. In present-value terms, the same fixed cash flows are discounted at a higher rate, so they are worth less today."
-    },
-    {
-      "deck": "Bonds & Time Value",
-      "topic": "Interest-rate risk",
-      "question": "A bond has a modified duration of 7. What does that tell you?",
-      "answer": "Its price changes by roughly 7% for each 1 percentage point change in yields, in the opposite direction: about −7% if yields rise by 1 point, and about +7% if they fall by 1 point.\n\nIt's a linear approximation. For large moves, convexity makes the actual price fall less and rise more than duration alone predicts."
-    },
-    {
-      "deck": "Bonds & Time Value",
-      "topic": "Bond pricing",
-      "question": "What is a bond's yield to maturity?",
-      "answer": "It's the single discount rate that makes the present value of all the bond's remaining cash flows (coupons and face value) equal to its current price. In other words, it's the bond's internal rate of return if you buy at today's price, hold to maturity, and every payment is made, assuming coupons can be reinvested at that same rate."
-    },
-    {
-      "deck": "LBOs & M&A",
-      "topic": "LBO basics",
-      "question": "What makes a company a good LBO candidate?",
-      "answer": "Above all, stable and predictable cash flow, because that's what pays down the debt. Also: low capital spending and working capital needs, a strong market position, room to improve operations or margins, a reasonable entry price, assets or divisions that could be sold, a capable management team, and a clear way to exit in a few years."
-    },
-    {
-      "deck": "LBOs & M&A",
-      "topic": "LBO basics",
-      "question": "What are the main drivers of returns in an LBO?",
-      "answer": "1. Earnings growth: growing EBITDA through revenue growth or better margins.\n2. Debt paydown: cash flow repays debt, so more of the enterprise value belongs to the equity at exit.\n3. Multiple expansion: selling at a higher EV/EBITDA multiple than you paid.\n\nLeverage itself amplifies all of these, because the fund puts in less equity for the same business."
-    },
-    {
-      "deck": "LBOs & M&A",
-      "topic": "LBO returns",
-      "template": {
-        "variables": [
-          {"name": "eq", "original": 100, "min": 50, "max": 300, "step": 10},
-          {"name": "ex", "original": 250, "min": 100, "max": 900, "step": 10},
-          {"name": "n", "original": 5, "min": 3, "max": 7, "step": 1}
-        ],
-        "derived": [
-          {"name": "moic", "formula": "ex / eq"},
-          {"name": "irr", "formula": "(moic ** (1 / n) - 1) * 100"}
-        ],
-        "constraints": ["ex > eq"],
-        "question": "A private equity fund invests ${eq}M of equity in a company and sells it {n} years later, receiving ${ex}M for its equity. What are the multiple of money (MOIC) and the approximate IRR?",
-        "answer": "MOIC = ${ex}M ÷ ${eq}M = {moic:.2f}x\nIRR = MOIC^(1/{n}) − 1 = {irr:.1f}% a year"
-      }
-    },
-    {
-      "deck": "LBOs & M&A",
-      "topic": "Accretion / dilution",
-      "template": {
-        "variables": [
-          {"name": "eps", "original": 2, "min": 1, "max": 5, "step": 0.25},
-          {"name": "sh", "original": 100, "min": 50, "max": 200, "step": 10},
-          {"name": "new", "original": 20, "min": 5, "max": 40, "step": 5},
-          {"name": "ni", "original": 70, "min": 20, "max": 150, "step": 5}
-        ],
-        "derived": [
-          {"name": "pni", "formula": "eps * sh + ni"},
-          {"name": "psh", "formula": "sh + new"},
-          {"name": "peps", "formula": "pni / psh"},
-          {"name": "chg", "formula": "(peps / eps - 1) * 100"}
-        ],
-        "constraints": ["peps > eps"],
-        "question": "An acquirer has EPS of ${eps:.2f} and {sh}M shares. It issues {new}M new shares to buy a target that adds ${ni}M of net income. Is the deal accretive or dilutive?",
-        "answer": "Pro forma net income = ${eps:.2f} × {sh}M + ${ni}M = ${pni:,.1f}M\nPro forma shares = {sh}M + {new}M = {psh}M\nPro forma EPS = ${pni:,.1f}M ÷ {psh}M = ${peps:.2f}, versus ${eps:.2f} before\n\nAccretive: EPS rises by {chg:.1f}%."
-      }
-    },
-    {
-      "deck": "LBOs & M&A",
-      "topic": "Buyers",
-      "question": "Why can strategic buyers often pay more for a company than private equity firms?",
-      "answer": "Strategic buyers can count on synergies, such as cost savings from combining operations or extra revenue from cross-selling, so the target is worth more to them than on its own. A private equity firm usually has no synergies, has to earn a high return on its equity within a few years, and is limited by how much debt the target can carry."
-    },
-    {
-      "deck": "LBOs & M&A",
-      "topic": "Accretion / dilution",
-      "question": "Can an accretive acquisition still destroy value?",
-      "answer": "Yes. EPS accretion only compares the earnings bought with the cost of financing them, often cheap debt or highly valued shares. If the buyer overpays relative to the target's intrinsic value, or the deal earns less than its cost of capital, shareholders lose value even though EPS goes up. Accretion is an accounting test, not a value test."
     }
   ]
 }

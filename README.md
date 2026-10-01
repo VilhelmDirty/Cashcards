@@ -1,9 +1,15 @@
-# Cashcards — finance flashcards you explain in your own words
+# Son of Bian — flashcards you explain in your own words
 
-**Cashcards** is a personal study app that runs on my own computer. It shows me a finance
-flashcard, I type the answer **in my own words**, and Claude grades my
-explanation against the reference answer. The grade feeds a spaced-repetition
-scheduler (FSRS), so cards I explain poorly come back sooner.
+**Son of Bian** is a study app for remembering what you learn. It shows a flashcard,
+you type the answer **in your own words**, and Claude grades the explanation against
+the reference answer. The grade feeds a spaced-repetition scheduler (FSRS), so cards
+you explain poorly come back sooner. I use it on my own computer with my finance
+cards; a public demo runs the same code with a sample deck on general subjects.
+
+> **The name.** In the *Zhuangzi*, Wheelwright Bian tells Duke Huan that the books he is
+> reading are only "the dregs of the men of old": a real knack can't be put into words,
+> so Bian couldn't even pass his skill on to his own son. Reading isn't knowing. An app
+> that makes you practise until it sticks is the son, finally getting it.
 
 > **Status:** in progress — being built in stages (see [Roadmap](#roadmap)).
 
@@ -246,8 +252,8 @@ card with parts a), b), c) — 34 cards became 12.
 The same code runs as a public demo with `DEMO_MODE=1`, built so strangers can use it
 safely without touching my own cards:
 
-- **Sample deck, not my cards.** 20 original cards in `demo/sample_deck.json` (my own
-  study cards come from courses and stay private). The 8 math cards are written as
+- **Sample deck, not my cards.** 23 original cards on general subjects in `demo/sample_deck.json` (my own
+  finance cards come from courses and stay private). The 6 maths cards are written as
   templates, so even their first version is generated from formulas, and every one is
   checked at start-up; a broken card stops the site from starting rather than going live.
 - **Each visitor gets their own database file**, copied from the sample deck, keyed by a
@@ -350,7 +356,7 @@ folder, set `CARDS_DIR` in `.env`. The list of files to import lives in `config.
 | **Recipient on the Settings page, sender in `.env`** | The address I receive at is a preference (stored locally, never in git); the sending password is a secret (`.env`). |
 | **Once-a-day email by default** | Three reminder times shouldn't mean three emails; configurable. |
 | **Single-instance check on startup** | Launching the app while a reminder already started it just opens the browser instead of crashing on a busy port. |
-| **Design: "money meets index card"** | Cream paper, banknote green and coin gold; Fraunces for headings, Instrument Sans for text, JetBrains Mono for figures; study cards styled as real index cards. Follows the system light/dark setting. |
+| **Design: index cards on cream paper** | A wheelwright's wheel for a logo; cream paper, deep green and gold; Fraunces for headings, Instrument Sans for text, JetBrains Mono for figures; study cards styled as real index cards. Follows the system light/dark setting. |
 | **App name in one setting (`APP_NAME`)** | Pages, emails, notifications and the Windows task all read it, so renaming is one line. |
 | **Email copy in its own module + template** | Wording and layout change without touching the scheduling code; card text is HTML-escaped. |
 | **Math templates computed by code, not by Claude at study time** | Language models make arithmetic slips; formulas checked against the original answer and evaluated locally are exact, instant and free. |
@@ -371,14 +377,14 @@ _More rows added as each tool is introduced._
 - [x] Study sessions of 25 / 50 / 75 / 100 questions, with a summary at the end
 - [x] Fresh numbers for math cards (piloted on DCF)
 - [x] Fresh numbers drafted for all decks (76 templates ready to review)
-- [x] Public demo mode (sample deck, per-visitor data, capped AI grading)
+- [x] Public demo mode (general-knowledge sample deck, per-visitor data, capped AI grading)
 - [ ] Deploy the demo to Render and link it here
 - [x] Stage 3 — Own-words grading with the Claude API
 - [x] Stage 4 — Due-card reminders (Windows desktop + email)
 - [x] Forgotten → Retained slider, suggested next date with override
 - [x] Reminder times and study days chosen in the app
 - [x] Add cards manually, or approve Claude-drafted ones
-- [x] Cashcards redesign and cheekier emails
+- [x] Redesign, cheekier emails, renamed Son of Bian
 - [ ] Multiple choice with Claude-written wrong options (time feeds the rating)
 
 ## License

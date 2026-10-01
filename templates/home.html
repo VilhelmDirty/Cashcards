@@ -3,11 +3,14 @@
 {% if demo %}
 <section class="panel demo-intro">
   <p class="eyebrow">Live demo</p>
-  <p><strong>{{ app_name }}</strong> is a study app I built for finance interview prep. Interviewers
-    don't ask you to recognise an answer, they ask you to <em>explain</em> it, so here you type your
-    answer in your own words and Claude grades it: how much you retained, what you missed, and a
-    tighter way to say it. A spaced-repetition scheduler (FSRS) then decides when you see each card again.</p>
-  <p class="muted small">Try a sample deck below. Math cards come with fresh numbers every time.
+  <p><strong>{{ app_name }}</strong> is a study app for remembering what you learn. Recognising an
+    answer isn't the same as knowing it, so instead of flipping cards you <em>explain</em> each answer
+    in your own words and Claude grades it: how much you retained, what you missed, and a tighter way
+    to say it. A spaced-repetition scheduler (FSRS) then brings each card back just before you'd forget it.</p>
+  <p class="muted small">The name comes from the Zhuangzi: Wheelwright Bian tells Duke Huan that books
+    are only "the dregs of the men of old", since a real knack can't be put into words, not even
+    for his own son. The only way is practice.</p>
+  <p class="muted small">Try a sample deck below. Maths cards come with fresh numbers every time.
     Your progress is private to this browser and resets now and then.
     <a href="{{ github_url }}">How it's built (GitHub) →</a></p>
 </section>
@@ -15,7 +18,7 @@
 <section class="hero">
   <p class="eyebrow">{{ greeting }}</p>
   <h1 class="hero-title">
-    {% if counts.due or counts.new %}Your balance is due.{% else %}All square for now.{% endif %}
+    {% if counts.due or counts.new %}Time for practice.{% else %}All caught up.{% endif %}
   </h1>
 
   <div class="ledger">
