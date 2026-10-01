@@ -66,8 +66,11 @@ body {
    (static/mountains.svg). Cards and panels have solid backgrounds, so they sit on top. */
 body::before {
   content: ""; position: fixed; left: 0; right: 0; bottom: 0; z-index: -1;
-  height: min(42vh, 420px); pointer-events: none;
+  height: min(56vh, 560px); pointer-events: none;
   background: url("mountains.svg") center bottom / cover no-repeat;
+  /* fade the top edge, so however a window crops the image, nothing ends in a hard line */
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 30%);
+  mask-image: linear-gradient(to bottom, transparent, #000 30%);
 }
 :root[data-theme="light"] body::before { filter: invert(1) opacity(.7); }  /* dark ink on light paper */
 main { max-width: 760px; margin: 0 auto; padding: 36px 18px 80px; }
@@ -88,12 +91,20 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing:
 }
 .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); text-decoration: none; }
 .brand:hover { color: var(--ink); }
-.brand-mark { width: 36px; height: 36px; flex: none; }
+.brand-mark { width: 46px; height: 46px; flex: none; }
 .mark-ink { stroke: var(--ink); }      /* pale ink on dark, dark ink on light */
 .mark-seal { fill: #b8392b; }          /* vermilion seal paste */
-.brand-text { display: flex; flex-direction: column; line-height: 1.1; }
-.brand-name { font: 600 22px var(--font-display); letter-spacing: .01em; }
-.brand-tagline { font: italic 400 12.5px var(--font-display); color: var(--muted); margin-top: 3px; }
+.brand-text { display: flex; flex-direction: column; line-height: 1; }
+.brand-name { font: 600 28px/1 var(--font-display); letter-spacing: .01em; }
+/* the tagline: old English book type, tucked right under the name */
+.brand-tagline {
+  font: italic 400 16px/1.1 "IM Fell English", Georgia, serif;
+  color: var(--muted); margin-top: 2px; letter-spacing: .01em;
+}
+/* While studying: a compact header (smaller name, no tagline) so the card has the stage. */
+.site-header.compact .nav { padding-top: 10px; padding-bottom: 10px; }
+.site-header.compact .brand-mark { width: 32px; height: 32px; }
+.site-header.compact .brand-name { font-size: 20px; }
 .nav-link { font-size: 15px; color: var(--muted); text-decoration: none; }
 .nav-link:hover { color: var(--ink); }
 
@@ -361,7 +372,9 @@ form.center { margin-top: 16px; }
   .card { padding: 22px 18px; }
   .question { font-size: 21px; }
   .ledger-num { font-size: 32px; }
-  .brand-tagline { display: none; }
+  .brand-mark { width: 38px; height: 38px; }
+  .brand-name { font-size: 23px; }
+  .brand-tagline { font-size: 13.5px; }
   .deck { flex-direction: column; align-items: stretch; gap: 10px; }
   .deck-side { justify-content: flex-end; }
 }

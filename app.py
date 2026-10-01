@@ -183,9 +183,14 @@ def current_mode():
 
 @app.context_processor
 def app_name():
-    """Makes {{ app_name }}, {{ demo }} etc. available in every page template."""
+    """Makes {{ app_name }}, {{ demo }} etc. available in every page template.
+    studying: True on the study screens, which get a compact header without the tagline."""
     return {"app_name": config.APP_NAME, "app_tagline": config.APP_TAGLINE,
-            "demo": config.DEMO_MODE, "github_url": config.GITHUB_URL}
+            "demo": config.DEMO_MODE, "github_url": config.GITHUB_URL,
+            "studying": request.endpoint in STUDY_PAGES}
+
+
+STUDY_PAGES = {"review", "grade", "feedback", "rate", "start_session"}
 
 
 @app.route("/")

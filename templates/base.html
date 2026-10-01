@@ -5,16 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}{{ app_name }}{% endblock %}</title>
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
-  {# Fonts: Spectral (headings), Work Sans (text), IBM Plex Mono (numbers).
+  {# Fonts: Spectral (headings), Work Sans (text), IBM Plex Mono (numbers),
+     IM Fell English italic (the tagline).
      Without internet the page falls back to fonts already on the computer. #}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&family=IM+Fell+English:ital@1&display=swap">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   {% block head %}{% endblock %}
 </head>
 <body>
-  <header class="site-header">
+  <header class="site-header{{ ' compact' if studying }}">
     <nav class="nav">
       <a href="{{ url_for('home') }}" class="brand" aria-label="{{ app_name }} home">
         {# The logo: a wheel in ink wash, signed with a small vermilion seal. The two
@@ -40,7 +41,7 @@
         </svg>
         <span class="brand-text">
           <span class="brand-name">{{ app_name }}</span>
-          <span class="brand-tagline">{{ app_tagline }}</span>
+          {% if not studying %}<span class="brand-tagline">{{ app_tagline }}</span>{% endif %}
         </span>
       </a>
       <a href="{{ url_for('settings') }}" class="nav-link">Settings</a>
