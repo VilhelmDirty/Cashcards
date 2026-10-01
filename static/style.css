@@ -8,7 +8,6 @@
 :root {
   color-scheme: dark;        /* text boxes, scrollbars and date pickers match */
   --paper: #16110c;          /* page: charred oak */
-  --grain: rgba(255, 220, 180, .025);
   --surface: #1f1812;        /* cards and panels */
   --surface-2: #2a2119;      /* inputs, tracks */
   --ink: #eee4d5;
@@ -34,7 +33,6 @@
 :root[data-theme="light"] {
   color-scheme: light;
   --paper: #f2ece1;          /* linen */
-  --grain: rgba(120, 84, 48, .035);
   --surface: #fbf8f2;
   --surface-2: #ece4d6;
   --ink: #2b2118;            /* walnut ink */
@@ -61,11 +59,17 @@ body {
   margin: 0;
   color: var(--ink);
   background-color: var(--paper);
-  /* the faintest wood grain */
-  background-image: repeating-linear-gradient(92deg, var(--grain) 0 2px, transparent 2px 9px);
   font: 17px/1.65 var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
+/* Faint ink-wash mountains in mist, fixed to the bottom of the window behind everything
+   (static/mountains.svg). Cards and panels have solid backgrounds, so they sit on top. */
+body::before {
+  content: ""; position: fixed; left: 0; right: 0; bottom: 0; z-index: -1;
+  height: min(42vh, 420px); pointer-events: none;
+  background: url("mountains.svg") center bottom / cover no-repeat;
+}
+:root[data-theme="light"] body::before { filter: invert(1) opacity(.7); }  /* dark ink on light paper */
 main { max-width: 760px; margin: 0 auto; padding: 36px 18px 80px; }
 a { color: var(--accent); text-underline-offset: 3px; text-decoration-thickness: 1px; }
 a:hover { color: var(--accent-strong); }
@@ -84,10 +88,9 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing:
 }
 .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); text-decoration: none; }
 .brand:hover { color: var(--ink); }
-.brand-mark { width: 32px; height: 32px; flex: none; }
-.mark-rim { fill: none; stroke: var(--accent); stroke-width: 2.6; }
-.mark-spokes { stroke: var(--accent); stroke-width: 1.6; stroke-linecap: round; }
-.mark-hub { fill: var(--brass); }
+.brand-mark { width: 36px; height: 36px; flex: none; }
+.mark-ink { stroke: var(--ink); }      /* pale ink on dark, dark ink on light */
+.mark-seal { fill: #b8392b; }          /* vermilion seal paste */
 .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
 .brand-name { font: 600 22px var(--font-display); letter-spacing: .01em; }
 .brand-tagline { font: italic 400 12.5px var(--font-display); color: var(--muted); margin-top: 3px; }
