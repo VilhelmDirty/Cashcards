@@ -31,6 +31,7 @@ from urllib.parse import urlparse
 from flask import Flask, Response, abort, g, redirect, render_template, request, session, url_for
 
 import backup
+import card_import
 import card_writer
 import config
 import db
@@ -412,6 +413,8 @@ def restore_progress():
 
 @app.errorhandler(413)
 def upload_too_large(_error):
+    if request.path == url_for("import_cards"):
+        return redirect(url_for("new_card", error="That file is too large to import.") + "#import")
     return redirect(url_for("settings", error="That file is too large to be a progress file."))
 
 
@@ -453,7 +456,7 @@ def new_card():
     conn = get_conn()
     return render_template("new_card.html", decks=card_writer.deck_names(conn),
                            deck=request.args.get("deck"), message=request.args.get("msg"),
-                           error=None, form={})
+                           error=request.args.get("error"), form={})
 
 
 @app.post("/cards/new")
@@ -469,6 +472,26 @@ def save_new_card():
                                deck=form.get("deck"), message=None, error=str(err), form=form)
     return redirect(url_for("new_card", deck=deck.strip(),
                             msg="Card added. It joins your reviews as a new card."))
+
+
+@app.post("/cards/import")
+def import_cards():
+    """Many cards at once from a CSV or Anki text export (see card_import.py)."""
+    conn = get_conn()
+    upload = request.files.get("file")
+    deck = request.form.get("new_deck", "") if request.form.get("deck") == "__new__" else request.form.get("deck", "")
+    deck = deck.strip() or "Imported"
+    if not upload or not upload.filename:
+        return redirect(url_for("new_card", error="Choose a CSV file to import.") + "#import")
+    try:
+        added, skipped = card_import.import_cards(conn, upload.read(), deck)
+    except card_import.CardImportError as err:
+        return redirect(url_for("new_card", error=str(err)) + "#import")
+    message = f"Imported {added} card{'' if added == 1 else 's'}."
+    if skipped:
+        shown = [reason.rstrip(".") for reason in skipped[:3]]
+        message += f" Skipped {len(skipped)}: " + "; ".join(shown) + ("; …" if len(skipped) > 3 else ".")
+    return redirect(url_for("new_card", msg=message) + "#import")
 
 
 def render_suggest(conn, deck, message=None, error=None):

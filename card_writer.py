@@ -52,12 +52,15 @@ def _now():
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def add_card(conn, deck, question, answer, topic=None, origin="manual"):
-    """Save one new card. Returns its id. Raises CardError if it can't be saved."""
+def add_card(conn, deck, question, answer, topic=None, origin="manual", commit=True):
+    """Save one new card. Returns its id. Raises CardError if it can't be saved.
+    commit=False lets a bulk import save many cards in one transaction."""
     deck, question, answer = deck.strip(), question.strip(), answer.strip()
     topic = (topic or "").strip() or None
     if not deck or len(deck) > 80:
         raise CardError("Give the deck a name (up to 80 characters).")
+    if deck.startswith("__"):  # reserved for the app's own pseudo-decks (e.g. the demo's)
+        raise CardError("Deck names can't start with two underscores.")
     if not question or not answer:
         raise CardError("A card needs both a question and an answer.")
     if len(question) > MAX_QUESTION or len(answer) > MAX_ANSWER:
@@ -73,7 +76,8 @@ def add_card(conn, deck, question, answer, topic=None, origin="manual"):
         "VALUES (?, NULL, ?, ?, ?, ?, ?, ?)",
         (deck, topic, question, answer, key, _now(), origin),
     )
-    conn.commit()
+    if commit:
+        conn.commit()
     return cursor.lastrowid
 
 

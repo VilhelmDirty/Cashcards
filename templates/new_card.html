@@ -19,11 +19,11 @@
 
   <label for="topic">Topic <span class="muted small">(optional)</span></label>
   <input type="text" id="topic" name="topic" value="{{ form.get('topic', '') }}" maxlength="80"
-         placeholder="e.g. Terminal Value">
+         placeholder="e.g. Photosynthesis">
 
   <label for="question">Question</label>
   <textarea id="question" name="question" rows="3" required maxlength="2000"
-            placeholder="Ask it the way an interviewer would.">{{ form.get('question', '') }}</textarea>
+            placeholder="Ask it the way a teacher or interviewer would.">{{ form.get('question', '') }}</textarea>
 
   <label for="answer">Answer</label>
   <textarea id="answer" name="answer" rows="6" required maxlength="5000"
@@ -35,6 +35,29 @@
     <button class="button primary" type="submit">Add card</button>
   </div>
 </form>
+
+<form method="post" action="{{ url_for('import_cards') }}" enctype="multipart/form-data"
+      class="card settings import-form" id="import">
+  <h2 class="section-title">Import from a spreadsheet</h2>
+  <p class="muted small">A CSV file with a <strong>question</strong> and an <strong>answer</strong>
+    column (and optionally <strong>deck</strong> and <strong>topic</strong>). In Excel or Google
+    Sheets, use <em>File → Save as / Download → CSV</em>. Anki decks work too: <em>File → Export →
+    Notes in Plain Text</em>. <a href="{{ url_for('static', filename='sample-cards.csv') }}" download>Download a sample file</a>.</p>
+
+  <label for="import-deck">Deck <span class="muted small">(for rows without a deck column)</span></label>
+  <select id="import-deck" name="deck">
+    {% for name in decks %}<option value="{{ name }}">{{ name }}</option>{% endfor %}
+    <option value="__new__" {% if not decks %}selected{% endif %}>+ New deck…</option>
+  </select>
+  <input type="text" id="import-new-deck" name="new_deck" placeholder="Name of the new deck (blank = Imported)" maxlength="80" hidden>
+
+  <label for="import-file">CSV file</label>
+  <input type="file" id="import-file" name="file" accept=".csv,.txt,.tsv,text/csv,text/plain" required>
+
+  <div class="settings-actions">
+    <button class="button" type="submit">Import cards</button>
+  </div>
+</form>
 {% endblock %}
 
 {% block scripts %}
@@ -44,5 +67,10 @@
   const sync = () => { newDeck.hidden = deck.value !== "__new__"; newDeck.required = !newDeck.hidden; };
   deck.addEventListener("change", () => { sync(); if (!newDeck.hidden) newDeck.focus(); });
   sync();
+  // The same for the import form's deck choice.
+  const importDeck = document.getElementById("import-deck"), importNew = document.getElementById("import-new-deck");
+  const syncImport = () => { importNew.hidden = importDeck.value !== "__new__"; };  // optional: blank = "Imported"
+  importDeck.addEventListener("change", () => { syncImport(); if (!importNew.hidden) importNew.focus(); });
+  syncImport();
 </script>
 {% endblock %}

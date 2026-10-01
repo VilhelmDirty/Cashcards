@@ -197,6 +197,13 @@ Each run writes a line to `data/reminders.log`, because scheduled runs have no w
 
 - **Add card** (top bar): pick a deck or create a new one, then type the question
   and reference answer. New cards join the review queue as new cards.
+- **Import from a spreadsheet** (`card_import.py`, same page): a CSV with `question` and
+  `answer` columns (optionally `deck`, `topic`; front/back and term/definition headers work
+  too), or no header at all. Commas, semicolons and tabs are detected; Excel's Windows
+  encoding is handled; Anki's "Notes in Plain Text" export works, with its HTML turned into
+  plain text. Each row goes through the same checks as a hand-typed card, duplicates and
+  bad rows are skipped with their row numbers reported, at most 2,000 rows per file, all
+  saved in one transaction. A sample file is at `static/sample-cards.csv`.
 - **New cards from Claude**: once I've seen every card in a deck, a *New cards*
   link appears. Claude reads up to 40 of the deck's cards and drafts 3, 5 or 10
   new ones that go a step further (the "why", worked examples, interviewer
@@ -404,6 +411,7 @@ _More rows added as each tool is introduced._
 - [x] Fresh numbers for math cards (piloted on DCF)
 - [x] Fresh numbers drafted for all decks (76 templates ready to review)
 - [x] Public demo mode (general-knowledge sample deck, per-visitor data, capped AI grading)
+- [x] Import cards from a CSV or Anki text export
 - [x] Download / restore progress as a file (demo visitors keep their cards; personal backups)
 - [ ] Deploy the demo to Render and link it here
 - [ ] Accounts with Google sign-in and permanent storage (free hosted database or ~$7/month disk)
