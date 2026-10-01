@@ -1,15 +1,17 @@
-# Son of Bian — flashcards you explain in your own words
+# Wheelwright — flashcards you explain in your own words
 
-**Son of Bian** is a study app for remembering what you learn. It shows a flashcard,
+*The hand-feel's not included.*
+
+**Wheelwright** is a study app for remembering what you learn. It shows a flashcard,
 you type the answer **in your own words**, and Claude grades the explanation against
 the reference answer. The grade feeds a spaced-repetition scheduler (FSRS), so cards
 you explain poorly come back sooner. I use it on my own computer with my finance
 cards; a public demo runs the same code with a sample deck on general subjects.
 
 > **The name.** In the *Zhuangzi*, Wheelwright Bian tells Duke Huan that the books he is
-> reading are only "the dregs of the men of old": a real knack can't be put into words,
-> so Bian couldn't even pass his skill on to his own son. Reading isn't knowing. An app
-> that makes you practise until it sticks is the son, finally getting it.
+> reading are only "the dregs of the men of old": the feel of a craft can't be put into
+> words, so Bian couldn't even pass his skill on to his own son. Reading isn't knowing.
+> The app can give you the cards; the hand-feel only comes from practice.
 
 > **Status:** in progress — being built in stages (see [Roadmap](#roadmap)).
 
@@ -356,7 +358,7 @@ folder, set `CARDS_DIR` in `.env`. The list of files to import lives in `config.
 | **Recipient on the Settings page, sender in `.env`** | The address I receive at is a preference (stored locally, never in git); the sending password is a secret (`.env`). |
 | **Once-a-day email by default** | Three reminder times shouldn't mean three emails; configurable. |
 | **Single-instance check on startup** | Launching the app while a reminder already started it just opens the browser instead of crashing on a busy port. |
-| **Design: index cards on cream paper** | A wheelwright's wheel for a logo; cream paper, deep green and gold; Fraunces for headings, Instrument Sans for text, JetBrains Mono for figures; study cards styled as real index cards. Follows the system light/dark setting. |
+| **Design: a woodworking workshop** | Matches the name: a wheel for a logo; linen paper, walnut ink, brass fittings and an olive for "retained"; Spectral for headings, Work Sans for text, IBM Plex Mono for figures; squared-off corners like cut timber, and a faint wood grain. Dark mode is charred oak and copper, following the system setting. |
 | **App name in one setting (`APP_NAME`)** | Pages, emails, notifications and the Windows task all read it, so renaming is one line. |
 | **Email copy in its own module + template** | Wording and layout change without touching the scheduling code; card text is HTML-escaped. |
 | **Math templates computed by code, not by Claude at study time** | Language models make arithmetic slips; formulas checked against the original answer and evaluated locally are exact, instant and free. |
@@ -384,7 +386,7 @@ _More rows added as each tool is introduced._
 - [x] Forgotten → Retained slider, suggested next date with override
 - [x] Reminder times and study days chosen in the app
 - [x] Add cards manually, or approve Claude-drafted ones
-- [x] Redesign, cheekier emails, renamed Son of Bian
+- [x] Renamed Wheelwright, with a workshop-style redesign
 - [ ] Multiple choice with Claude-written wrong options (time feeds the rating)
 
 ## License

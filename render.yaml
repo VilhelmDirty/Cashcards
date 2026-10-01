@@ -3,7 +3,7 @@
 # to main redeploys it.
 services:
   - type: web
-    name: son-of-bian
+    name: wheelwright
     runtime: python
     plan: free                       # sleeps after ~15 idle minutes; upgrade to "starter" to stay awake
     buildCommand: pip install -r requirements.txt

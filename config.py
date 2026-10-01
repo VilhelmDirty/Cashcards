@@ -15,8 +15,9 @@ load_dotenv(PROJECT_DIR / ".env")
 # The app's name, shown on every page, in emails and in notifications. From the
 # Zhuangzi: Wheelwright Bian tells Duke Huan that books are only "the dregs of the men
 # of old", because a real knack can't be put into words; he couldn't even teach it to
-# his own son. An app that makes you practise until it sticks is the son, at last.
-APP_NAME = "Son of Bian"
+# his own son. Hence the tagline: the cards are here, the hand-feel comes from practice.
+APP_NAME = "Wheelwright"
+APP_TAGLINE = "The hand-feel's not included."
 
 # --- Public demo mode (see demo.py) ---
 # On for the live site (DEMO_MODE=1 in its settings), or locally with --demo.

@@ -2,40 +2,40 @@
 {# Reminder email. Email apps ignore most CSS, so: tables for layout and inline styles. #}
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f5f1e6;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f1e6;">
+<body style="margin:0;padding:0;background:#f2ece1;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f2ece1;">
 <tr><td align="center" style="padding:28px 12px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-         style="max-width:540px;background:#fffdf7;border:1px solid #e3dccb;border-radius:14px;overflow:hidden;font-family:'Segoe UI',Helvetica,Arial,sans-serif;color:#16241d;">
+         style="max-width:540px;background:#fbf8f2;border:1px solid #ddd2c0;border-radius:14px;overflow:hidden;font-family:'Segoe UI',Helvetica,Arial,sans-serif;color:#2b2118;">
 
     <!-- header -->
-    <tr><td style="background:#1d5c43;padding:18px 24px;">
+    <tr><td style="background:#6e4224;padding:18px 24px;">
       <span style="font:bold 20px Georgia,'Times New Roman',serif;color:#fbf8f0;vertical-align:middle;">{{ app_name }}</span>
     </td></tr>
 
     <!-- opener -->
     <tr><td style="padding:24px 24px 4px;">
       <p style="margin:0;font:600 20px/1.4 Georgia,'Times New Roman',serif;">{{ opener }}</p>
-      {% if nudge %}<p style="margin:12px 0 0;font-size:15px;color:#6c7068;">{{ nudge }}</p>{% endif %}
+      {% if nudge %}<p style="margin:12px 0 0;font-size:15px;color:#7b6f62;">{{ nudge }}</p>{% endif %}
     </td></tr>
 
     <!-- statement -->
     <tr><td style="padding:20px 24px 4px;">
-      <p style="margin:0 0 8px;font-size:11px;font-weight:bold;letter-spacing:2px;color:#d4a13d;">TODAY'S STATEMENT</p>
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:15px;border-top:1px dashed #e3dccb;">
+      <p style="margin:0 0 8px;font-size:11px;font-weight:bold;letter-spacing:2px;color:#a87b2d;">TODAY'S STATEMENT</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:15px;border-top:1px dashed #ddd2c0;">
         <tr>
-          <td style="padding:10px 0;border-bottom:1px dashed #e3dccb;"><strong>Reviews due</strong></td>
-          <td align="right" style="padding:10px 0;border-bottom:1px dashed #e3dccb;font:bold 18px Consolas,monospace;color:#1d5c43;">{{ counts.due }}</td>
+          <td style="padding:10px 0;border-bottom:1px dashed #ddd2c0;"><strong>Reviews due</strong></td>
+          <td align="right" style="padding:10px 0;border-bottom:1px dashed #ddd2c0;font:bold 18px Consolas,monospace;color:#6e4224;">{{ counts.due }}</td>
         </tr>
         {% for deck, n in counts.by_deck %}
         <tr>
-          <td style="padding:6px 0 6px 14px;border-bottom:1px dashed #e3dccb;color:#6c7068;">{{ deck }}</td>
-          <td align="right" style="padding:6px 0;border-bottom:1px dashed #e3dccb;font:14px Consolas,monospace;color:#6c7068;">{{ n }}</td>
+          <td style="padding:6px 0 6px 14px;border-bottom:1px dashed #ddd2c0;color:#7b6f62;">{{ deck }}</td>
+          <td align="right" style="padding:6px 0;border-bottom:1px dashed #ddd2c0;font:14px Consolas,monospace;color:#7b6f62;">{{ n }}</td>
         </tr>
         {% endfor %}
         <tr>
-          <td style="padding:10px 0;border-bottom:1px dashed #e3dccb;"><strong>New cards ready</strong></td>
-          <td align="right" style="padding:10px 0;border-bottom:1px dashed #e3dccb;font:bold 18px Consolas,monospace;color:#b8862b;">{{ counts.new }}</td>
+          <td style="padding:10px 0;border-bottom:1px dashed #ddd2c0;"><strong>New cards ready</strong></td>
+          <td align="right" style="padding:10px 0;border-bottom:1px dashed #ddd2c0;font:bold 18px Consolas,monospace;color:#a87b2d;">{{ counts.new }}</td>
         </tr>
       </table>
     </td></tr>
@@ -43,11 +43,11 @@
     {% if warm_up %}
     <!-- pop quiz, styled like an index card -->
     <tr><td style="padding:22px 24px 4px;">
-      <p style="margin:0 0 8px;font-size:11px;font-weight:bold;letter-spacing:2px;color:#d4a13d;">POP QUIZ · {{ warm_up[0] | upper }}</p>
-      <div style="background:#ffffff;border:1px solid #e3dccb;border-top:3px solid #d9776c;border-radius:10px;padding:16px 18px;">
+      <p style="margin:0 0 8px;font-size:11px;font-weight:bold;letter-spacing:2px;color:#a87b2d;">POP QUIZ · {{ warm_up[0] | upper }}</p>
+      <div style="background:#ffffff;border:1px solid #ddd2c0;border-top:3px solid #a87b2d;border-radius:10px;padding:16px 18px;">
         <p style="margin:0;font:600 17px/1.5 Georgia,'Times New Roman',serif;white-space:pre-line;">{{ warm_up[1] }}</p>
       </div>
-      <p style="margin:8px 0 0;font-size:13px;color:#6c7068;">Answer it in your head. No peeking. Then check yourself in {{ app_name }} on your laptop.</p>
+      <p style="margin:8px 0 0;font-size:13px;color:#7b6f62;">Answer it in your head. No peeking. Then check yourself in {{ app_name }} on your laptop.</p>
     </td></tr>
     {% endif %}
 

@@ -184,7 +184,8 @@ def current_mode():
 @app.context_processor
 def app_name():
     """Makes {{ app_name }}, {{ demo }} etc. available in every page template."""
-    return {"app_name": config.APP_NAME, "demo": config.DEMO_MODE, "github_url": config.GITHUB_URL}
+    return {"app_name": config.APP_NAME, "app_tagline": config.APP_TAGLINE,
+            "demo": config.DEMO_MODE, "github_url": config.GITHUB_URL}
 
 
 @app.route("/")
