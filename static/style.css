@@ -203,6 +203,14 @@ kbd {
 .remind-toggle input:checked + span { background: var(--accent-soft); border-color: transparent; color: var(--accent); font-weight: 600; }
 .remind-toggle input:focus-visible + span { outline: 2px solid var(--brass); outline-offset: 2px; }
 
+/* The "Choose file" button for restoring progress, dressed like the other buttons. */
+input[type="file"] { color: var(--muted); font: 14px var(--font-body); max-width: 100%; }
+input[type="file"]::file-selector-button {
+  margin-right: 12px; padding: 8px 14px; border-radius: var(--radius); cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); font: 500 14px var(--font-body);
+}
+input[type="file"]::file-selector-button:hover { border-color: var(--muted); }
+
 /* ------------------------------------------------------------------ about */
 .about-lede { font-size: 18px; line-height: 1.6; margin: 0; }
 .about-section { margin-top: 24px; }

@@ -275,6 +275,15 @@ safely without touching my own cards:
   headers are sent, and personal-only features (reminders, email, Claude drafting) return 404.
 - **Hosting**: Render, configured by `render.yaml`, running the app under gunicorn. Every
   `git push` redeploys it. The free tier sleeps when idle, which also resets demo progress.
+- **Keeping progress without accounts** (`backup.py`): Settings → *Download my progress*
+  saves one JSON file (cards, schedules, history, feedback, study settings); *Restore*
+  loads it back on any later visit. The upload is treated as hostile: size and row caps,
+  only known tables and columns (column names come from the schema, never the file),
+  plain values only, every FSRS schedule must load, foreign keys must line up, and it all
+  runs in one transaction, so a bad file changes nothing. Fresh-number templates contain
+  formulas the server runs, so in the demo they're re-attached from the trusted sample deck
+  rather than taken from the file. The personal app gets the same buttons as a one-click
+  backup, and saves a copy of the current database to `data/backups` before any restore.
 
 Try the demo locally (it uses port 5001 and its own data folder):
 
@@ -326,6 +335,7 @@ folder, set `CARDS_DIR` in `.env`. The list of files to import lives in `config.
 | **One database file per visitor** | Complete separation between visitors with zero changes to the app's queries; the risky part of a multi-user app (forgetting a "which user?" filter) can't happen. |
 | **Anonymous signed-cookie IDs, no accounts** | Nothing to sign up for, and no passwords or emails to protect. |
 | **Free grades on my key, capped; or bring your own key** | Recruiters can see the AI feedback without an API key, and the worst-case daily cost has a hard ceiling. |
+| **A download/restore file instead of accounts (for now)** | Persistent storage on Render costs about $7/month; a file the visitor keeps costs nothing, stores no personal data, and its "download my data" half is needed for accounts anyway. |
 | **Origin check instead of CSRF tokens** | Modern browsers always send `Origin` on form posts; checking it blocks forged posts without changing every form. |
 | **Render + gunicorn** | Deploys straight from GitHub with HTTPS included; gunicorn is a production-grade server where Flask's built-in one is not. |
 
@@ -384,7 +394,9 @@ _More rows added as each tool is introduced._
 - [x] Fresh numbers for math cards (piloted on DCF)
 - [x] Fresh numbers drafted for all decks (76 templates ready to review)
 - [x] Public demo mode (general-knowledge sample deck, per-visitor data, capped AI grading)
+- [x] Download / restore progress as a file (demo visitors keep their cards; personal backups)
 - [ ] Deploy the demo to Render and link it here
+- [ ] Accounts with Google sign-in and permanent storage (free hosted database or ~$7/month disk)
 - [x] Stage 3 — Own-words grading with the Claude API
 - [x] Stage 4 — Due-card reminders (Windows desktop + email)
 - [x] Forgotten → Retained slider, suggested next date with override

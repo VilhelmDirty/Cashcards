@@ -28,8 +28,9 @@ import webbrowser
 from datetime import date, datetime, timedelta, timezone
 from urllib.parse import urlparse
 
-from flask import Flask, abort, g, redirect, render_template, request, session, url_for
+from flask import Flask, Response, abort, g, redirect, render_template, request, session, url_for
 
+import backup
 import card_writer
 import config
 import db
@@ -49,6 +50,7 @@ app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",     # other sites' forms can't send it
     SESSION_COOKIE_SECURE=os.getenv("DEMO_MODE") == "1",  # HTTPS-only on the live site
     PERMANENT_SESSION_LIFETIME=timedelta(days=30),
+    MAX_CONTENT_LENGTH=config.BACKUP_MAX_BYTES,  # biggest upload accepted (a progress file)
 )
 PORT = 5001 if "--demo" in sys.argv else config.APP_PORT
 URL = f"http://127.0.0.1:{PORT}"
@@ -273,7 +275,7 @@ def about():
 
 @app.route("/settings")
 def settings():
-    return render_settings(get_conn(), message=request.args.get("msg"))
+    return render_settings(get_conn(), message=request.args.get("msg"), error=request.args.get("error"))
 
 
 @app.post("/settings")
@@ -344,6 +346,40 @@ def own_key():
         return render_settings(conn, error=problem)
     session["own_key"] = demo.seal_key(key, app.secret_key)
     return redirect(url_for("settings", msg="Key saved in this browser. Grading is now unlimited."))
+
+
+@app.get("/progress")
+def download_progress():
+    """All my cards and progress as one JSON file (see backup.py)."""
+    body = json.dumps(backup.export(get_conn()), ensure_ascii=False)
+    return Response(body, mimetype="application/json", headers={
+        "Content-Disposition": f'attachment; filename="{backup.filename()}"'})
+
+
+@app.post("/progress")
+def restore_progress():
+    """Replace everything with an uploaded progress file. In the personal app the
+    current database is copied to data/backups first, in case I pick the wrong file."""
+    upload = request.files.get("file")
+    if not upload or not upload.filename:
+        return redirect(url_for("settings", error="Choose a progress file to restore."))
+    conn = get_conn()
+    if not config.DEMO_MODE:
+        folder = config.DB_PATH.parent / "backups"
+        folder.mkdir(exist_ok=True)
+        with db.sqlite3.connect(folder / f"before-restore-{datetime.now():%Y%m%d-%H%M%S}.db") as copy:
+            conn.backup(copy)
+    try:
+        count = backup.restore(conn, upload.read(),
+                               keep_templates_from=demo.template_db() if config.DEMO_MODE else None)
+    except backup.BackupError as err:
+        return redirect(url_for("settings", error=str(err)))
+    return redirect(url_for("settings", msg=f"Restored {count} cards and your progress."))
+
+
+@app.errorhandler(413)
+def upload_too_large(_error):
+    return redirect(url_for("settings", error="That file is too large to be a progress file."))
 
 
 @app.post("/settings/schedule")

@@ -27,6 +27,8 @@ DEMO_FREE_GRADES = 5      # free AI grades per visitor per day, on the owner's k
 DEMO_DAILY_CAP = 150      # free AI grades per day for the whole site (~$0.20 at Haiku prices)
 DEMO_KEEP_DAYS = 7        # visitors idle this long are deleted
 DEMO_MAX_VISITORS = 1000  # beyond this, the least recently active visitors are deleted
+# Largest progress file the restore page accepts (my own full backup is well under 1 MB).
+BACKUP_MAX_BYTES = (5 if DEMO_MODE else 50) * 1024 * 1024
 GITHUB_URL = "https://github.com/VilhelmDirty/Cashcards"
 
 # The SQLite database file. The data/ folder is git-ignored.

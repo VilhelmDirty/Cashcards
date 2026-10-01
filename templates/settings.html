@@ -122,8 +122,8 @@
       <input type="password" id="key" name="key" placeholder="sk-ant-..." autocomplete="off" required>
       <div class="settings-actions"><button class="button primary" name="action" value="save">Use my key</button></div>
     </form>
-    <p class="muted small">Your key is kept only in this browser's cookie and sent with your own
-      grading requests. It is never saved on the server. You can create one at console.anthropic.com.</p>
+    <p class="muted small">Your key is kept only in this browser's cookie, encrypted, and sent with
+      your own grading requests. It is never saved on the server. You can create one at console.anthropic.com.</p>
   {% endif %}
 </section>
 {% else %}
@@ -154,10 +154,34 @@
   {% endif %}
 </section>
 {% endif %}
+
+<section class="card settings schedule" id="progress">
+  <h2>Your progress</h2>
+  {% if demo %}
+    <p>This demo forgets visitors after a week away, and sometimes sooner. To keep your cards and
+      progress, download them now and then, and restore the file when you come back.</p>
+  {% else %}
+    <p>Download everything (cards, review history, schedules, settings) as one file, as a backup
+      or to move to another computer.</p>
+  {% endif %}
+  <p><a class="button" href="{{ url_for('download_progress') }}">Download my progress</a></p>
+  <form method="post" action="{{ url_for('restore_progress') }}" enctype="multipart/form-data" id="restore-form">
+    <label for="backup-file">Restore from a progress file</label>
+    <input type="file" id="backup-file" name="file" accept=".json,application/json" required>
+    <div class="settings-actions"><button class="button" type="submit">Restore</button></div>
+  </form>
+  <p class="muted small">Restoring replaces everything here with what's in the file.
+    {% if not demo %}A copy of your current database is saved in data/backups first.{% endif %}</p>
+</section>
 {% endblock %}
 
 {% block scripts %}
 <script>
+  // Restoring overwrites everything, so ask first.
+  document.getElementById("restore-form").addEventListener("submit", (e) => {
+    if (!confirm("Replace all your current cards and progress with this file?")) e.preventDefault();
+  });
+
   // Add / remove reminder-time rows (at least one must stay).
   const times = document.getElementById("times");
   if (times) document.getElementById("add-time").addEventListener("click", () => {
