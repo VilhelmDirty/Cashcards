@@ -30,6 +30,12 @@
   <main>
     {% block content %}{% endblock %}
   </main>
+  {% if demo %}
+  <footer class="site-footer">
+    {{ app_name }} demo · built with Flask, SQLite, FSRS and Claude ·
+    <a href="{{ github_url }}">source on GitHub</a>
+  </footer>
+  {% endif %}
   {% block scripts %}{% endblock %}
 </body>
 </html>

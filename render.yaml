@@ -1,0 +1,22 @@
+# How Render (render.com) runs the public demo. Render reads this file from the
+# GitHub repository, installs the requirements and starts the app; every `git push`
+# to main redeploys it.
+services:
+  - type: web
+    name: cashcards
+    runtime: python
+    plan: free                       # sleeps after ~15 idle minutes; upgrade to "starter" to stay awake
+    buildCommand: pip install -r requirements.txt
+    # gunicorn is a production web server (Flask's own server is for development only).
+    # One worker process with several threads is plenty for a demo and builds the
+    # sample deck once at start-up.
+    startCommand: gunicorn app:app --workers 1 --threads 8 --timeout 90
+    envVars:
+      - key: DEMO_MODE               # the public demo: sample deck, per-visitor data, limits
+        value: "1"
+      - key: SECRET_KEY              # signs visitors' cookies; Render generates a random one
+        generateValue: true
+      - key: ANTHROPIC_API_KEY       # the free grades; entered by hand in Render's dashboard, never in git
+        sync: false
+      - key: PYTHON_VERSION
+        value: "3.12.3"

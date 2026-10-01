@@ -4,6 +4,7 @@ Anything set in the .env file overrides the defaults below, so personal
 paths and the API key never have to be written into the code.
 """
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -13,6 +14,16 @@ load_dotenv(PROJECT_DIR / ".env")
 
 # The app's name, shown on every page, in emails and in notifications.
 APP_NAME = "Cashcards"
+
+# --- Public demo mode (see demo.py) ---
+# On for the live site (DEMO_MODE=1 in its settings), or locally with --demo.
+DEMO_MODE = os.getenv("DEMO_MODE") == "1" or "--demo" in sys.argv
+DEMO_DIR = Path(os.getenv("DEMO_DIR") or PROJECT_DIR / "data" / "demo")
+DEMO_FREE_GRADES = 5      # free AI grades per visitor per day, on the owner's key
+DEMO_DAILY_CAP = 150      # free AI grades per day for the whole site (~$0.20 at Haiku prices)
+DEMO_KEEP_DAYS = 7        # visitors idle this long are deleted
+DEMO_MAX_VISITORS = 1000  # beyond this, the least recently active visitors are deleted
+GITHUB_URL = "https://github.com/VilhelmDirty/Cashcards"
 
 # The SQLite database file. The data/ folder is git-ignored.
 DB_PATH = Path(os.getenv("DB_PATH") or PROJECT_DIR / "data" / "flashcards.db")

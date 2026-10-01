@@ -70,23 +70,41 @@ def score_to_rating(score):
     return 1
 
 
-def _client():
-    # Reads ANTHROPIC_API_KEY from the environment (loaded from .env by config.py).
+def _client(api_key=None):
+    # Without api_key, reads ANTHROPIC_API_KEY from the environment (loaded from .env).
     # timeout: give up after 60 s; max_retries: the SDK retries brief outages itself.
+    if api_key:
+        return anthropic.Anthropic(api_key=api_key, timeout=60.0, max_retries=2)
     return anthropic.Anthropic(timeout=60.0, max_retries=2)
 
 
-def call_claude(system, prompt, output_format, max_tokens):
+def key_problem(api_key):
+    """Check a visitor's own key with a free call (listing models). None if it works,
+    otherwise a plain-English problem."""
+    try:
+        _client(api_key).models.list()
+        return None
+    except anthropic.AuthenticationError:
+        return "Anthropic rejected that key. Check you copied all of it."
+    except anthropic.PermissionDeniedError:
+        return "That key isn't allowed to use the API."
+    except anthropic.APIConnectionError:
+        return "Couldn't reach Anthropic to check the key. Try again shortly."
+    except anthropic.APIStatusError as err:
+        return f"Anthropic had a problem checking the key ({err.status_code}). Try again shortly."
+
+
+def call_claude(system, prompt, output_format, max_tokens, api_key=None):
     """One Claude request with a structured reply. Shared by grading and card drafting.
 
     Returns the SDK response (response.parsed_output is the validated object).
     Raises GradingError with a plain-English message for anything that goes wrong.
     """
-    if not api_key_configured():
+    if not api_key and not api_key_configured():
         raise GradingError("No API key found. Add ANTHROPIC_API_KEY to the .env file "
                            "in the project folder, then restart the app.")
     try:
-        response = _client().messages.parse(
+        response = _client(api_key).messages.parse(
             model=config.CLAUDE_MODEL,
             max_tokens=max_tokens,
             system=system,
@@ -94,6 +112,8 @@ def call_claude(system, prompt, output_format, max_tokens):
             output_format=output_format,
         )
     except anthropic.AuthenticationError:
+        if api_key:
+            raise GradingError("Your API key was rejected. Check it on the Settings page.")
         raise GradingError("The API key was rejected. Check ANTHROPIC_API_KEY in .env.")
     except anthropic.PermissionDeniedError:
         raise GradingError("This API key isn't allowed to use that model.")
@@ -118,7 +138,7 @@ def call_claude(system, prompt, output_format, max_tokens):
     return response
 
 
-def grade_answer(card, user_answer):
+def grade_answer(card, user_answer, api_key=None):
     """Ask Claude to grade one answer. Returns (Grade, input_tokens, output_tokens)."""
     reference = card["answer"]
     if card["note"]:
@@ -130,7 +150,7 @@ def grade_answer(card, user_answer):
     )
 
     response = call_claude(system=SYSTEM_PROMPT, prompt=prompt, output_format=Grade,
-                           max_tokens=2000)
+                           max_tokens=2000, api_key=api_key)
 
     grade = response.parsed_output
     grade.score = max(0, min(100, grade.score))  # keep it in range whatever comes back

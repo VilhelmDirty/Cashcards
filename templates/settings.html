@@ -7,6 +7,7 @@
 {% if error %}<p class="error">{{ error }}</p>{% endif %}
 
 <form method="post" action="{{ url_for('save_settings') }}" class="card settings">
+  {% if not demo %}
   <h2>When</h2>
   <label>Reminder time{{ 's' if times | length > 1 }}</label>
   <div id="times">
@@ -43,6 +44,7 @@
     {% if unseen %}{{ unseen }} cards in your reminded decks haven't been started yet, so study days
     also remind you about new cards.{% endif %}
   </p>
+  {% endif %}
 
   <h2>Study sessions</h2>
   <label for="session_size">Questions per session</label>
@@ -66,6 +68,7 @@
   <p class="muted small">When it's on, a countdown bar sits above each card. When time runs out, the
     answer is revealed (or, in typed mode, what you've written is submitted).</p>
 
+  {% if not demo %}
   <h2>Email</h2>
   <label for="email_to">Send reminder emails to</label>
   <input type="email" id="email_to" name="email_to" value="{{ email_to }}"
@@ -96,12 +99,34 @@
     {% if reminded %}{{ reminded | join(', ') }}.{% else %}None: every deck is unticked.{% endif %}
     Change these with the <a href="{{ url_for('home') }}">Remind me</a> checkboxes on the home page.
   </p>
+  {% endif %}
 
   <div class="settings-actions">
     <button class="button primary" type="submit">Save</button>
   </div>
 </form>
 
+{% if demo %}
+<section class="card settings schedule">
+  <h2>AI grading</h2>
+  {% if own_key %}
+    <p>Using <strong>your own Anthropic API key</strong>: grading is unlimited and billed to you.</p>
+    <form method="post" action="{{ url_for('own_key') }}">
+      <button class="button" name="action" value="remove">Remove my key from this browser</button>
+    </form>
+  {% else %}
+    <p>You have <strong>{{ free_left }} of {{ free_per_day }}</strong> free AI grades left today.
+      For unlimited grading, use your own Anthropic API key (each grade costs about $0.001).</p>
+    <form method="post" action="{{ url_for('own_key') }}">
+      <label for="key">Your Anthropic API key</label>
+      <input type="password" id="key" name="key" placeholder="sk-ant-..." autocomplete="off" required>
+      <div class="settings-actions"><button class="button primary" name="action" value="save">Use my key</button></div>
+    </form>
+    <p class="muted small">Your key is kept only in this browser's cookie and sent with your own
+      grading requests. It is never saved on the server. You can create one at console.anthropic.com.</p>
+  {% endif %}
+</section>
+{% else %}
 <form method="post" action="{{ url_for('test_email') }}" class="center">
   <button class="button" type="submit" {% if not email_to or not email_ready %}disabled{% endif %}>
     Send a test email now
@@ -128,20 +153,21 @@
     </form>
   {% endif %}
 </section>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
 <script>
   // Add / remove reminder-time rows (at least one must stay).
   const times = document.getElementById("times");
-  document.getElementById("add-time").addEventListener("click", () => {
+  if (times) document.getElementById("add-time").addEventListener("click", () => {
     const rows = times.querySelectorAll(".time-row");
     if (rows.length >= 6) return;
     const row = rows[rows.length - 1].cloneNode(true);
     row.querySelector("input").value = "12:00";
     times.appendChild(row);
   });
-  times.addEventListener("click", (e) => {
+  if (times) times.addEventListener("click", (e) => {
     if (!e.target.classList.contains("remove-time")) return;
     if (times.querySelectorAll(".time-row").length > 1) e.target.closest(".time-row").remove();
   });

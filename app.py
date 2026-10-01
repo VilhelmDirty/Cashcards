@@ -13,23 +13,27 @@ Options:
   --no-browser   don't open a browser tab
   --background   started invisibly by remind.py: log to data/app.log and quit
                  after config.IDLE_SHUTDOWN_MINUTES without any page requests
+  --demo         run the public demo locally (sample deck, port 5001), see demo.py
 """
 import json
 import os
 import random
 import re
+import secrets
 import socket
 import sys
 import threading
 import time
 import webbrowser
 from datetime import date, datetime, timedelta, timezone
+from urllib.parse import urlparse
 
-from flask import Flask, abort, g, redirect, render_template, request, url_for
+from flask import Flask, abort, g, redirect, render_template, request, session, url_for
 
 import card_writer
 import config
 import db
+import demo
 import grader
 import mailer
 import setup_reminders
@@ -37,21 +41,76 @@ import srs
 import variants
 
 app = Flask(__name__)
-URL = f"http://127.0.0.1:{config.APP_PORT}"
+# Signs the browser cookie so it can't be tampered with. The live site sets SECRET_KEY;
+# locally a fresh random key per run is fine.
+app.secret_key = os.getenv("SECRET_KEY") or secrets.token_hex(32)
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,      # page scripts can't read the cookie
+    SESSION_COOKIE_SAMESITE="Lax",     # other sites' forms can't send it
+    SESSION_COOKIE_SECURE=os.getenv("DEMO_MODE") == "1",  # HTTPS-only on the live site
+    PERMANENT_SESSION_LIFETIME=timedelta(days=30),
+)
+PORT = 5001 if "--demo" in sys.argv else config.APP_PORT
+URL = f"http://127.0.0.1:{PORT}"
 _last_request = time.monotonic()
 
+# Pages that don't exist in the public demo (reminders, email, and Claude drafting,
+# which would spend the site owner's credit).
+DEMO_OFF = {"save_reminders", "test_email", "change_schedule", "suggest", "make_suggestions",
+            "save_drafts", "numbers", "draft_numbers", "decide_numbers"}
+if config.DEMO_MODE:
+    demo.build_template_db()  # rebuilt at every start, so deck edits go live on deploy
 
-def is_running():
+
+def is_running(port=None):
     """True if something is already answering on the app's port."""
     with socket.socket() as s:
         s.settimeout(0.5)
-        return s.connect_ex(("127.0.0.1", config.APP_PORT)) == 0
+        return s.connect_ex(("127.0.0.1", port or config.APP_PORT)) == 0
 
 
 @app.before_request
 def note_activity():
     global _last_request
     _last_request = time.monotonic()
+
+
+def same_origin():
+    """Was this form sent by one of our own pages? Browsers say where a form came from;
+    a form on another website posting here would name that site instead (a "CSRF" attack)."""
+    source = request.headers.get("Origin") or request.headers.get("Referer")
+    if not source:
+        return True  # not sent by a browser form, so it can't be a forged one
+    return urlparse(source).netloc == request.host
+
+
+@app.before_request
+def guard_requests():
+    if request.method == "POST" and not same_origin():
+        abort(403)
+    if not config.DEMO_MODE or request.endpoint == "static":
+        return
+    if request.endpoint in DEMO_OFF:
+        abort(404)
+    visitor = session.get("visitor")
+    if demo.is_valid_visitor(visitor):
+        g.db_path = demo.visitor_db(visitor)
+        return
+    # A brand-new browser: give it an ID, and show the sample deck read-only until it
+    # comes back with the cookie. Bots that ignore cookies never create a file.
+    session["visitor"] = demo.new_visitor_id()
+    session.permanent = True
+    if request.endpoint != "home":
+        return redirect(url_for("home"))
+    g.db_path, g.read_only = demo.template_db(), True
+
+
+@app.after_request
+def security_headers(response):
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")  # no guessing file types
+    response.headers.setdefault("X-Frame-Options", "DENY")            # can't be framed by other sites
+    response.headers.setdefault("Referrer-Policy", "same-origin")
+    return response
 
 
 def _quit_when_idle():
@@ -66,8 +125,8 @@ def _quit_when_idle():
 
 def get_conn():
     """One database connection per page request, closed automatically afterwards."""
-    if "conn" not in g:
-        g.conn = db.connect()
+    if "conn" not in g:  # in the demo, each visitor has their own database file
+        g.conn = db.connect(g.get("db_path"), read_only=g.get("read_only", False))
     return g.conn
 
 
@@ -94,18 +153,38 @@ def read_duration():
     return duration_ms
 
 
+def ai_available():
+    """Can typed answers be graded? (The site's key, or a demo visitor's own key.)"""
+    return grader.api_key_configured() or bool(config.DEMO_MODE and session.get("own_key"))
+
+
+def demo_api_key():
+    """Demo only: the key to grade with. None = the site's key (uses a free grade).
+    Raises GradingError when the visitor's free grades for today are used up."""
+    if not config.DEMO_MODE:
+        return None
+    own = session.get("own_key")
+    if own:
+        return own
+    if demo.free_grades_left(session["visitor"]) <= 0:
+        raise grader.GradingError(
+            "You've used today's free AI grades. Add your own Anthropic API key on the "
+            "Settings page for unlimited grading, or rate yourself below.")
+    return None
+
+
 def current_mode():
-    """'type' (AI grading) when an API key is set up, unless I picked otherwise."""
+    """'type' (AI grading) when grading is available, unless I picked otherwise."""
     mode = request.args.get("mode")
     if mode in ("type", "flip"):
         return mode
-    return "type" if grader.api_key_configured() else "flip"
+    return "type" if ai_available() else "flip"
 
 
 @app.context_processor
 def app_name():
-    """Makes {{ app_name }} available in every page template."""
-    return {"app_name": config.APP_NAME}
+    """Makes {{ app_name }}, {{ demo }} etc. available in every page template."""
+    return {"app_name": config.APP_NAME, "demo": config.DEMO_MODE, "github_url": config.GITHUB_URL}
 
 
 @app.route("/")
@@ -119,8 +198,10 @@ def home():
         decks=srs.deck_summary(conn),
         counts=srs.queue_counts(conn),
         reviewed_today=srs.reviewed_today(conn),
-        ai_ready=grader.api_key_configured(),
-        math_cards=variants.candidate_counts(conn),
+        ai_ready=ai_available(),
+        own_key=bool(config.DEMO_MODE and session.get("own_key")),
+        free_left=demo.free_grades_left(session["visitor"]) if config.DEMO_MODE else None,
+        math_cards={} if config.DEMO_MODE else variants.candidate_counts(conn),
     )
 
 
@@ -147,6 +228,15 @@ def schedule_status():
 
 
 def render_settings(conn, message=None, error=None):
+    common = dict(
+        timer_seconds=int(db.get_setting(conn, "timer_seconds")), timer_choices=config.TIMER_CHOICES,
+        session_size=int(db.get_setting(conn, "session_size")), session_sizes=config.SESSION_SIZES,
+        message=message, error=error,
+    )
+    if config.DEMO_MODE:  # just the study settings, plus "use your own API key"
+        return render_template("settings.html", **common, own_key=bool(session.get("own_key")),
+                               free_left=demo.free_grades_left(session["visitor"]),
+                               free_per_day=config.DEMO_FREE_GRADES)
     days = db.study_days(conn)
     outlook, unseen = srs.upcoming(conn, days)
     return render_template(
@@ -157,10 +247,8 @@ def render_settings(conn, message=None, error=None):
         sender=mailer.sender(), email_ready=mailer.email_configured(),
         times=db.reminder_times(conn), study_days=days, weekdays=WEEKDAYS,
         outlook=outlook, unseen=unseen, schedule=schedule_status(),
-        timer_seconds=int(db.get_setting(conn, "timer_seconds")), timer_choices=config.TIMER_CHOICES,
-        session_size=int(db.get_setting(conn, "session_size")), session_sizes=config.SESSION_SIZES,
         reminded=[d["deck"] for d in srs.deck_summary(conn) if d["remind"]],
-        message=message, error=error,
+        **common,
     )
 
 
@@ -172,6 +260,15 @@ def settings():
 @app.post("/settings")
 def save_settings():
     conn = get_conn()
+    if config.DEMO_MODE:  # the demo only has the study settings
+        timer_text = request.form.get("timer_seconds", "0")
+        size_text = request.form.get("session_size", "25")
+        if (not timer_text.isdigit() or int(timer_text) not in config.TIMER_CHOICES
+                or not size_text.isdigit() or int(size_text) not in config.SESSION_SIZES):
+            abort(400)
+        db.set_setting(conn, "timer_seconds", timer_text)
+        db.set_setting(conn, "session_size", size_text)
+        return redirect(url_for("settings", msg="Saved."))
     email_to = request.form.get("email_to", "").strip()
     if email_to and not mailer.looks_like_email(email_to):
         return render_settings(conn, error=f"'{email_to}' doesn't look like an email address.")
@@ -207,6 +304,27 @@ def save_settings():
         except setup_reminders.ScheduleError as err:
             return render_settings(conn, error=f"Saved, but updating the schedule failed: {err}")
     return redirect(url_for("settings", msg=message))
+
+
+@app.post("/settings/key")
+def own_key():
+    """Demo only: a visitor's own Anthropic key, for unlimited grading. It is kept in
+    their signed browser cookie and sent with their requests; never saved on the server."""
+    if not config.DEMO_MODE:
+        abort(404)
+    conn = get_conn()
+    if request.form.get("action") == "remove":
+        session.pop("own_key", None)
+        return redirect(url_for("settings", msg="Your key was removed from this browser."))
+    key = request.form.get("key", "").strip()
+    if not demo.looks_like_api_key(key):
+        return render_settings(conn, error="That doesn't look like an Anthropic API key "
+                                           "(they start with sk-ant-).")
+    problem = grader.key_problem(key)
+    if problem:
+        return render_settings(conn, error=problem)
+    session["own_key"] = key
+    return redirect(url_for("settings", msg="Key saved in this browser. Grading is now unlimited."))
 
 
 @app.post("/settings/schedule")
@@ -455,8 +573,11 @@ def grade(card_id):
         result, model, tokens_in, tokens_out = grader.blank_grade(), None, 0, 0
     else:
         try:
-            result, tokens_in, tokens_out = grader.grade_answer(card, answer)
+            api_key = demo_api_key()  # demo: the visitor's own key, or a free grade
+            result, tokens_in, tokens_out = grader.grade_answer(card, answer, api_key=api_key)
             model = config.CLAUDE_MODEL
+            if config.DEMO_MODE and not api_key:
+                demo.use_free_grade(session["visitor"])
         except grader.GradingError as err:
             # Grading failed: show the reference answer so I can still rate myself.
             return render_template(
@@ -556,7 +677,7 @@ if __name__ == "__main__":
     background = "--background" in sys.argv
     open_browser = not background and "--no-browser" not in sys.argv
 
-    if is_running():  # one copy is enough
+    if is_running(PORT):  # one copy is enough
         if open_browser:
             webbrowser.open(URL)
         print(f"The app is already running at {URL}")
@@ -572,6 +693,7 @@ if __name__ == "__main__":
     elif open_browser:
         threading.Timer(1.0, webbrowser.open, args=[URL]).start()
 
-    print(f"Study app running at {URL}  (press Ctrl+C to stop)")
+    print(f"{'Public demo' if config.DEMO_MODE else 'Study app'} running at {URL}  (press Ctrl+C to stop)")
     # 127.0.0.1 means "this computer only": nothing else on the network can reach it.
-    app.run(host="127.0.0.1", port=config.APP_PORT, debug=False)
+    # (The live site runs under gunicorn instead; see render.yaml.)
+    app.run(host="127.0.0.1", port=PORT, debug=False)

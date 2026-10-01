@@ -241,6 +241,35 @@ Some cards only made sense after the previous one ("…of this same bond").
 They're listed in `MERGE_GROUPS` in `config.py` and merged at import into one
 card with parts a), b), c) — 34 cards became 12.
 
+### 7. Public demo (`demo.py`, `render.yaml`)
+
+The same code runs as a public demo with `DEMO_MODE=1`, built so strangers can use it
+safely without touching my own cards:
+
+- **Sample deck, not my cards.** 20 original cards in `demo/sample_deck.json` (my own
+  study cards come from courses and stay private). The 8 math cards are written as
+  templates, so even their first version is generated from formulas, and every one is
+  checked at start-up; a broken card stops the site from starting rather than going live.
+- **Each visitor gets their own database file**, copied from the sample deck, keyed by a
+  random ID in a signed cookie. No sign-up, and no query in the app had to change to keep
+  visitors apart. A brand-new browser sees the deck read-only until it proves it keeps
+  cookies, so bots can't fill the disk; idle visitors are deleted after a week.
+- **AI grading costs are capped**: 5 free grades per visitor per day and 150 for the whole
+  site per day (about $0.20 at most), counted in a small shared database. Visitors can paste
+  their own Anthropic key for unlimited grading; it is checked with a free API call, kept
+  only in their signed cookie, and never written to the server's disk.
+- **Web security basics**: forged cross-site form posts are refused (the browser's `Origin`
+  header must match), cookies are HTTP-only, SameSite and HTTPS-only, standard protective
+  headers are sent, and personal-only features (reminders, email, Claude drafting) return 404.
+- **Hosting**: Render, configured by `render.yaml`, running the app under gunicorn. Every
+  `git push` redeploys it. The free tier sleeps when idle, which also resets demo progress.
+
+Try the demo locally (it uses port 5001 and its own data folder):
+
+```powershell
+.\.venv\Scripts\python app.py --demo
+```
+
 ## How to run it
 
 Requires **Python 3.10+** on Windows (commands below are for PowerShell).
@@ -280,7 +309,15 @@ folder, set `CARDS_DIR` in `.env`. The list of files to import lives in `config.
 
 ## Design decisions
 
-| Choice | Why |
+| Public demo choice | Why |
+|---|---|
+| **One database file per visitor** | Complete separation between visitors with zero changes to the app's queries; the risky part of a multi-user app (forgetting a "which user?" filter) can't happen. |
+| **Anonymous signed-cookie IDs, no accounts** | Nothing to sign up for, and no passwords or emails to protect. |
+| **Free grades on my key, capped; or bring your own key** | Recruiters can see the AI feedback without an API key, and the worst-case daily cost has a hard ceiling. |
+| **Origin check instead of CSRF tokens** | Modern browsers always send `Origin` on form posts; checking it blocks forged posts without changing every form. |
+| **Render + gunicorn** | Deploys straight from GitHub with HTTPS included; gunicorn is a production-grade server where Flask's built-in one is not. |
+
+| Personal app choice | Why |
 |---|---|
 | **Python** | Readable, already installed, and widely used in finance. |
 | **SQLite** | A full database stored in one file — no server to install or run. |
@@ -334,6 +371,8 @@ _More rows added as each tool is introduced._
 - [x] Study sessions of 25 / 50 / 75 / 100 questions, with a summary at the end
 - [x] Fresh numbers for math cards (piloted on DCF)
 - [x] Fresh numbers drafted for all decks (76 templates ready to review)
+- [x] Public demo mode (sample deck, per-visitor data, capped AI grading)
+- [ ] Deploy the demo to Render and link it here
 - [x] Stage 3 — Own-words grading with the Claude API
 - [x] Stage 4 — Due-card reminders (Windows desktop + email)
 - [x] Forgotten → Retained slider, suggested next date with override

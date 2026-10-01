@@ -4,3 +4,4 @@ python-dotenv>=1.0     # loads settings and the API key from .env
 flask>=3.0             # the small web server behind the study screens
 fsrs>=6.0              # the spaced-repetition scheduler (FSRS algorithm)
 anthropic>=1.0         # official Claude API library (AI grading)
+gunicorn>=22.0         # production web server for the public demo (runs on Linux hosts like Render)

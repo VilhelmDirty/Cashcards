@@ -364,3 +364,16 @@ form.center { margin-top: 16px; }
 .variant-example .fb-text { margin-top: 10px; font-size: 15px; }
 .variant .draft-actions { margin-top: 14px; }
 .variant form { display: flex; gap: 8px; }
+
+/* ------------------------------------------------------------------ public demo */
+.demo-intro { margin: 0 0 28px; border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.demo-intro p { margin: 6px 0 0; }
+.demo-intro .eyebrow { margin: 0; }
+.site-footer {
+  max-width: 780px; margin: 0 auto; padding: 0 16px 40px;
+  text-align: center; font-size: 13px; color: var(--muted);
+}
+.settings input[type="password"] {
+  width: 100%; max-width: 440px; padding: 10px 12px; border: 1px solid var(--line);
+  border-radius: 10px; background: var(--surface-2); color: var(--ink); font: inherit;
+}

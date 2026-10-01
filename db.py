@@ -127,10 +127,17 @@ MIGRATIONS = [
 ]
 
 
-def connect():
-    """Open the database, creating the file and tables on first use."""
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+def connect(path=None, read_only=False):
+    """Open the database, creating the file and tables on first use.
+    `path` and `read_only` are only used by the public demo, where each visitor has
+    their own file and brand-new visitors see the shared sample deck read-only."""
+    path = path or DB_PATH
+    if read_only:  # SQLite refuses any write through this connection
+        conn = sqlite3.connect(f"file:{path.as_posix()}?mode=ro", uri=True, timeout=10)
+        conn.row_factory = sqlite3.Row
+        return conn
+    path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(path, timeout=10)
     conn.row_factory = sqlite3.Row  # lets code read columns by name: row["question"]
     conn.execute("PRAGMA foreign_keys = ON")  # refuse reviews that point at a missing card
     # We keep SQLite's default "rollback journal" mode rather than WAL mode.

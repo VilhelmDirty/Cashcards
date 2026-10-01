@@ -1,5 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
+{% if demo %}
+<section class="panel demo-intro">
+  <p class="eyebrow">Live demo</p>
+  <p><strong>{{ app_name }}</strong> is a study app I built for finance interview prep. Interviewers
+    don't ask you to recognise an answer, they ask you to <em>explain</em> it, so here you type your
+    answer in your own words and Claude grades it: how much you retained, what you missed, and a
+    tighter way to say it. A spaced-repetition scheduler (FSRS) then decides when you see each card again.</p>
+  <p class="muted small">Try a sample deck below. Math cards come with fresh numbers every time.
+    Your progress is private to this browser and resets now and then.
+    <a href="{{ github_url }}">How it's built (GitHub) →</a></p>
+</section>
+{% endif %}
 <section class="hero">
   <p class="eyebrow">{{ greeting }}</p>
   <h1 class="hero-title">
@@ -35,7 +47,13 @@
   <div class="ai-status" aria-hidden="true"></div>
   <div>
     <h2 class="section-title">AI grading</h2>
-    {% if ai_ready %}
+    {% if demo and own_key %}
+      <p>On, using your own API key: unlimited grading.</p>
+    {% elif demo and ai_ready %}
+      <p>On. <strong>{{ free_left }}</strong> free graded answer{{ '' if free_left == 1 else 's' }} left
+        today; after that you rate yourself, or <a href="{{ url_for('settings') }}">add your own API key</a>
+        for unlimited grading.</p>
+    {% elif ai_ready %}
       <p>On. Explain each answer in your own words, and Claude marks it: how much you retained,
          what you missed, and a tighter way to say it.</p>
     {% else %}
@@ -48,8 +66,10 @@
 <section class="decks-section">
   <div class="section-head">
     <h2 class="section-title">Decks</h2>
+    {% if not demo %}
     <span class="muted small">Tick <em>Remind</em> for decks you want reminders about
       <span id="remind-saved" class="saved" hidden>· Saved</span></span>
+    {% endif %}
   </div>
 
   <form id="remind-form" method="post" action="{{ url_for('save_reminders') }}">
@@ -65,17 +85,19 @@
           <span class="deck-meta">
             {{ seen }}/{{ d.total }} seen
             {% if d.avg_seconds is not none %}· avg {{ '%.0f' % d.avg_seconds }}s{% endif %}
-            {% if d.unseen == 0 %}· <a href="{{ url_for('suggest', deck=d.deck) }}">finished, add new cards?</a>{% endif %}
+            {% if d.unseen == 0 and not demo %}· <a href="{{ url_for('suggest', deck=d.deck) }}">finished, add new cards?</a>{% endif %}
             {% if math_cards.get(d.deck) %}· <a href="{{ url_for('numbers', deck=d.deck) }}">fresh numbers</a>{% endif %}
           </span>
         </div>
         <div class="deck-side">
           {% if d.due %}<span class="badge">{{ d.due }} due</span>{% endif %}
+          {% if not demo %}
           <label class="remind-toggle">
             <input type="checkbox" name="remind" value="{{ d.deck }}" {% if d.remind %}checked{% endif %}
                    aria-label="Remind me about {{ d.deck }}">
             <span>Remind</span>
           </label>
+          {% endif %}
           <a class="button small" href="{{ url_for('start_session', deck=d.deck) }}">Study</a>
         </div>
       </li>
@@ -90,11 +112,11 @@
 <script>
   // Save straight away when a Remind box is ticked or unticked.
   const remindForm = document.getElementById("remind-form");
-  remindForm.addEventListener("change", async () => {
+  {% if not demo %}remindForm.addEventListener("change", async () => {
     await fetch(remindForm.action, { method: "POST", body: new FormData(remindForm) });
     const saved = document.getElementById("remind-saved");
     saved.hidden = false;
     setTimeout(() => (saved.hidden = true), 1500);
-  });
+  });{% endif %}
 </script>
 {% endblock %}
