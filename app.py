@@ -155,7 +155,14 @@ def read_duration():
 
 def ai_available():
     """Can typed answers be graded? (The site's key, or a demo visitor's own key.)"""
-    return grader.api_key_configured() or bool(config.DEMO_MODE and session.get("own_key"))
+    return grader.api_key_configured() or bool(visitor_key())
+
+
+def visitor_key():
+    """Demo only: the visitor's own API key, unlocked from their cookie (or None)."""
+    if not config.DEMO_MODE:
+        return None
+    return demo.open_key(session.get("own_key"), app.secret_key)
 
 
 def demo_api_key():
@@ -163,7 +170,7 @@ def demo_api_key():
     Raises GradingError when the visitor's free grades for today are used up."""
     if not config.DEMO_MODE:
         return None
-    own = session.get("own_key")
+    own = visitor_key()
     if own:
         return own
     if demo.free_grades_left(session["visitor"]) <= 0:
@@ -205,7 +212,7 @@ def home():
         counts=srs.queue_counts(conn),
         reviewed_today=srs.reviewed_today(conn),
         ai_ready=ai_available(),
-        own_key=bool(config.DEMO_MODE and session.get("own_key")),
+        own_key=bool(visitor_key()),
         free_left=demo.free_grades_left(session["visitor"]) if config.DEMO_MODE else None,
         math_cards={} if config.DEMO_MODE else variants.candidate_counts(conn),
     )
@@ -240,7 +247,7 @@ def render_settings(conn, message=None, error=None):
         message=message, error=error,
     )
     if config.DEMO_MODE:  # just the study settings, plus "use your own API key"
-        return render_template("settings.html", **common, own_key=bool(session.get("own_key")),
+        return render_template("settings.html", **common, own_key=bool(visitor_key()),
                                free_left=demo.free_grades_left(session["visitor"]),
                                free_per_day=config.DEMO_FREE_GRADES)
     days = db.study_days(conn)
@@ -321,7 +328,7 @@ def save_settings():
 @app.post("/settings/key")
 def own_key():
     """Demo only: a visitor's own Anthropic key, for unlimited grading. It is kept in
-    their signed browser cookie and sent with their requests; never saved on the server."""
+    their browser cookie, encrypted, and sent with their requests; never saved on the server."""
     if not config.DEMO_MODE:
         abort(404)
     conn = get_conn()
@@ -335,7 +342,7 @@ def own_key():
     problem = grader.key_problem(key)
     if problem:
         return render_settings(conn, error=problem)
-    session["own_key"] = key
+    session["own_key"] = demo.seal_key(key, app.secret_key)
     return redirect(url_for("settings", msg="Key saved in this browser. Grading is now unlimited."))
 
 

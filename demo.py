@@ -9,10 +9,12 @@ locally on port 5001). Differences from the personal app:
   - Visitors are anonymous: a random ID in a signed browser cookie, no sign-up.
   - AI grading: a few free grades a day on the site owner's key, with a cap for the
     whole site; or unlimited with the visitor's own key, which lives only in their
-    browser cookie and is never written to the server's disk.
+    browser cookie, encrypted, and is never written to the server's disk.
   - Reminders, emails, Claude-drafted cards and template drafting are switched off.
   - Old visitor files are deleted, so the server's disk can't fill up.
 """
+import base64
+import hashlib
 import json
 import re
 import secrets
@@ -20,6 +22,8 @@ import shutil
 import sqlite3
 import time
 from datetime import datetime, timezone
+
+from cryptography.fernet import Fernet, InvalidToken
 
 import config
 import db
@@ -145,3 +149,25 @@ def use_free_grade(visitor_id):
 
 def looks_like_api_key(key):
     return bool(OWN_KEY.match(key or ""))
+
+
+# A visitor's own key goes in their cookie ENCRYPTED. The cookie is only signed (it
+# can't be changed, but anyone holding it could decode it), so without this a copied
+# cookie would reveal the key. The lock is made from the site's SECRET_KEY, so only
+# this server can open it.
+def _fernet(secret):
+    return Fernet(base64.urlsafe_b64encode(hashlib.sha256(secret.encode()).digest()))
+
+
+def seal_key(key, secret):
+    return _fernet(secret).encrypt(key.encode()).decode()
+
+
+def open_key(sealed, secret):
+    """The key, or None if it's missing or can't be opened (e.g. SECRET_KEY changed)."""
+    if not sealed:
+        return None
+    try:
+        return _fernet(secret).decrypt(sealed.encode()).decode()
+    except (InvalidToken, ValueError):
+        return None

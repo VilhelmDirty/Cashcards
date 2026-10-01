@@ -268,7 +268,8 @@ safely without touching my own cards:
 - **AI grading costs are capped**: 5 free grades per visitor per day and 150 for the whole
   site per day (about $0.20 at most), counted in a small shared database. Visitors can paste
   their own Anthropic key for unlimited grading; it is checked with a free API call, kept
-  only in their signed cookie, and never written to the server's disk.
+  only in their cookie, encrypted with a key derived from the site's secret (a signed cookie
+  alone can be decoded by whoever holds it), and never written to the server's disk.
 - **Web security basics**: forged cross-site form posts are refused (the browser's `Origin`
   header must match), cookies are HTTP-only, SameSite and HTTPS-only, standard protective
   headers are sent, and personal-only features (reminders, email, Claude drafting) return 404.
