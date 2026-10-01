@@ -254,7 +254,9 @@ card with parts a), b), c) — 34 cards became 12.
 The same code runs as a public demo with `DEMO_MODE=1`, built so strangers can use it
 safely without touching my own cards:
 
-- **Sample deck, not my cards.** 23 original cards on general subjects in `demo/sample_deck.json` (my own
+- **Sample deck, not my cards.** 53 original cards across 14 subjects (memory, physics, biology,
+  medicine, law, history, philosophy, economics, psychology, earth science, language, computing,
+  maths and money) in `demo/sample_deck.json` (my own
   finance cards come from courses and stay private). The 6 maths cards are written as
   templates, so even their first version is generated from formulas, and every one is
   checked at start-up; a broken card stops the site from starting rather than going live.
@@ -358,7 +360,7 @@ folder, set `CARDS_DIR` in `.env`. The list of files to import lives in `config.
 | **Recipient on the Settings page, sender in `.env`** | The address I receive at is a preference (stored locally, never in git); the sending password is a secret (`.env`). |
 | **Once-a-day email by default** | Three reminder times shouldn't mean three emails; configurable. |
 | **Single-instance check on startup** | Launching the app while a reminder already started it just opens the browser instead of crashing on a busy port. |
-| **Design: a woodworking workshop** | Matches the name: a wheel for a logo; linen paper, walnut ink, brass fittings and an olive for "retained"; Spectral for headings, Work Sans for text, IBM Plex Mono for figures; squared-off corners like cut timber, and a faint wood grain. Dark mode is charred oak and copper, following the system setting. |
+| **Design: a woodworking workshop** | Matches the name: a wheel for a logo; charred-oak dark theme with copper, brass and an olive for "retained" (a linen-and-walnut light theme is kept in the stylesheet); Spectral for headings, Work Sans for text, IBM Plex Mono for figures; squared-off corners like cut timber, and a faint wood grain. Dark for everyone, whatever the system setting. |
 | **App name in one setting (`APP_NAME`)** | Pages, emails, notifications and the Windows task all read it, so renaming is one line. |
 | **Email copy in its own module + template** | Wording and layout change without touching the scheduling code; card text is HTML-escaped. |
 | **Math templates computed by code, not by Claude at study time** | Language models make arithmetic slips; formulas checked against the original answer and evaluated locally are exact, instant and free. |

@@ -1,215 +1,249 @@
 {
-  "_about": "The public demo's sample deck: original cards on a mix of subjects, written for this project (no third-party course material). Cards with a 'template' get fresh numbers every time: their question and answer are generated from it, with the 'original' values used for the first version and for the start-up checks.",
+  "_about": "The public demo's sample deck: original cards across many subjects, written for this project (no third-party course material). Cards with a 'template' get fresh numbers every time: their question and answer are generated from it, with the 'original' values used for the first version and for the start-up checks.",
   "cards": [
-    {
-      "deck": "How Memory Works",
-      "topic": "Forgetting",
-      "question": "What is the forgetting curve?",
-      "answer": "It's the pattern, first measured by Hermann Ebbinghaus in the 1880s, that we forget new information quickly at first and then more slowly. Without review, much of what you learn is gone within days. Each well-timed review makes the curve flatter, so the memory lasts longer before it fades again."
-    },
-    {
-      "deck": "How Memory Works",
-      "topic": "Spacing",
-      "question": "Why does spaced repetition beat cramming?",
-      "answer": "Reviewing just as you're starting to forget strengthens a memory far more than reviewing something you still remember easily. Spacing reviews out, with gaps that grow each time you succeed, gives you those effortful recalls. Cramming packs reviews together, so it works for tomorrow's test but fades quickly afterwards."
-    },
-    {
-      "deck": "How Memory Works",
-      "topic": "Retrieval practice",
-      "question": "What is the testing effect, and how is it different from rereading?",
-      "answer": "The testing effect is the finding that actively pulling information out of memory, by answering questions or recalling without looking, strengthens it much more than rereading. Rereading feels productive because the material looks familiar, but recognising something is not the same as being able to produce it."
-    },
-    {
-      "deck": "How Memory Works",
-      "topic": "Elaboration",
-      "question": "Why does explaining something in your own words help you learn it?",
-      "answer": "Putting an idea into your own words forces you to connect it to what you already know, which makes it easier to recall later. It also exposes gaps: if you can't explain it simply, you haven't fully understood it yet. This is the idea behind the Feynman technique."
-    },
-    {
-      "deck": "How Memory Works",
-      "topic": "The name",
-      "question": "In the Zhuangzi, what does Wheelwright Bian tell Duke Huan about the books he is reading?",
-      "answer": "That they are only the dregs of the men of old. Bian can feel the knack of making a wheel in his hands, but he can't put it into words, so he couldn't even pass it on to his own son, and is still making wheels at seventy. Real skill comes from practice, not from reading about it."
-    },
-    {
-      "deck": "Science",
-      "topic": "Light",
-      "question": "Why is the sky blue?",
-      "answer": "Sunlight contains all colours. As it passes through the atmosphere, air molecules scatter short wavelengths, like blue, much more strongly than long ones, like red (Rayleigh scattering). That scattered blue light reaches your eyes from every part of the sky. Violet is scattered even more, but the sun emits less of it and our eyes are less sensitive to it."
-    },
-    {
-      "deck": "Science",
-      "topic": "Earth",
-      "question": "What causes the seasons?",
-      "answer": "The tilt of Earth's axis, about 23.4 degrees. As Earth orbits the sun, each hemisphere spends part of the year tilted towards it, getting more direct sunlight and longer days (summer), and part tilted away (winter). It isn't distance from the sun: Earth is actually closest to the sun in early January."
-    },
-    {
-      "deck": "Science",
-      "topic": "Biology",
-      "question": "What's the difference between a bacterium and a virus?",
-      "answer": "A bacterium is a living single-celled organism that can feed and reproduce on its own; antibiotics can kill many bacteria. A virus is much smaller and isn't a cell at all: it can only copy itself by getting inside a host's cells. That's why antibiotics don't work on viruses."
-    },
-    {
-      "deck": "Science",
-      "topic": "Biology",
-      "question": "In a sentence or two, what does DNA do?",
-      "answer": "DNA stores the instructions for building and running an organism. Its sequence of bases is read in groups of three, through RNA, to make proteins, and it is copied and passed on to offspring."
-    },
-    {
-      "deck": "Science",
-      "topic": "Method",
-      "question": "What is the placebo effect, and why do drug trials use a control group?",
-      "answer": "The placebo effect is a real improvement people feel after a treatment with no active ingredient, because they expect to get better. Trials compare the drug with a placebo given to a control group, ideally with neither patients nor doctors knowing who got which, so that any extra benefit can be credited to the drug itself."
-    },
-    {
-      "deck": "History & Ideas",
-      "topic": "Writing",
-      "question": "What is the Rosetta Stone, and why did it matter?",
-      "answer": "It's an Egyptian stone slab from 196 BC carrying the same decree in three scripts: hieroglyphs, Demotic and ancient Greek. Because scholars could read the Greek, it gave them the key to deciphering hieroglyphs, which Jean-François Champollion achieved in 1822."
-    },
-    {
-      "deck": "History & Ideas",
-      "topic": "Technology",
-      "question": "Why was Gutenberg's printing press such a big deal?",
-      "answer": "Around 1440, Johannes Gutenberg combined movable metal type with a press, so books could be produced quickly and cheaply instead of copied by hand. Ideas spread faster and further than ever, literacy grew, and the press helped fuel the Reformation and the Scientific Revolution."
-    },
-    {
-      "deck": "History & Ideas",
-      "topic": "Trade",
-      "question": "What was the Silk Road?",
-      "answer": "Not one road but a network of trade routes linking China with Central Asia, the Middle East and Europe, active from around the 2nd century BC. Silk, spices and other goods travelled along it, and so did ideas, religions, technologies and diseases."
-    },
-    {
-      "deck": "History & Ideas",
-      "topic": "Philosophy",
-      "question": "What is the Socratic method?",
-      "answer": "A way of teaching and thinking by asking questions instead of giving answers. By questioning someone's beliefs step by step, you expose hidden assumptions and contradictions, so they reach a clearer understanding themselves."
-    },
-    {
-      "deck": "Everyday Maths",
-      "topic": "Percentages",
-      "template": {
-        "variables": [
-          {"name": "old", "original": 80, "min": 20, "max": 200, "step": 5},
-          {"name": "new", "original": 92, "min": 25, "max": 300, "step": 5}
-        ],
-        "derived": [
-          {"name": "diff", "formula": "new - old"},
-          {"name": "pct", "formula": "diff / old * 100"}
-        ],
-        "constraints": ["new > old"],
-        "question": "A price rises from ${old} to ${new}. What is the percentage increase?",
-        "answer": "Change = ${new} − ${old} = ${diff}\nPercentage increase = change ÷ original price = ${diff} ÷ ${old} = {pct:.1f}%"
-      }
-    },
-    {
-      "deck": "Everyday Maths",
-      "topic": "Percentages",
-      "template": {
-        "variables": [
-          {"name": "p", "original": 80, "min": 10, "max": 300, "step": 5},
-          {"name": "d", "original": 25, "min": 5, "max": 50, "step": 5},
-          {"name": "t", "original": 8, "min": 3, "max": 15, "step": 1}
-        ],
-        "derived": [
-          {"name": "sale", "formula": "p * (1 - d / 100)"},
-          {"name": "final", "formula": "sale * (1 + t / 100)"}
-        ],
-        "constraints": [],
-        "question": "A jacket costs ${p}. It's {d}% off, and then {t}% sales tax is added. What do you pay?",
-        "answer": "Sale price = ${p} × (1 − {d}%) = ${sale:,.2f}\nWith tax = ${sale:,.2f} × (1 + {t}%) = ${final:,.2f}"
-      }
-    },
-    {
-      "deck": "Everyday Maths",
-      "topic": "Averages",
-      "template": {
-        "variables": [
-          {"name": "d", "original": 60, "min": 20, "max": 150, "step": 10},
-          {"name": "v1", "original": 60, "min": 30, "max": 120, "step": 10},
-          {"name": "v2", "original": 30, "min": 30, "max": 120, "step": 10}
-        ],
-        "derived": [
-          {"name": "t1", "formula": "d / v1"},
-          {"name": "t2", "formula": "d / v2"},
-          {"name": "tt", "formula": "t1 + t2"},
-          {"name": "dist", "formula": "2 * d"},
-          {"name": "avg", "formula": "dist / tt"}
-        ],
-        "constraints": ["v1 != v2"],
-        "question": "You drive {d} km at {v1} km/h, then another {d} km at {v2} km/h. What is your average speed for the whole trip?",
-        "answer": "Time = {d} ÷ {v1} + {d} ÷ {v2} = {t1:.2f} + {t2:.2f} = {tt:.2f} hours\nAverage speed = total distance ÷ total time = {dist} km ÷ {tt:.2f} h = {avg:.1f} km/h\n\nIt isn't the simple average of the two speeds, because you spend longer driving at the slower one."
-      }
-    },
-    {
-      "deck": "Everyday Maths",
-      "topic": "Growth",
-      "template": {
-        "variables": [
-          {"name": "r", "original": 8, "min": 2, "max": 12, "step": 1}
-        ],
-        "derived": [
-          {"name": "approx", "formula": "72 / r"},
-          {"name": "exact", "formula": "log(2) / log(1 + r / 100)"}
-        ],
-        "constraints": [],
-        "question": "Using the rule of 72, roughly how many years does an investment take to double at {r}% a year? How close is that to the exact answer?",
-        "answer": "Rule of 72: 72 ÷ {r} ≈ {approx:.1f} years\nExact: ln 2 ÷ ln(1 + {r}%) = {exact:.1f} years, so the shortcut is very close at everyday interest rates."
-      }
-    },
-    {
-      "deck": "Money Basics",
-      "topic": "Interest",
-      "question": "In plain words, what is compound interest?",
-      "answer": "Interest that is earned on your earlier interest as well as on the original amount. Each year's growth is added to the balance, so the next year's interest is calculated on a bigger number. Over long periods this snowballing makes a huge difference, which is why starting early matters."
-    },
-    {
-      "deck": "Money Basics",
-      "topic": "Interest",
-      "template": {
-        "variables": [
-          {"name": "P", "original": 1000, "min": 500, "max": 20000, "step": 500},
-          {"name": "r", "original": 5, "min": 1, "max": 10, "step": 0.5},
-          {"name": "n", "original": 10, "min": 2, "max": 30, "step": 1}
-        ],
-        "derived": [
-          {"name": "f", "formula": "(1 + r / 100) ** n"},
-          {"name": "V", "formula": "P * f"}
-        ],
-        "constraints": [],
-        "question": "You invest ${P:,.0f} at {r}% a year, compounded annually. How much is it worth after {n} years?",
-        "answer": "Value = ${P:,.0f} × (1 + {r}%)^{n} = ${P:,.0f} × {f:.4f} = ${V:,.2f}"
-      }
-    },
-    {
-      "deck": "Money Basics",
-      "topic": "Inflation",
-      "question": "What is inflation, and what does it do to money sitting in a savings account?",
-      "answer": "Inflation is the general rise in prices over time, so each dollar buys a little less each year. If your savings earn less interest than the inflation rate, their real value, what they can actually buy, shrinks even though the balance goes up."
-    },
-    {
-      "deck": "Money Basics",
-      "topic": "Risk",
-      "question": "Why does diversification reduce risk?",
-      "answer": "Different investments don't all go up and down at the same time. Holding many of them means the losses on some are often offset by gains on others, so the overall result swings less than any single investment would. It reduces the risk specific to individual investments, but not the risk of the whole market falling together."
-    },
-    {
-      "deck": "Money Basics",
-      "topic": "Time value of money",
-      "template": {
-        "variables": [
-          {"name": "FV", "original": 10000, "min": 1000, "max": 50000, "step": 1000},
-          {"name": "n", "original": 5, "min": 2, "max": 10, "step": 1},
-          {"name": "r", "original": 6, "min": 2, "max": 12, "step": 0.5}
-        ],
-        "derived": [
-          {"name": "f", "formula": "(1 + r / 100) ** n"},
-          {"name": "PV", "formula": "FV / f"}
-        ],
-        "constraints": [],
-        "question": "How much is ${FV:,.0f} received in {n} years worth today, at a discount rate of {r}% a year?",
-        "answer": "Present value = ${FV:,.0f} ÷ (1 + {r}%)^{n} = ${FV:,.0f} ÷ {f:.4f} = ${PV:,.2f}"
-      }
-    }
+    {"deck": "How Memory Works", "topic": "Forgetting",
+     "question": "What is the forgetting curve?",
+     "answer": "It's the pattern, first measured by Hermann Ebbinghaus in the 1880s, that we forget new information quickly at first and then more slowly. Without review, much of what you learn is gone within days. Each well-timed review makes the curve flatter, so the memory lasts longer before it fades again."},
+    {"deck": "How Memory Works", "topic": "Spacing",
+     "question": "Why does spaced repetition beat cramming?",
+     "answer": "Reviewing just as you're starting to forget strengthens a memory far more than reviewing something you still remember easily. Spacing reviews out, with gaps that grow each time you succeed, gives you those effortful recalls. Cramming packs reviews together, so it works for tomorrow's test but fades quickly afterwards."},
+    {"deck": "How Memory Works", "topic": "Retrieval practice",
+     "question": "What is the testing effect, and how is it different from rereading?",
+     "answer": "The testing effect is the finding that actively pulling information out of memory, by answering questions or recalling without looking, strengthens it much more than rereading. Rereading feels productive because the material looks familiar, but recognising something is not the same as being able to produce it."},
+    {"deck": "How Memory Works", "topic": "Elaboration",
+     "question": "Why does explaining something in your own words help you learn it?",
+     "answer": "Putting an idea into your own words forces you to connect it to what you already know, which makes it easier to recall later. It also exposes gaps: if you can't explain it simply, you haven't fully understood it yet. This is the idea behind the Feynman technique."},
+
+    {"deck": "Physics & Chemistry", "topic": "Light",
+     "question": "Why is the sky blue?",
+     "answer": "Sunlight contains all colours. As it passes through the atmosphere, air molecules scatter short wavelengths, like blue, much more strongly than long ones, like red (Rayleigh scattering). That scattered blue light reaches your eyes from every part of the sky. Violet is scattered even more, but the sun emits less of it and our eyes are less sensitive to it."},
+    {"deck": "Physics & Chemistry", "topic": "Earth and sun",
+     "question": "What causes the seasons?",
+     "answer": "The tilt of Earth's axis, about 23.4 degrees. As Earth orbits the sun, each hemisphere spends part of the year tilted towards it, getting more direct sunlight and longer days (summer), and part tilted away (winter). It isn't distance from the sun: Earth is actually closest to the sun in early January."},
+    {"deck": "Physics & Chemistry", "topic": "Water",
+     "question": "Why does ice float on water?",
+     "answer": "Water expands when it freezes. In ice, hydrogen bonds lock the molecules into an open, hexagonal pattern that takes up more space than the jumbled molecules of liquid water, so ice is about 9% less dense and floats. That's why lakes freeze from the top down, and the ice layer insulates the water and life beneath it."},
+    {"deck": "Physics & Chemistry", "topic": "Forces",
+     "question": "What's the difference between mass and weight?",
+     "answer": "Mass is the amount of matter in an object, measured in kilograms, and it's the same everywhere. Weight is the force of gravity pulling on that mass, measured in newtons, so it changes with location: on the Moon you'd have the same mass but weigh about a sixth as much."},
+
+    {"deck": "Biology", "topic": "Microbes",
+     "question": "What's the difference between a bacterium and a virus?",
+     "answer": "A bacterium is a living single-celled organism that can feed and reproduce on its own; antibiotics can kill many bacteria. A virus is much smaller and isn't a cell at all: it can only copy itself by getting inside a host's cells. That's why antibiotics don't work on viruses."},
+    {"deck": "Biology", "topic": "Genetics",
+     "question": "In a sentence or two, what does DNA do?",
+     "answer": "DNA stores the instructions for building and running an organism. Its sequence of bases is read in groups of three, through RNA, to make proteins, and it is copied and passed on to offspring."},
+    {"deck": "Biology", "topic": "Evolution",
+     "question": "How does natural selection work?",
+     "answer": "Individuals in a population vary, and some of that variation is inherited. Individuals whose traits help them survive and reproduce in their environment tend to leave more offspring, who inherit those traits. Over many generations, helpful traits become more common and the population changes."},
+    {"deck": "Biology", "topic": "Cells",
+     "question": "What do mitochondria do?",
+     "answer": "They produce most of a cell's usable energy, in the form of ATP, by using oxygen to break down food molecules (aerobic respiration). Unusually, they have their own small set of DNA, which in humans is inherited from the mother."},
+
+    {"deck": "Medicine", "topic": "Research",
+     "question": "What is the placebo effect, and why do drug trials use a control group?",
+     "answer": "The placebo effect is a real improvement people feel after a treatment with no active ingredient, because they expect to get better. Trials compare the drug with a placebo given to a control group, ideally with neither patients nor doctors knowing who got which, so that any extra benefit can be credited to the drug itself."},
+    {"deck": "Medicine", "topic": "Immunity",
+     "question": "How does a vaccine protect you?",
+     "answer": "It shows your immune system a harmless version or part of a germ, or instructions for making one of its proteins, without causing the disease. Your body responds by making antibodies and memory cells. If you meet the real germ later, the immune system recognises it and fights it off much faster."},
+    {"deck": "Medicine", "topic": "Antibiotics",
+     "question": "How does antibiotic resistance develop?",
+     "answer": "Bacteria multiply quickly, and random mutations or genes picked up from other bacteria make a few of them resistant. When an antibiotic is used, it kills the susceptible bacteria, and the resistant ones survive and multiply. Overusing and misusing antibiotics, for example for viral infections or routinely in livestock, speeds this up."},
+    {"deck": "Medicine", "topic": "Measurements",
+     "question": "What do the two numbers in a blood pressure reading like 120/80 mean?",
+     "answer": "Both are pressures in millimetres of mercury (mmHg). The first, systolic, is the pressure in the arteries when the heart contracts; the second, diastolic, is the pressure between beats, when the heart relaxes. Around 120/80 or below is generally healthy for adults; readings consistently at about 130/80 to 140/90 or above count as high, depending on the guideline used."},
+
+    {"deck": "Law", "topic": "Kinds of law",
+     "question": "What's the difference between criminal law and civil law?",
+     "answer": "Criminal law deals with wrongs against society as a whole: the state prosecutes, the outcome can be punishment, and guilt must be proved beyond reasonable doubt. Civil law deals with disputes between private parties, such as broken contracts or negligence: the person harmed sues, the usual remedy is compensation, and the standard is the balance of probabilities (in the US, a preponderance of the evidence)."},
+    {"deck": "Law", "topic": "Common law",
+     "question": "What is legal precedent?",
+     "answer": "In common-law systems such as England, the US and Canada, courts follow the decisions earlier courts made in similar cases, especially decisions of higher courts (the principle of stare decisis). This makes the law more consistent and predictable, while still letting judges distinguish cases whose facts are genuinely different."},
+    {"deck": "Law", "topic": "Contracts",
+     "question": "In common-law systems, what makes an agreement a legally binding contract?",
+     "answer": "Generally: an offer, an acceptance of that offer, consideration (each side gives something of value), and an intention to create legal relations, made by parties with the capacity to contract. Some kinds of contract, such as sales of land, also have to be in writing."},
+    {"deck": "Law", "topic": "Rights",
+     "question": "What is habeas corpus?",
+     "answer": "A court order requiring that a person who is being detained be brought before a court, so the court can decide whether the detention is lawful. It's a centuries-old protection against being imprisoned without legal justification."},
+
+    {"deck": "History", "topic": "Writing",
+     "question": "What is the Rosetta Stone, and why did it matter?",
+     "answer": "It's an Egyptian stone slab from 196 BC carrying the same decree in three scripts: hieroglyphs, Demotic and ancient Greek. Because scholars could read the Greek, it gave them the key to deciphering hieroglyphs, which Jean-François Champollion achieved in 1822."},
+    {"deck": "History", "topic": "Technology",
+     "question": "Why was Gutenberg's printing press such a big deal?",
+     "answer": "Around 1440, Johannes Gutenberg combined movable metal type with a press, so books could be produced quickly and cheaply instead of copied by hand. Ideas spread faster and further than ever, literacy grew, and the press helped fuel the Reformation and the Scientific Revolution."},
+    {"deck": "History", "topic": "Trade",
+     "question": "What was the Silk Road?",
+     "answer": "Not one road but a network of trade routes linking China with Central Asia, the Middle East and Europe, active from around the 2nd century BC. Silk, spices and other goods travelled along it, and so did ideas, religions, technologies and diseases."},
+    {"deck": "History", "topic": "Government",
+     "question": "What was Magna Carta, and why is it remembered?",
+     "answer": "A charter that rebellious barons forced King John of England to agree to in 1215. It limited the king's power, for example by saying no free man could be imprisoned except by the lawful judgment of his peers or the law of the land. Though much of it was soon ignored or revised, it became a lasting symbol of the idea that rulers are subject to the law."},
+
+    {"deck": "Philosophy", "topic": "Zhuangzi",
+     "question": "In the Zhuangzi, what does Wheelwright Bian tell Duke Huan about the books he is reading?",
+     "answer": "That they are only the dregs of the men of old. Bian can feel the knack of making a wheel in his hands, but he can't put it into words, so he couldn't even pass it on to his own son, and is still making wheels at seventy. Real skill comes from practice, not from reading about it."},
+    {"deck": "Philosophy", "topic": "Socrates",
+     "question": "What is the Socratic method?",
+     "answer": "A way of teaching and thinking by asking questions instead of giving answers. By questioning someone's beliefs step by step, you expose hidden assumptions and contradictions, so they reach a clearer understanding themselves."},
+    {"deck": "Philosophy", "topic": "Plato",
+     "question": "What is Plato's allegory of the cave about?",
+     "answer": "Prisoners chained in a cave since birth see only shadows on a wall and take them for reality. One is freed, climbs out, is dazzled at first, and finally sees the real world and the sun. Plato uses it to describe education: moving from appearances to true understanding, which is hard, and which others may resist when you return to tell them."},
+    {"deck": "Philosophy", "topic": "Descartes",
+     "question": "What did Descartes mean by \"I think, therefore I am\"?",
+     "answer": "Descartes tried to doubt everything that could possibly be false, even the existence of the world and his own body. But the very act of doubting is thinking, and thinking needs a thinker, so his own existence as a thinking thing was the one thing he couldn't doubt. He used it as a certain foundation to rebuild knowledge."},
+    {"deck": "Philosophy", "topic": "Ethics",
+     "question": "What's the core difference between utilitarianism and Kant's ethics?",
+     "answer": "Utilitarianism (Bentham, Mill) judges actions by their consequences: the right action produces the greatest overall happiness. Kant judges actions by duty and principle: some acts are right or wrong whatever the consequences, you should act only on rules you could will everyone to follow, and you must never treat people merely as a means to an end."},
+
+    {"deck": "Economics", "topic": "Choices",
+     "question": "What is opportunity cost?",
+     "answer": "The value of the best alternative you give up when you make a choice. An hour spent studying costs you the hour of work or rest you could have had instead. It's a reminder that every choice has a cost, even when no money changes hands."},
+    {"deck": "Economics", "topic": "Markets",
+     "question": "What happens to a product's price when demand for it rises but supply doesn't change at first?",
+     "answer": "The price rises. At the old price more people want the product than is available, so buyers compete and sellers can charge more. The higher price then encourages producers to supply more and puts some buyers off, until a new balance between supply and demand is reached."},
+    {"deck": "Economics", "topic": "Trade",
+     "question": "What is comparative advantage?",
+     "answer": "The idea, from David Ricardo, that two parties can both gain from trade even if one is better at producing everything. Each should specialise in what it gives up least to produce, meaning its lowest opportunity cost, and trade for the rest. Total output rises, so both can end up better off."},
+    {"deck": "Economics", "topic": "Inflation",
+     "question": "What is inflation, and what does it do to money sitting in a savings account?",
+     "answer": "Inflation is the general rise in prices over time, so each dollar buys a little less each year. If your savings earn less interest than the inflation rate, their real value, what they can actually buy, shrinks even though the balance goes up."},
+
+    {"deck": "Psychology", "topic": "Biases",
+     "question": "What is confirmation bias?",
+     "answer": "The tendency to look for, notice, interpret and remember information in a way that confirms what we already believe, while overlooking or explaining away evidence against it. A useful habit against it is to ask what evidence would change your mind, and then look for that."},
+    {"deck": "Psychology", "topic": "Biases",
+     "question": "What is the Dunning-Kruger effect?",
+     "answer": "A pattern in which people with limited skill in an area tend to overestimate how good they are, partly because the knowledge needed to perform well is the same knowledge needed to judge performance. Experts, by contrast, often slightly underestimate how unusual their skill is."},
+    {"deck": "Psychology", "topic": "Learning",
+     "question": "What is classical conditioning?",
+     "answer": "Learning by association, famously shown by Ivan Pavlov. A neutral signal, like a bell, is repeatedly paired with something that naturally causes a response, like food causing salivation. Eventually the signal alone triggers the response: the dogs salivated at the bell."},
+
+    {"deck": "Earth & Environment", "topic": "Geology",
+     "question": "What is plate tectonics?",
+     "answer": "The theory that Earth's outer shell is broken into large plates that slowly move, a few centimetres a year, over the hotter, softer layer beneath. Where plates meet, pull apart or grind past each other, we get most of the world's earthquakes and volcanoes, and over millions of years, mountain ranges and new ocean floor."},
+    {"deck": "Earth & Environment", "topic": "Climate",
+     "question": "What is the greenhouse effect?",
+     "answer": "Sunlight passes through the atmosphere and warms Earth's surface, which gives off heat as infrared radiation. Greenhouse gases such as carbon dioxide, methane and water vapour absorb some of that heat and send part of it back down, warming the planet. The natural effect keeps Earth habitable; adding more of these gases, mainly by burning fossil fuels, strengthens it and raises temperatures."},
+    {"deck": "Earth & Environment", "topic": "Oceans",
+     "question": "What causes the tides?",
+     "answer": "Mainly the Moon's gravity, which pulls on the oceans unevenly and creates two bulges of water: one facing the Moon and one on the opposite side. As Earth rotates through them, most coasts get two high tides a day. The Sun's gravity adds to the effect: tides are biggest (spring tides) when Sun and Moon line up, and smallest (neap tides) when they're at right angles."},
+
+    {"deck": "Language & Literature", "topic": "Figures of speech",
+     "question": "What's the difference between a metaphor and a simile?",
+     "answer": "Both compare two unlike things. A simile makes the comparison explicit with \"like\" or \"as\": she was as brave as a lion. A metaphor says one thing is the other: she was a lion in that meeting."},
+    {"deck": "Language & Literature", "topic": "Poetry",
+     "question": "What is iambic pentameter?",
+     "answer": "A line of verse made of five iambs, each an unstressed syllable followed by a stressed one (da-DUM), so usually ten syllables: \"But SOFT, what LIGHT through YONder WINdow BREAKS?\" It's the main rhythm of Shakespeare's plays and much English poetry, because it's close to the natural rhythm of spoken English."},
+    {"deck": "Language & Literature", "topic": "Usage",
+     "question": "When do you use \"affect\" and when \"effect\"?",
+     "answer": "Usually, \"affect\" is a verb meaning to influence (the rain affected the game), and \"effect\" is a noun meaning a result (the rain had an effect on the game). The less common exceptions: \"effect\" as a verb means to bring about (to effect change), and \"affect\" as a noun is a psychology term for displayed emotion."},
+
+    {"deck": "Computing", "topic": "Basics",
+     "question": "What is an algorithm?",
+     "answer": "A precise, step-by-step set of instructions for solving a problem or completing a task, like a recipe that a computer can follow. A good algorithm always finishes, gives the right answer, and doesn't waste time or memory."},
+    {"deck": "Computing", "topic": "Basics",
+     "question": "How does binary represent numbers?",
+     "answer": "Binary is base 2: it uses only the digits 0 and 1, which map neatly onto electronic switches being off or on. Each place is worth double the one to its right (1, 2, 4, 8...), so binary 1011 means 8 + 0 + 2 + 1 = 11."},
+    {"deck": "Computing", "topic": "Security",
+     "question": "How should a website store users' passwords?",
+     "answer": "Never as plain text. It should store only a hash of each password, made with a slow algorithm designed for passwords (such as bcrypt or Argon2) and a unique random salt per user. At login it hashes the password typed in and compares the results, so even if the database is stolen, the passwords aren't directly revealed."},
+
+    {"deck": "Everyday Maths", "topic": "Percentages",
+     "template": {
+       "variables": [
+         {"name": "old", "original": 80, "min": 20, "max": 200, "step": 5},
+         {"name": "new", "original": 92, "min": 25, "max": 300, "step": 5}
+       ],
+       "derived": [
+         {"name": "diff", "formula": "new - old"},
+         {"name": "pct", "formula": "diff / old * 100"}
+       ],
+       "constraints": ["new > old"],
+       "question": "A price rises from ${old} to ${new}. What is the percentage increase?",
+       "answer": "Change = ${new} − ${old} = ${diff}\nPercentage increase = change ÷ original price = ${diff} ÷ ${old} = {pct:.1f}%"
+     }},
+    {"deck": "Everyday Maths", "topic": "Percentages",
+     "template": {
+       "variables": [
+         {"name": "p", "original": 80, "min": 10, "max": 300, "step": 5},
+         {"name": "d", "original": 25, "min": 5, "max": 50, "step": 5},
+         {"name": "t", "original": 8, "min": 3, "max": 15, "step": 1}
+       ],
+       "derived": [
+         {"name": "sale", "formula": "p * (1 - d / 100)"},
+         {"name": "final", "formula": "sale * (1 + t / 100)"}
+       ],
+       "constraints": [],
+       "question": "A jacket costs ${p}. It's {d}% off, and then {t}% sales tax is added. What do you pay?",
+       "answer": "Sale price = ${p} × (1 − {d}%) = ${sale:,.2f}\nWith tax = ${sale:,.2f} × (1 + {t}%) = ${final:,.2f}"
+     }},
+    {"deck": "Everyday Maths", "topic": "Averages",
+     "template": {
+       "variables": [
+         {"name": "d", "original": 60, "min": 20, "max": 150, "step": 10},
+         {"name": "v1", "original": 60, "min": 30, "max": 120, "step": 10},
+         {"name": "v2", "original": 30, "min": 30, "max": 120, "step": 10}
+       ],
+       "derived": [
+         {"name": "t1", "formula": "d / v1"},
+         {"name": "t2", "formula": "d / v2"},
+         {"name": "tt", "formula": "t1 + t2"},
+         {"name": "dist", "formula": "2 * d"},
+         {"name": "avg", "formula": "dist / tt"}
+       ],
+       "constraints": ["v1 != v2"],
+       "question": "You drive {d} km at {v1} km/h, then another {d} km at {v2} km/h. What is your average speed for the whole trip?",
+       "answer": "Time = {d} ÷ {v1} + {d} ÷ {v2} = {t1:.2f} + {t2:.2f} = {tt:.2f} hours\nAverage speed = total distance ÷ total time = {dist} km ÷ {tt:.2f} h = {avg:.1f} km/h\n\nIt isn't the simple average of the two speeds, because you spend longer driving at the slower one."
+     }},
+    {"deck": "Everyday Maths", "topic": "Growth",
+     "template": {
+       "variables": [
+         {"name": "r", "original": 8, "min": 2, "max": 12, "step": 1}
+       ],
+       "derived": [
+         {"name": "approx", "formula": "72 / r"},
+         {"name": "exact", "formula": "log(2) / log(1 + r / 100)"}
+       ],
+       "constraints": [],
+       "question": "Using the rule of 72, roughly how many years does an investment take to double at {r}% a year? How close is that to the exact answer?",
+       "answer": "Rule of 72: 72 ÷ {r} ≈ {approx:.1f} years\nExact: ln 2 ÷ ln(1 + {r}%) = {exact:.1f} years, so the shortcut is very close at everyday interest rates."
+     }},
+
+    {"deck": "Money Basics", "topic": "Interest",
+     "question": "In plain words, what is compound interest?",
+     "answer": "Interest that is earned on your earlier interest as well as on the original amount. Each year's growth is added to the balance, so the next year's interest is calculated on a bigger number. Over long periods this snowballing makes a huge difference, which is why starting early matters."},
+    {"deck": "Money Basics", "topic": "Interest",
+     "template": {
+       "variables": [
+         {"name": "P", "original": 1000, "min": 500, "max": 20000, "step": 500},
+         {"name": "r", "original": 5, "min": 1, "max": 10, "step": 0.5},
+         {"name": "n", "original": 10, "min": 2, "max": 30, "step": 1}
+       ],
+       "derived": [
+         {"name": "f", "formula": "(1 + r / 100) ** n"},
+         {"name": "V", "formula": "P * f"}
+       ],
+       "constraints": [],
+       "question": "You invest ${P:,.0f} at {r}% a year, compounded annually. How much is it worth after {n} years?",
+       "answer": "Value = ${P:,.0f} × (1 + {r}%)^{n} = ${P:,.0f} × {f:.4f} = ${V:,.2f}"
+     }},
+    {"deck": "Money Basics", "topic": "Time value of money",
+     "template": {
+       "variables": [
+         {"name": "FV", "original": 10000, "min": 1000, "max": 50000, "step": 1000},
+         {"name": "n", "original": 5, "min": 2, "max": 10, "step": 1},
+         {"name": "r", "original": 6, "min": 2, "max": 12, "step": 0.5}
+       ],
+       "derived": [
+         {"name": "f", "formula": "(1 + r / 100) ** n"},
+         {"name": "PV", "formula": "FV / f"}
+       ],
+       "constraints": [],
+       "question": "How much is ${FV:,.0f} received in {n} years worth today, at a discount rate of {r}% a year?",
+       "answer": "Present value = ${FV:,.0f} ÷ (1 + {r}%)^{n} = ${FV:,.0f} ÷ {f:.4f} = ${PV:,.2f}"
+     }},
+    {"deck": "Money Basics", "topic": "Risk",
+     "question": "Why does diversification reduce risk?",
+     "answer": "Different investments don't all go up and down at the same time. Holding many of them means the losses on some are often offset by gains on others, so the overall result swings less than any single investment would. It reduces the risk specific to individual investments, but not the risk of the whole market falling together."}
   ]
 }

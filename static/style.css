@@ -2,13 +2,41 @@
    Linen paper, walnut ink, brass fittings and an olive for "retained"; a bookish serif
    for headings (Spectral), a plain workmanlike sans for reading (Work Sans), and
    monospaced figures (IBM Plex Mono). Squared-off corners, like cut timber.
-   Light and dark themes follow the computer's setting (dark = charred oak and copper). */
+   Dark (charred oak and copper) for everyone. A light theme (linen and walnut) is kept
+   below and can be switched on with <html data-theme="light">. */
 
 :root {
-  --paper: #f2ece1;          /* page: linen */
+  color-scheme: dark;        /* text boxes, scrollbars and date pickers match */
+  --paper: #16110c;          /* page: charred oak */
+  --grain: rgba(255, 220, 180, .025);
+  --surface: #1f1812;        /* cards and panels */
+  --surface-2: #2a2119;      /* inputs, tracks */
+  --ink: #eee4d5;
+  --muted: #a59684;
+  --line: #3a2e23;
+  --accent: #d08a5a;         /* copper */
+  --accent-strong: #e3a275;
+  --accent-soft: #3a271a;
+  --on-accent: #1a110a;
+  --brass: #d8aa52;
+  --brass-soft: #3a2f18;
+  --forgot: #e57a66;
+  --shaky: #e0a64a;
+  --solid: #93bf6b;          /* olive */
+  --flag-bg: #3b2f17;
+  --shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 8px 22px rgba(0, 0, 0, .3);
+
+  --font-display: "Spectral", Georgia, "Times New Roman", serif;
+  --font-body: "Work Sans", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
+  --radius: 6px;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --paper: #f2ece1;          /* linen */
   --grain: rgba(120, 84, 48, .035);
-  --surface: #fbf8f2;        /* cards and panels */
-  --surface-2: #ece4d6;      /* inputs, tracks */
+  --surface: #fbf8f2;
+  --surface-2: #ece4d6;
   --ink: #2b2118;            /* walnut ink */
   --muted: #7b6f62;
   --line: #ddd2c0;
@@ -20,36 +48,9 @@
   --brass-soft: #f0e2c2;
   --forgot: #a8402f;
   --shaky: #b0761c;
-  --solid: #4f7537;          /* olive */
+  --solid: #4f7537;
   --flag-bg: #f6e6c8;
   --shadow: 0 1px 0 rgba(43, 33, 24, .05), 0 6px 18px rgba(43, 33, 24, .07);
-
-  --font-display: "Spectral", Georgia, "Times New Roman", serif;
-  --font-body: "Work Sans", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
-  --radius: 6px;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #16110c;
-    --grain: rgba(255, 220, 180, .025);
-    --surface: #1f1812;
-    --surface-2: #2a2119;
-    --ink: #eee4d5;
-    --muted: #a59684;
-    --line: #3a2e23;
-    --accent: #d08a5a;       /* copper */
-    --accent-strong: #e3a275;
-    --accent-soft: #3a271a;
-    --on-accent: #1a110a;
-    --brass: #d8aa52;
-    --brass-soft: #3a2f18;
-    --forgot: #e57a66;
-    --shaky: #e0a64a;
-    --solid: #93bf6b;
-    --flag-bg: #3b2f17;
-    --shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 8px 22px rgba(0, 0, 0, .3);
-  }
 }
 
 /* ------------------------------------------------------------------ base */
