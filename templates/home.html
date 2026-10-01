@@ -20,7 +20,7 @@
 </section>
 {% endif %}
 <section class="hero">
-  <p class="eyebrow">{{ greeting }}</p>
+  <p class="eyebrow" id="greeting">{{ greeting }}</p>
   <h1 class="hero-title">
     {% if not decks %}Make your first card.{% elif counts.due or counts.new %}Time for practice.{% else %}All caught up.{% endif %}
   </h1>
@@ -124,6 +124,12 @@
 
 {% block scripts %}
 <script>
+  // Greet by the visitor's own clock. The server's greeting is only a fallback: on the
+  // public site the server runs on UTC, which said "Good morning" at midnight in Canada.
+  const hour = new Date().getHours();
+  document.getElementById("greeting").textContent =
+    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+
   // Save straight away when a Remind box is ticked or unticked.
   const remindForm = document.getElementById("remind-form");
   {% if not demo and decks %}remindForm.addEventListener("change", async () => {

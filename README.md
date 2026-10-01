@@ -1,7 +1,5 @@
 # Wheelwright — flashcards you explain in your own words
 
-*The hand-feel's not included.*
-
 **Wheelwright** is a study app for remembering what you learn. It shows a flashcard,
 you type the answer **in your own words**, and Claude grades the explanation against
 the reference answer. The grade feeds a spaced-repetition scheduler (FSRS), so cards

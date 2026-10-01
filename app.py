@@ -198,8 +198,8 @@ def current_mode():
 @app.context_processor
 def app_name():
     """Makes {{ app_name }}, {{ demo }} etc. available in every page template.
-    studying: True on the study screens, which get a compact header without the tagline."""
-    return {"app_name": config.APP_NAME, "app_tagline": config.APP_TAGLINE,
+    studying: True on the study screens, which get a compact header."""
+    return {"app_name": config.APP_NAME,
             "demo": config.DEMO_MODE, "github_url": config.GITHUB_URL,
             "studying": request.endpoint in STUDY_PAGES,
             "site_url": site_url(), "site_description": config.SITE_DESCRIPTION}

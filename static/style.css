@@ -96,12 +96,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing:
 .mark-seal { fill: #b8392b; }          /* vermilion seal paste */
 .brand-text { display: flex; flex-direction: column; line-height: 1; }
 .brand-name { font: 600 28px/1 var(--font-display); letter-spacing: .01em; }
-/* the tagline: old English book type, tucked right under the name */
-.brand-tagline {
-  font: italic 400 16px/1.1 "IM Fell English", Georgia, serif;
-  color: var(--muted); margin-top: 2px; letter-spacing: .01em;
-}
-/* While studying: a compact header (smaller name, no tagline) so the card has the stage. */
+/* While studying: a compact header (smaller logo and name) so the card has the stage. */
 .site-header.compact .nav { padding-top: 10px; padding-bottom: 10px; }
 .site-header.compact .brand-mark { width: 32px; height: 32px; }
 .site-header.compact .brand-name { font-size: 20px; }
@@ -390,7 +385,6 @@ form.center { margin-top: 16px; }
   .ledger-num { font-size: 32px; }
   .brand-mark { width: 38px; height: 38px; }
   .brand-name { font-size: 23px; }
-  .brand-tagline { font-size: 13.5px; }
   .deck { flex-direction: column; align-items: stretch; gap: 10px; }
   .deck-side { justify-content: flex-end; }
 }
