@@ -258,6 +258,12 @@ def render_settings(conn, message=None, error=None):
     )
 
 
+@app.route("/about")
+def about():
+    """What the app is, where the name comes from, and how it works."""
+    return render_template("about.html")
+
+
 @app.route("/settings")
 def settings():
     return render_settings(get_conn(), message=request.args.get("msg"))

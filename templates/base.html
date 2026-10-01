@@ -44,7 +44,10 @@
           {% if not studying %}<span class="brand-tagline">{{ app_tagline }}</span>{% endif %}
         </span>
       </a>
-      <a href="{{ url_for('settings') }}" class="nav-link">Settings</a>
+      <span class="nav-links">
+        <a href="{{ url_for('about') }}" class="nav-link">About</a>
+        <a href="{{ url_for('settings') }}" class="nav-link">Settings</a>
+      </span>
     </nav>
   </header>
   <main>

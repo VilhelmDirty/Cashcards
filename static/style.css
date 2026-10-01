@@ -107,6 +107,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing:
 .site-header.compact .brand-name { font-size: 20px; }
 .nav-link { font-size: 15px; color: var(--muted); text-decoration: none; }
 .nav-link:hover { color: var(--ink); }
+.nav-links { display: flex; gap: 18px; }
 
 /* ------------------------------------------------------------------ buttons */
 .button {
@@ -201,6 +202,15 @@ kbd {
 }
 .remind-toggle input:checked + span { background: var(--accent-soft); border-color: transparent; color: var(--accent); font-weight: 600; }
 .remind-toggle input:focus-visible + span { outline: 2px solid var(--brass); outline-offset: 2px; }
+
+/* ------------------------------------------------------------------ about */
+.about-lede { font-size: 18px; line-height: 1.6; margin: 0; }
+.about-section { margin-top: 24px; }
+.about-section p, .about-section li { line-height: 1.65; }
+.about-section ul { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 8px; }
+.about-moral {
+  font: italic 400 19px/1.4 "IM Fell English", Georgia, serif; color: var(--brass); margin-bottom: 0;
+}
 
 /* ------------------------------------------------------------------ study */
 .review-bar {
