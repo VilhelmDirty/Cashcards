@@ -56,7 +56,7 @@ def filename():
 
 def restore(conn, raw, keep_templates_from=None):
     """Replace everything in `conn` with the backup in `raw` (bytes). Returns the
-    number of cards restored. Raises BackupError, leaving the database untouched.
+    number of my own cards restored. Raises BackupError, leaving the database untouched.
 
     keep_templates_from: the demo passes its sample-deck database here. Fresh-number
     templates are then taken from that trusted copy (matched by card), never from the
@@ -103,7 +103,7 @@ def restore(conn, raw, keep_templates_from=None):
     except (db.sqlite3.Error, OverflowError) as err:
         conn.rollback()
         raise BackupError("That progress file is damaged, so nothing was changed.") from err
-    return len(tables["cards"])
+    return sum(1 for card in tables["cards"] if card.get("origin") != "demo")  # my own cards
 
 
 def _rows(tables, name):

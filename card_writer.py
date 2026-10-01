@@ -64,6 +64,8 @@ def add_card(conn, deck, question, answer, topic=None, origin="manual"):
         raise CardError("That card is very long. Keep questions under 2,000 characters "
                         "and answers under 5,000.")
     key = card_key(deck, question)  # same fingerprint the importer uses
+    if origin == "demo":  # the demo's hidden sample cards must never block a visitor's own
+        key = "demo-" + key
     if conn.execute("SELECT 1 FROM cards WHERE card_key = ?", (key,)).fetchone():
         raise CardError(f"'{deck}' already has a card with that question.")
     cursor = conn.execute(
@@ -76,7 +78,9 @@ def add_card(conn, deck, question, answer, topic=None, origin="manual"):
 
 
 def deck_names(conn):
-    return [row[0] for row in conn.execute("SELECT DISTINCT deck FROM cards ORDER BY deck")]
+    """My decks (not the public demo's sample decks)."""
+    return [row[0] for row in conn.execute(
+        "SELECT DISTINCT deck FROM cards WHERE origin != 'demo' ORDER BY deck")]
 
 
 def draft_cards(conn, deck, count=5):

@@ -6,7 +6,8 @@
 you type the answer **in your own words**, and Claude grades the explanation against
 the reference answer. The grade feeds a spaced-repetition scheduler (FSRS), so cards
 you explain poorly come back sooner. I use it on my own computer with my finance
-cards; a public demo runs the same code with a sample deck on general subjects.
+cards; a public demo runs the same code, where visitors make their own cards and can
+try a set of sample questions on general subjects first.
 
 > **The name.** The name comes from a parable in the *Zhuangzi*: a wheelwright named Bian
 > tells Duke Huan that the books he's reading are just the dregs of men long dead, because
@@ -255,7 +256,12 @@ card with parts a), b), c) — 34 cards became 12.
 The same code runs as a public demo with `DEMO_MODE=1`, built so strangers can use it
 safely without touching my own cards:
 
-- **Sample deck, not my cards.** 53 original cards across 14 subjects (memory, physics, biology,
+- **Visitors' own cards, plus a "Try the demo" button.** A visitor's home page shows only
+  cards they write themselves. The sample questions live in the same file but are marked
+  `origin='demo'`: every query behind "my decks" leaves them out (`srs._deck_filter`), and
+  "Try the demo" studies only them, as a pseudo-deck with its own daily allowance of new
+  cards. Once a visitor adds their own API key the button disappears.
+- **Sample questions, not my cards.** 53 original cards across 14 subjects (memory, physics, biology,
   medicine, law, history, philosophy, economics, psychology, earth science, language, computing,
   maths and money) in `demo/sample_deck.json` (my own
   finance cards come from courses and stay private). The 6 maths cards are written as

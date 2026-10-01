@@ -2,7 +2,7 @@
 {% block title %}Feedback · {{ card.deck }}{% endblock %}
 {% block content %}
 <div class="review-bar">
-  <span>{{ deck or "All decks" }}</span>
+  <span>{{ deck | deck_label }}</span>
   <span>
     {% if duration_ms is not none %}{{ '%.0f' % (duration_ms / 1000) }}s{% endif %}
     {% if timed_out %} · time ran out{% endif %}

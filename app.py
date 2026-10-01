@@ -42,6 +42,7 @@ import srs
 import variants
 
 app = Flask(__name__)
+app.add_template_filter(srs.deck_label)  # "__demo__" -> "Demo", None -> "All decks"
 # Signs the browser cookie so it can't be tampered with. The live site sets SECRET_KEY;
 # locally a fresh random key per run is fine.
 app.secret_key = os.getenv("SECRET_KEY") or secrets.token_hex(32)
@@ -217,6 +218,7 @@ def home():
         own_key=bool(visitor_key()),
         free_left=demo.free_grades_left(session["visitor"]) if config.DEMO_MODE else None,
         math_cards={} if config.DEMO_MODE else variants.candidate_counts(conn),
+        demo_deck=srs.DEMO_DECK,
     )
 
 
@@ -510,6 +512,8 @@ def start_session():
     """Every Study button lands here: start a session of the smaller of my
     session size (Settings) and the cards actually waiting, then begin."""
     deck = request.args.get("deck") or None
+    if deck == srs.DEMO_DECK and (not config.DEMO_MODE or visitor_key()):
+        return redirect(url_for("home"))  # the sample questions are for trying the site out
     conn = get_conn()
     session_id = srs.start_session(conn, deck, int(db.get_setting(conn, "session_size")))
     if session_id is None:

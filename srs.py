@@ -41,8 +41,23 @@ def _start_of_today():
     return _iso(local_now.replace(hour=0, minute=0, second=0, microsecond=0))
 
 
+# The public demo's sample cards (origin 'demo') sit apart from a visitor's own cards:
+# they're studied only through "Try the demo" (this pseudo-deck), and never appear in or
+# count towards the visitor's own decks. The personal app has no demo cards.
+DEMO_DECK = "__demo__"
+OWN = "c.origin != 'demo'"
+
+
 def _deck_filter(deck):
-    return ("AND c.deck = ?", [deck]) if deck else ("", [])
+    if deck == DEMO_DECK:
+        return "AND c.origin = 'demo'", []
+    if deck:
+        return f"AND c.deck = ? AND {OWN}", [deck]
+    return f"AND {OWN}", []
+
+
+def deck_label(deck):
+    return "Demo" if deck == DEMO_DECK else deck or "All decks"
 
 
 def format_interval(delta):
@@ -73,9 +88,12 @@ def _load_fsrs_card(conn, card_id):
 
 # ---------------------------------------------------------------- the queue
 
-def new_cards_left_today(conn):
+def new_cards_left_today(conn, deck=None):
+    """The daily allowance of new cards; the demo's sample cards have their own."""
+    scope = "c.origin = 'demo'" if deck == DEMO_DECK else OWN
     introduced = conn.execute(
-        "SELECT COUNT(*) FROM review_log WHERE was_new = 1 AND reviewed_at >= ?",
+        "SELECT COUNT(*) FROM review_log l JOIN cards c ON c.id = l.card_id "
+        f"WHERE l.was_new = 1 AND l.reviewed_at >= ? AND {scope}",
         (_start_of_today(),),
     ).fetchone()[0]
     return max(0, config.NEW_CARDS_PER_DAY - introduced)
@@ -89,7 +107,7 @@ def next_card(conn, deck=None):
         f"WHERE r.due <= ? {where} ORDER BY r.due LIMIT 1",
         [_iso(_now()), *params],
     ).fetchone()
-    if card is None and new_cards_left_today(conn) > 0:
+    if card is None and new_cards_left_today(conn, deck) > 0:
         card = conn.execute(
             f"SELECT c.* FROM cards c LEFT JOIN review_state r ON r.card_id = c.id "
             f"WHERE r.card_id IS NULL {where} ORDER BY RANDOM() LIMIT 1",
@@ -111,7 +129,7 @@ def queue_counts(conn, deck=None):
         f"WHERE r.card_id IS NULL {where}",
         params,
     ).fetchone()[0]
-    return {"due": due, "new": min(unseen, new_cards_left_today(conn))}
+    return {"due": due, "new": min(unseen, new_cards_left_today(conn, deck))}
 
 
 def next_due(conn, deck=None):
@@ -333,9 +351,9 @@ def deck_summary(conn):
         f"      MAX({REMINDED}) AS remind, "
         "       (SELECT AVG(l.duration_ms) / 1000.0 FROM review_log l "
         "        JOIN cards c2 ON c2.id = l.card_id "
-        "        WHERE c2.deck = c.deck AND l.duration_ms IS NOT NULL) AS avg_seconds "
+        "        WHERE c2.deck = c.deck AND c2.origin != 'demo' AND l.duration_ms IS NOT NULL) AS avg_seconds "
         "FROM cards c LEFT JOIN review_state r ON r.card_id = c.id "
-        "GROUP BY c.deck ORDER BY c.deck",
+        f"WHERE {OWN} GROUP BY c.deck ORDER BY c.deck",
         (_iso(_now()),),
     ).fetchall()
 
@@ -358,5 +376,5 @@ def study_history(conn):
 
 
 def reviewed_today(conn):
-    return conn.execute("SELECT COUNT(*) FROM review_log WHERE reviewed_at >= ?",
-                        (_start_of_today(),)).fetchone()[0]
+    return conn.execute("SELECT COUNT(*) FROM review_log l JOIN cards c ON c.id = l.card_id "
+                        f"WHERE l.reviewed_at >= ? AND {OWN}", (_start_of_today(),)).fetchone()[0]

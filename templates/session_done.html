@@ -4,7 +4,7 @@
 <section class="done">
   <p class="eyebrow">Session complete</p>
   <h1>{{ session.done }} question{{ '' if session.done == 1 else 's' }}, done.</h1>
-  <p class="muted">{% if deck %}{{ deck }}{% else %}All decks{% endif %}</p>
+  <p class="muted">{{ deck | deck_label }}</p>
 
   <div class="ledger session-ledger">
     <div class="ledger-item">

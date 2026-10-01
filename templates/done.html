@@ -7,7 +7,7 @@
 {% endblock %}
 {% block content %}
 <section class="done">
-  <h1>All caught up{% if deck %} on {{ deck }}{% endif %}</h1>
+  <h1>All caught up{% if deck %} on {{ deck | deck_label }}{% endif %}</h1>
   {% if session and session.done %}
     <p class="muted">This session: {{ session.done }} of {{ session.target }} answered. The rest are
       cards you're still learning, so they need a short gap before they come back.</p>

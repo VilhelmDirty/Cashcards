@@ -7,18 +7,24 @@
     answer isn't the same as knowing it, so instead of flipping cards you <em>explain</em> each answer
     in your own words and Claude grades it: how much you retained, what you missed, and a tighter way
     to say it. A spaced-repetition scheduler (FSRS) then brings each card back just before you'd forget it.</p>
-  <p class="muted small">Try a sample deck below. Maths cards come with fresh numbers every time.
-    Your progress is private to this browser and resets now and then, so
-    <a href="{{ url_for('settings') }}#progress">download it</a> to keep it.
+  <p class="muted small">Your cards are private to this browser, and the site forgets them now and then,
+    so <a href="{{ url_for('settings') }}#progress">download your progress</a> to keep it.
     <a href="{{ github_url }}">How it's built (GitHub) →</a></p>
+  {% if not own_key %}
+  <div class="demo-try">
+    <a class="button primary" href="{{ url_for('start_session', deck=demo_deck) }}">Try the demo <span aria-hidden="true">→</span></a>
+    <span class="muted small">Answer a few sample questions first, from science to law to philosophy.</span>
+  </div>
+  {% endif %}
 </section>
 {% endif %}
 <section class="hero">
   <p class="eyebrow">{{ greeting }}</p>
   <h1 class="hero-title">
-    {% if counts.due or counts.new %}Time for practice.{% else %}All caught up.{% endif %}
+    {% if not decks %}Make your first card.{% elif counts.due or counts.new %}Time for practice.{% else %}All caught up.{% endif %}
   </h1>
 
+  {% if decks %}
   <div class="ledger">
     <div class="ledger-item">
       <span class="ledger-num">{{ counts.due }}</span>
@@ -33,14 +39,18 @@
       <span class="ledger-label">reviewed today</span>
     </div>
   </div>
+  {% endif %}
 
   <div class="hero-actions">
-    {% if counts.due or counts.new %}
+    {% if not decks %}
+      <p class="muted">Write a question and the answer you want to be able to give. Your cards live here.</p>
+      <a class="button primary big" href="{{ url_for('new_card') }}">+ Add a card</a>
+    {% elif counts.due or counts.new %}
       <a class="button primary big" href="{{ url_for('start_session') }}">Study all decks <span aria-hidden="true">→</span></a>
     {% else %}
       <p class="muted">Nothing to study right now. Your next cards come due soon.</p>
     {% endif %}
-    <a class="button ghost" href="{{ url_for('new_card') }}">+ Add a card</a>
+    {% if decks %}<a class="button ghost" href="{{ url_for('new_card') }}">+ Add a card</a>{% endif %}
   </div>
 </section>
 
@@ -64,6 +74,7 @@
   </div>
 </section>
 
+{% if decks %}
 <section class="decks-section">
   <div class="section-head">
     <h2 class="section-title">Decks</h2>
@@ -107,13 +118,14 @@
     <noscript><button class="button" type="submit">Save reminder choices</button></noscript>
   </form>
 </section>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
 <script>
   // Save straight away when a Remind box is ticked or unticked.
   const remindForm = document.getElementById("remind-form");
-  {% if not demo %}remindForm.addEventListener("change", async () => {
+  {% if not demo and decks %}remindForm.addEventListener("change", async () => {
     await fetch(remindForm.action, { method: "POST", body: new FormData(remindForm) });
     const saved = document.getElementById("remind-saved");
     saved.hidden = false;

@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Review · {{ deck or "All decks" }}{% endblock %}
+{% block title %}Review · {{ deck | deck_label }}{% endblock %}
 {% block content %}
 <div class="review-bar">
-  <span>{{ deck or "All decks" }} · <a href="{{ url_for('review', deck=deck, mode='flip', s=session.id) }}">switch to self-rating</a></span>
+  <span>{{ deck | deck_label }} · <a href="{{ url_for('review', deck=deck, mode='flip', s=session.id) }}">switch to self-rating</a></span>
   <span class="session-count" title="Questions answered this session">
     <strong>{{ session.done + 1 }}</strong> / {{ session.target }}
   </span>
