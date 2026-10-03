@@ -17,11 +17,7 @@ try a set of sample questions on general subjects first.
 
 ## Why I built it
 
-I'm a finance grad student preparing for interviews. In an interview nobody
-asks me to recognise the right answer — they ask me to *explain* it: "Walk me
-through a DCF", "Why do PE firms pay lower multiples than strategics?".
-Classic flashcards only test recognition. This app makes me produce the
-explanation, then tells me what I missed and shows a tighter way to say it.
+I wanted to build something that allowed me to interact with the information I cared about continuously so as to avoid forgetting it. I found in school I would often forget most of what I studied immediately after a test. Conversely while working at my job most of the information I dealt with seemed to be burned into my brain just because I was dealing with it so frequently. I'm unsure of the extent to which the mind genuinely cares about the significance of information relative to simply prioritising information that it is presented with most often. I'm not denying the idea that saliency doesn't play a role in retaining information but I do believe that, beyond that, the most efficient way to ensure information i retained is to engage with it constantly over time. 
 
 ## What it does
 
