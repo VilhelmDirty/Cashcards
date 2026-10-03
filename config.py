@@ -34,7 +34,7 @@ SITE_DESCRIPTION = ("Knowledge, built by hand. Flashcards you explain in your ow
                     "spaced repetition brings it back just before you'd forget.")
 # Largest progress file the restore page accepts (my own full backup is well under 1 MB).
 BACKUP_MAX_BYTES = (5 if DEMO_MODE else 50) * 1024 * 1024
-GITHUB_URL = "https://github.com/VilhelmDirty/Cashcards"
+GITHUB_URL = "https://github.com/WillNeatt/Cashcards"
 
 # The SQLite database file. The data/ folder is git-ignored.
 DB_PATH = Path(os.getenv("DB_PATH") or PROJECT_DIR / "data" / "flashcards.db")
