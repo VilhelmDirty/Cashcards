@@ -63,7 +63,7 @@ _last_request = time.monotonic()
 DEMO_OFF = {"save_reminders", "test_email", "change_schedule", "suggest", "make_suggestions",
             "save_drafts", "numbers", "draft_numbers", "decide_numbers"}
 # Pages anyone (including search engines, which keep no cookies) can open directly.
-PUBLIC_PAGES = {"about", "robots_txt", "sitemap_xml"}
+PUBLIC_PAGES = {"about", "robots_txt", "sitemap_xml", "favicon_ico"}
 if config.DEMO_MODE:
     demo.build_template_db()  # rebuilt at every start, so deck edits go live on deploy
 
@@ -292,10 +292,16 @@ def robots_txt():
     if not config.DEMO_MODE:
         lines = ["User-agent: *", "Disallow: /"]
     else:
-        lines = ["User-agent: *", "Allow: /$", "Allow: /about", "Allow: /static/", "Disallow: /",
+        lines = ["User-agent: *", "Allow: /$", "Allow: /about", "Allow: /static/", "Allow: /favicon.ico", "Disallow: /",
                  f"Sitemap: {site_url()}/sitemap.xml"]
     body = "\n".join(lines) + "\n"
     return Response(body, mimetype="text/plain")
+
+
+@app.route("/favicon.ico")
+def favicon_ico():
+    """The standard address browsers and search engines check for a site's icon."""
+    return app.send_static_file("favicon.ico")
 
 
 @app.route("/sitemap.xml")
